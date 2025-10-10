@@ -1,0 +1,117 @@
+@startuml
+title Logistics on Rails - Domain Model (Conceptual)
+
+' ==========================================================
+' ENTIDADES PRINCIPAIS
+' ==========================================================
+
+class Line {
+  +lineId : int
+  +name : string
+  +owner : string
+  +totalLengthKm : double
+}
+
+class LineSegment {
+  +segmentId : int
+  +lengthKm : double
+  +trackType : string   'single | double
+  +gauge : int
+  +maxWeightKgPerMeter : double
+  +speedLimitKmH : double
+  +electrified : boolean
+}
+
+class Station {
+  +stationId : int
+  +name : string
+  +city : string
+  +hasWarehouse : boolean
+}
+
+class Operator {
+  +operatorId : int
+  +name : string
+  +country : string
+}
+
+class Locomotive {
+  +locomotiveId : int
+  +make : string
+  +model : string
+  +year : int
+  +type : string        'diesel | electric
+  +powerKw : double
+  +maxSpeedKmH : double
+  +totalWeightTons : double
+  +numBogies : int
+  +fuelCapacityL : double
+  +gauge : int
+}
+
+class Wagon {
+  +wagonId : int
+  +type : string        'boxcar | flatcar | tankcar | hopper | refrigerated
+  +payloadCapacityKg : double
+  +volumeM3 : double
+  +tareWeightKg : double
+  +gauge : int
+}
+
+class Train {
+  +trainId : int
+  +name : string
+  +status : string
+}
+
+class Freight {
+  +freightId : int
+  +departureTime : datetime
+  +arrivalTime : datetime
+  +status : string        'planned | in_transit | completed
+}
+
+class FreightWagon {
+  +freightId : int
+  +wagonId : int
+  +cargoDescription : string
+  +grossWeightKg : double
+}
+
+class Route {
+  +routeId : int
+  +description : string
+}
+
+class RouteSegment {
+  +routeId : int
+  +segmentId : int
+  +sequenceOrder : int
+}
+
+
+' ==========================================================
+' RELAÇÕES
+' ==========================================================
+
+Line "1" -- "many" LineSegment : contains >
+LineSegment "1" -- "1" Station : startStation >
+LineSegment "1" -- "1" Station : endStation >
+
+Operator "1" -- "many" Locomotive : owns >
+Operator "1" -- "many" Wagon : owns >
+Operator "1" -- "many" Train : manages >
+
+Train "many" -- "many" Locomotive : composed of >
+Train "many" -- "many" Wagon : composed of >
+
+Freight "many" -- "many" Wagon : includes >
+Freight "1" -- "1" Route : follows >
+Route "1" -- "many" RouteSegment : composed of >
+RouteSegment "many" -- "1" LineSegment : references >
+
+Station "1" -- "many" Freight : origin/destination >
+Freight "1" --> "1" Station : origin
+Freight "1" --> "1" Station : destination
+
+@enduml
