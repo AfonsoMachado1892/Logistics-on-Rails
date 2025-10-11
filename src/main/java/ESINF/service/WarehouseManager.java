@@ -3,11 +3,11 @@ package ESINF.service;
 import ESINF.model.*;
 import java.util.*;
 
-public class warehouseManager {
+public class WarehouseManager {
 
     private Warehouse warehouse;
 
-    public warehouseManager(Warehouse warehouse) {
+    public WarehouseManager(Warehouse warehouse) {
         this.warehouse = warehouse;
     }
 
