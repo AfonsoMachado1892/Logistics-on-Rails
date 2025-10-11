@@ -1,117 +1,130 @@
 @startuml
-title Logistics on Rails - Domain Model (Conceptual)
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+hide circle
+hide methods
 
-' ==========================================================
-' ENTIDADES PRINCIPAIS
-' ==========================================================
+title Logistics on Rails - Domain Model
 
-class Line {
-  +lineId : int
-  +name : string
-  +owner : string
-  +totalLengthKm : double
+' Operators and Rolling Stock
+
+package "Operators and Rolling Stock" {
+
+    class Operator {
+        name
+        country
+    }
+
+    class Locomotive {
+        make
+        model
+        year
+        type
+        powerKw
+        maxSpeedKmH
+        totalWeightTons
+        numBogies
+        fuelCapacityL
+        gauge
+    }
+
+    class Wagon {
+        type
+        payloadCapacityKg
+        volumeM3
+        tareWeightKg
+        gauge
+    }
+
+    class Train {
+        name
+        status
+    }
+
+    ' Relationships
+    Operator "1" -- "*" Locomotive : owns
+    Operator "1" -- "*" Wagon : owns
+    Operator "1" -- "*" Train : manages
+
+    Train "*" -- "*" Locomotive : uses
+    Train "*" -- "*" Wagon : pulls
 }
 
-class LineSegment {
-  +segmentId : int
-  +lengthKm : double
-  +trackType : string   'single | double
-  +gauge : int
-  +maxWeightKgPerMeter : double
-  +speedLimitKmH : double
-  +electrified : boolean
+' Insfrastucture
+
+package "Infrastructure" {
+
+    class Station {
+        name
+        city
+        hasWarehouse
+    }
+
+    class RailwayLine {
+        name
+        owner
+        totalLengthKm
+    }
+
+    class LineSegment {
+        lengthKm
+        trackType
+        gauge
+        maxWeightKgPerMeter
+        speedLimitKmH
+        electrified
+    }
+
+    class Gauge {
+        name
+        measureMM
+    }
+
+    ' Relationships
+    RailwayLine "1" -- "*" LineSegment : composed of
+    LineSegment "1" -- "1" Station : start
+    LineSegment "1" -- "1" Station : end
+    Gauge "1" -- "*" LineSegment : defines
+    Gauge "1" -- "*" Locomotive : supports
+    Gauge "1" -- "*" Wagon : supports
 }
 
-class Station {
-  +stationId : int
-  +name : string
-  +city : string
-  +hasWarehouse : boolean
+' Freight and Routes
+
+package "Freight and Routes" {
+
+    class Freight {
+        departureTime
+        arrivalTime
+        status
+    }
+
+    class FreightWagon {
+        cargoDescription
+        grossWeightKg
+    }
+
+    class Route {
+        description
+    }
+
+    class RouteSegment {
+        sequenceOrder
+    }
+
+    ' Relationships
+    Freight "1" -- "*" Wagon : includes
+    Freight "1" -- "*" FreightWagon : includes
+    Freight "1" -- "1" Route : follows
+    Freight "1" -- "1" Station : origin
+    Freight "1" -- "1" Station : destination
+
+    Wagon "1" -- "*" FreightWagon : assigned to
+    Route "1" -- "*" RouteSegment : consists of
+    RouteSegment "*" -- "1" LineSegment : references
+    Station "1" -- "*" Freight : dispatches/receives
 }
-
-class Operator {
-  +operatorId : int
-  +name : string
-  +country : string
-}
-
-class Locomotive {
-  +locomotiveId : int
-  +make : string
-  +model : string
-  +year : int
-  +type : string        'diesel | electric
-  +powerKw : double
-  +maxSpeedKmH : double
-  +totalWeightTons : double
-  +numBogies : int
-  +fuelCapacityL : double
-  +gauge : int
-}
-
-class Wagon {
-  +wagonId : int
-  +type : string        'boxcar | flatcar | tankcar | hopper | refrigerated
-  +payloadCapacityKg : double
-  +volumeM3 : double
-  +tareWeightKg : double
-  +gauge : int
-}
-
-class Train {
-  +trainId : int
-  +name : string
-  +status : string
-}
-
-class Freight {
-  +freightId : int
-  +departureTime : datetime
-  +arrivalTime : datetime
-  +status : string        'planned | in_transit | completed
-}
-
-class FreightWagon {
-  +freightId : int
-  +wagonId : int
-  +cargoDescription : string
-  +grossWeightKg : double
-}
-
-class Route {
-  +routeId : int
-  +description : string
-}
-
-class RouteSegment {
-  +routeId : int
-  +segmentId : int
-  +sequenceOrder : int
-}
-
-
-' ==========================================================
-' RELAÇÕES
-' ==========================================================
-
-Line "1" -- "many" LineSegment : contains >
-LineSegment "1" -- "1" Station : startStation >
-LineSegment "1" -- "1" Station : endStation >
-
-Operator "1" -- "many" Locomotive : owns >
-Operator "1" -- "many" Wagon : owns >
-Operator "1" -- "many" Train : manages >
-
-Train "many" -- "many" Locomotive : composed of >
-Train "many" -- "many" Wagon : composed of >
-
-Freight "many" -- "many" Wagon : includes >
-Freight "1" -- "1" Route : follows >
-Route "1" -- "many" RouteSegment : composed of >
-RouteSegment "many" -- "1" LineSegment : references >
-
-Station "1" -- "many" Freight : origin/destination >
-Freight "1" --> "1" Station : origin
-Freight "1" --> "1" Station : destination
 
 @enduml
