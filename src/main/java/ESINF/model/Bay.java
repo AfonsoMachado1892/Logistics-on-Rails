@@ -1,6 +1,7 @@
 package ESINF.model;
 
 
+import java.util.Collection;
 import java.util.PriorityQueue;
 
 public class Bay {
@@ -39,6 +40,8 @@ public class Bay {
     public int getNumber() { return number; }
     public int getAisleNumber() { return aisleNumber; }
     public int getCapacityBoxes() { return capacityBoxes; }
+    public PriorityQueue<Box> getBoxes() { return boxes;}
+
 
     @Override
     public String toString() {

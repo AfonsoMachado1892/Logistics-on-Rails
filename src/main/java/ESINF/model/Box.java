@@ -10,7 +10,7 @@ public class Box implements Comparable<Box> {
     private int qty;                   // Quantidade total na caixa
     private LocalDate expiryDate;      // Data de validade (pode ser null)
     private LocalDateTime receivedAt;  // Data/hora de receção no terminal
-
+    private Bay bay;
     // Construtor
     public Box(String boxId, String sku, int qty, LocalDate expiryDate, LocalDateTime receivedAt) {
         this.boxId = boxId;
@@ -26,6 +26,9 @@ public class Box implements Comparable<Box> {
     public int getQty() { return qty; }
     public LocalDate getExpiryDate() { return expiryDate; }
     public LocalDateTime getReceivedAt() { return receivedAt; }
+    public Bay getBay() { return bay; }
+    public void setBay(Bay bay) { this.bay = bay; }
+    public void setQty(int qty) { this.qty = qty; }
 
     public boolean isPerishable() {
         return expiryDate != null;
