@@ -1,0 +1,3 @@
+[items.csv:0] INFO | Loaded 25 valid items.
+[bays.csv:0] INFO | Loaded 1 warehouses.
+[wagons.csv:0] INFO | Loaded 8 wagons.
