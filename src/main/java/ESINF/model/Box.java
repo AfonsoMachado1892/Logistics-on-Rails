@@ -34,6 +34,12 @@ public class Box implements Comparable<Box> {
         return expiryDate != null;
     }
 
+    public Integer getAisleNumber() {
+        return (bay != null) ? bay.getAisleNumber() : null;
+    }
+
+
+
     // Ordem FEFO/FIFO
     @Override
     public int compareTo(Box other) {

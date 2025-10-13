@@ -14,19 +14,27 @@ public class WarehouseManager {
     public void unloadWagons(List<Wagon> wagons) {
         for (Wagon wagon : wagons) {
             for (Box box : wagon.getBoxes()) {
-                // exemplo simples: escolher a 1ª baia disponível no armazém
+                boolean placed = false;
+
                 for (Aisle aisle : warehouse.getAisles().values()) {
                     for (Bay bay : aisle.getBays().values()) {
                         if (!bay.isFull()) {
                             bay.addBox(box);
                             box.setBay(bay);
-                            break;
+                            placed = true;
+                            break; // sai do ciclo das bays
                         }
                     }
+                    if (placed) break; // sai também do ciclo dos aisles
+                }
+
+                if (!placed) {
+                    System.err.println("⚠️ No available space for box " + box.getBoxId());
                 }
             }
         }
     }
+
 
     public void printInventory() {
         System.out.println("\n===== WAREHOUSE INVENTORY =====");
@@ -126,5 +134,38 @@ public class WarehouseManager {
 
         return dispatched;
     }
+
+    /**
+     * Retorna todas as boxes existentes no warehouse.
+     */
+    public List<Box> getAllBoxes() {
+        List<Box> allBoxes = new ArrayList<>();
+        for (Aisle aisle : warehouse.getAisles().values()) {
+            for (Bay bay : aisle.getBays().values()) {
+                allBoxes.addAll(bay.getBoxes());
+            }
+        }
+        return allBoxes;
+    }
+
+
+    public List<Box> getBoxesForSku(String sku) {
+        List<Box> boxes = new ArrayList<>();
+
+        for (Aisle aisle : warehouse.getAisles().values()) {
+            for (Bay bay : aisle.getBays().values()) {
+                for (Box box : bay.getBoxes()) {
+                    if (box.getSku().equalsIgnoreCase(sku)) {
+                        boxes.add(box);
+                    }
+                }
+            }
+        }
+
+        // Ordena segundo FEFO/FIFO
+        Collections.sort(boxes);
+        return boxes;
+    }
+
 
 }
