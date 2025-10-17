@@ -1,102 +1,192 @@
-INSERT INTO Facility (ID, Name) VALUES (1, 'São Romão');
-INSERT INTO Facility (ID, Name) VALUES (2, 'Tamel');
-INSERT INTO Facility (ID, Name) VALUES (3, 'Senhora das Dores');
-INSERT INTO Facility (ID, Name) VALUES (4, 'Lousado');
-INSERT INTO Facility (ID, Name) VALUES (5, 'Porto Campanhã');
-INSERT INTO Facility (ID, Name) VALUES (6, 'Leandro');
-INSERT INTO Facility (ID, Name) VALUES (7, 'Porto São Bento');
-INSERT INTO Facility (ID, Name) VALUES (8, 'Barcelos');
-INSERT INTO Facility (ID, Name) VALUES (9, 'Vila Nova da Cerveira');
-INSERT INTO Facility (ID, Name) VALUES (10, 'Midões');
-INSERT INTO Facility (ID, Name) VALUES (11, 'Valença');
-INSERT INTO Facility (ID, Name) VALUES (12, 'Darque');
-INSERT INTO Facility (ID, Name) VALUES (13, 'Contumil');
-INSERT INTO Facility (ID, Name) VALUES (14, 'Ermesinde');
-INSERT INTO Facility (ID, Name) VALUES (15, 'São Frutuoso');
-INSERT INTO Facility (ID, Name) VALUES (16, 'São Pedro da Torre');
-INSERT INTO Facility (ID, Name) VALUES (17, 'Viana do Castelo');
-INSERT INTO Facility (ID, Name) VALUES (18, 'Famalicão');
-INSERT INTO Facility (ID, Name) VALUES (19, 'Barroselas');
-INSERT INTO Facility (ID, Name) VALUES (20, 'Nine');
-INSERT INTO Facility (ID, Name) VALUES (21, 'Caminha');
-INSERT INTO Facility (ID, Name) VALUES (22, 'Carvalha');
-INSERT INTO Facility (ID, Name) VALUES (23, 'Carreço');
+-- Insert into owner
+INSERT INTO owner (id_owner, short_name, vatnumber) VALUES (1, 'IP', 'PT503933813');
 
+-- Insert into operator
+INSERT INTO operator (Id_operator, short_name_operator, vatnumber_operator) VALUES (1, 'Medway', 'PT509017800');
 
-INSERT INTO Line (ID, Name, Owner, Start ID, Start, End ID, End, Gauge) VALUES (1, 'Ramal São Bento - Campanhã', 'IP', 7, 'Porto São Bento', 5, 'Porto Campanhã', 1668);
-INSERT INTO Line (ID, Name, Owner, Start ID, Start, End ID, End, Gauge) VALUES (2, 'Ramal Camapanhã - Nine', 'IP', 5, 'Porto Campanhã', 20, 'Nine', 1668);
-INSERT INTO Line (ID, Name, Owner, Start ID, Start, End ID, End, Gauge) VALUES (3, 'Ramal Nine - Barcelos', 'IP', 20, 'Nine', 8, 'Barcelos', 1668);
-INSERT INTO Line (ID, Name, Owner, Start ID, Start, End ID, End, Gauge) VALUES (4, 'Ramal Barcelos - Viana', 'IP', 8, 'Barcelos', 17, 'Viana do Castelo', 1668);
-INSERT INTO Line (ID, Name, Owner, Start ID, Start, End ID, End, Gauge) VALUES (5, 'Ramal viana - Caminha', 'IP', 17, 'Viana do Castelo', 21, 'Caminha', 1668);
-INSERT INTO Line (ID, Name, Owner, Start ID, Start, End ID, End, Gauge) VALUES (6, 'Ramal Caminha - Torre', 'IP', 21, 'Caminha', 16, 'São Pedro da Torre', 1668);
-INSERT INTO Line (ID, Name, Owner, Start ID, Start, End ID, End, Gauge) VALUES (7, 'Ramal Torre - Valença', 'IP', 16, 'São Pedro da Torre', 11, 'Valença', 1668);
+-- Insert into facility
+INSERT INTO facility (id_facility, name) VALUES (1, 'São Romão');
+INSERT INTO facility (id_facility, name) VALUES (2, 'Tamel');
+INSERT INTO facility (id_facility, name) VALUES (3, 'Senhora das Dores');
+INSERT INTO facility (id_facility, name) VALUES (4, 'Lousado');
+INSERT INTO facility (id_facility, name) VALUES (5, 'Porto Campanhã');
+INSERT INTO facility (id_facility, name) VALUES (6, 'Leandro');
+INSERT INTO facility (id_facility, name) VALUES (7, 'Porto São Bento');
+INSERT INTO facility (id_facility, name) VALUES (8, 'Barcelos');
+INSERT INTO facility (id_facility, name) VALUES (9, 'Vila Nova da Cerveira');
+INSERT INTO facility (id_facility, name) VALUES (10, 'Midões');
+INSERT INTO facility (id_facility, name) VALUES (11, 'Valença');
+INSERT INTO facility (id_facility, name) VALUES (12, 'Darque');
+INSERT INTO facility (id_facility, name) VALUES (13, 'Contumil');
+INSERT INTO facility (id_facility, name) VALUES (14, 'Ermesinde');
+INSERT INTO facility (id_facility, name) VALUES (15, 'São Frutuoso');
+INSERT INTO facility (id_facility, name) VALUES (16, 'São Pedro da Torre');
+INSERT INTO facility (id_facility, name) VALUES (17, 'Viana do Castelo');
+INSERT INTO facility (id_facility, name) VALUES (18, 'Famalicão');
+INSERT INTO facility (id_facility, name) VALUES (19, 'Barroselas');
+INSERT INTO facility (id_facility, name) VALUES (20, 'Nine');
+INSERT INTO facility (id_facility, name) VALUES (21, 'Caminha');
+INSERT INTO facility (id_facility, name) VALUES (22, 'Carvalha');
+INSERT INTO facility (id_facility, name) VALUES (23, 'Carreço');
 
+-- Insert into line
+INSERT INTO line (id_line, name_line, owner, gauge, start_id, start_name, end_id, end_name) VALUES (1, 'Ramal São Bento - Campanhã', 'IP', 1668, 7, 'Porto São Bento', 5, 'Porto Campanhã');
+INSERT INTO line (id_line, name_line, owner, gauge, start_id, start_name, end_id, end_name) VALUES (2, 'Ramal Camapanhã - Nine', 'IP', 1668, 5, 'Porto Campanhã', 20, 'Nine');
+INSERT INTO line (id_line, name_line, owner, gauge, start_id, start_name, end_id, end_name) VALUES (3, 'Ramal Nine - Barcelos', 'IP', 1668, 20, 'Nine', 8, 'Barcelos');
+INSERT INTO line (id_line, name_line, owner, gauge, start_id, start_name, end_id, end_name) VALUES (4, 'Ramal Barcelos - Viana', 'IP', 1668, 8, 'Barcelos', 17, 'Viana do Castelo');
+INSERT INTO line (id_line, name_line, owner, gauge, start_id, start_name, end_id, end_name) VALUES (5, 'Ramal viana - Caminha', 'IP', 1668, 17, 'Viana do Castelo', 21, 'Caminha');
+INSERT INTO line (id_line, name_line, owner, gauge, start_id, start_name, end_id, end_name) VALUES (6, 'Ramal Caminha - Torre', 'IP', 1668, 21, 'Caminha', 16, 'São Pedro da Torre');
+INSERT INTO line (id_line, name_line, owner, gauge, start_id, start_name, end_id, end_name) VALUES (7, 'Ramal Torre - Valença', 'IP', 1668, 16, 'São Pedro da Torre', 11, 'Valença');
 
-INSERT INTO Segment (ID, Line, Order, Electrified, Max Weight (kg/m), Length (m), NumberTracks) VALUES (1, 1, 1, 'Yes', 8000, 2618, 4);
-INSERT INTO Segment (ID, Line, Order, Electrified, Max Weight (kg/m), Length (m), NumberTracks) VALUES (10, 2, 1, 'Yes', 8000, 29003, 2);
-INSERT INTO Segment (ID, Line, Order, Electrified, Max Weight (kg/m), Length (m), NumberTracks) VALUES (11, 2, 2, 'Yes', 8000, 10000, 2);
-INSERT INTO Segment (ID, Line, Order, Electrified, Max Weight (kg/m), Length (m), NumberTracks) VALUES (15, 3, 1, 'Yes', 8000, 5286, 2);
-INSERT INTO Segment (ID, Line, Order, Electrified, Max Weight (kg/m), Length (m), NumberTracks) VALUES (16, 3, 2, 'Yes', 8000, 6000, 2);
-INSERT INTO Segment (ID, Line, Order, Electrified, Max Weight (kg/m), Length (m), NumberTracks) VALUES (14, 4, 1, 'Yes', 8000, 10387, 2);
-INSERT INTO Segment (ID, Line, Order, Electrified, Max Weight (kg/m), Length (m), NumberTracks) VALUES (12, 4, 2, 'Yes', 8000, 12000, 2);
-INSERT INTO Segment (ID, Line, Order, Electrified, Max Weight (kg/m), Length (m), NumberTracks) VALUES (13, 4, 3, 'Yes', 6400, 8000, 2);
-INSERT INTO Segment (ID, Line, Order, Electrified, Max Weight (kg/m), Length (m), NumberTracks) VALUES (20, 5, 1, 'Yes', 8000, 6000, 2);
-INSERT INTO Segment (ID, Line, Order, Electrified, Max Weight (kg/m), Length (m), NumberTracks) VALUES (21, 5, 2, 'Yes', 8000, 3000, 2);
-INSERT INTO Segment (ID, Line, Order, Electrified, Max Weight (kg/m), Length (m), NumberTracks) VALUES (22, 5, 3, 'Yes', 8000, 15000, 2);
-INSERT INTO Segment (ID, Line, Order, Electrified, Max Weight (kg/m), Length (m), NumberTracks) VALUES (25, 6, 1, 'Yes', 8000, 20829, 2);
-INSERT INTO Segment (ID, Line, Order, Electrified, Max Weight (kg/m), Length (m), NumberTracks) VALUES (26, 7, 1, 'Yes', 8000, 4264, 2);
+-- Insert into owner_line (assuming owner field is owner_id for simplicity)
+INSERT INTO owner_line (owner_id, line_id, owner) VALUES (1, 1, 1);
+INSERT INTO owner_line (owner_id, line_id, owner) VALUES (1, 2, 1);
+INSERT INTO owner_line (owner_id, line_id, owner) VALUES (1, 3, 1);
+INSERT INTO owner_line (owner_id, line_id, owner) VALUES (1, 4, 1);
+INSERT INTO owner_line (owner_id, line_id, owner) VALUES (1, 5, 1);
+INSERT INTO owner_line (owner_id, line_id, owner) VALUES (1, 6, 1);
+INSERT INTO owner_line (owner_id, line_id, owner) VALUES (1, 7, 1);
 
+-- Insert into segment
+INSERT INTO segment (id_segment, line_id, "order", eletrified, weight, length, number_tracks) VALUES (1, 1, 1, 'Yes', 8000, 2618, '4');
+INSERT INTO segment (id_segment, line_id, "order", eletrified, weight, length, number_tracks) VALUES (10, 2, 1, 'Yes', 8000, 29003, '2');
+INSERT INTO segment (id_segment, line_id, "order", eletrified, weight, length, number_tracks) VALUES (11, 2, 2, 'Yes', 8000, 10000, '2');
+INSERT INTO segment (id_segment, line_id, "order", eletrified, weight, length, number_tracks) VALUES (15, 3, 1, 'Yes', 8000, 5286, '2');
+INSERT INTO segment (id_segment, line_id, "order", eletrified, weight, length, number_tracks) VALUES (16, 3, 2, 'Yes', 8000, 6000, '2');
+INSERT INTO segment (id_segment, line_id, "order", eletrified, weight, length, number_tracks) VALUES (14, 4, 1, 'Yes', 8000, 10387, '2');
+INSERT INTO segment (id_segment, line_id, "order", eletrified, weight, length, number_tracks) VALUES (12, 4, 2, 'Yes', 8000, 12000, '2');
+INSERT INTO segment (id_segment, line_id, "order", eletrified, weight, length, number_tracks) VALUES (13, 4, 3, 'Yes', 6400, 8000, '2');
+INSERT INTO segment (id_segment, line_id, "order", eletrified, weight, length, number_tracks) VALUES (20, 5, 1, 'Yes', 8000, 6000, '2');
+INSERT INTO segment (id_segment, line_id, "order", eletrified, weight, length, number_tracks) VALUES (21, 5, 2, 'Yes', 8000, 3000, '2');
+INSERT INTO segment (id_segment, line_id, "order", eletrified, weight, length, number_tracks) VALUES (22, 5, 3, 'Yes', 8000, 15000, '2');
+INSERT INTO segment (id_segment, line_id, "order", eletrified, weight, length, number_tracks) VALUES (25, 6, 1, 'Yes', 8000, 20829, '2');
+INSERT INTO segment (id_segment, line_id, "order", eletrified, weight, length, number_tracks) VALUES (26, 7, 1, 'Yes', 8000, 4264, '2');
 
-INSERT INTO Owner (Name, Short name, VATNumber) VALUES ('Infraestruturas de Portugal, SA', 'IP', 'PT503933813');
+-- Insert into line_facility (using facility IDs and names)
+INSERT INTO line_facility (id_facility_start_id, name_facility_start_name, id_facility_end_id, name_facility_end_name) VALUES (7, 'Porto São Bento', 5, 'Porto Campanhã');
+INSERT INTO line_facility (id_facility_start_id, name_facility_start_name, id_facility_end_id, name_facility_end_name) VALUES (5, 'Porto Campanhã', 20, 'Nine');
+INSERT INTO line_facility (id_facility_start_id, name_facility_start_name, id_facility_end_id, name_facility_end_name) VALUES (20, 'Nine', 8, 'Barcelos');
+INSERT INTO line_facility (id_facility_start_id, name_facility_start_name, id_facility_end_id, name_facility_end_name) VALUES (8, 'Barcelos', 17, 'Viana do Castelo');
+INSERT INTO line_facility (id_facility_start_id, name_facility_start_name, id_facility_end_id, name_facility_end_name) VALUES (17, 'Viana do Castelo', 21, 'Caminha');
+INSERT INTO line_facility (id_facility_start_id, name_facility_start_name, id_facility_end_id, name_facility_end_name) VALUES (21, 'Caminha', 16, 'São Pedro da Torre');
+INSERT INTO line_facility (id_facility_start_id, name_facility_start_name, id_facility_end_id, name_facility_end_name) VALUES (16, 'São Pedro da Torre', 11, 'Valença');
 
+-- Insert into locomotive (ignoring model field as not present in schema)
+INSERT INTO locomotive (id_locomotive, name, make, service, number_bogies, bogies, power, length, width, height, weight, max_speed, operational_speed, traction, type, voltage, frequency, operator, bitola, combustivel) VALUES (5621, 'Inês', 'Siemens', 1995, 2, 'Bo-Bo', 5600, 19.2, 3, 4.375, 87, 220, 70, 300, 'Electric', 25, 50, 'Medway', 1668, NULL);
+INSERT INTO locomotive (id_locomotive, name, make, service, number_bogies, bogies, power, length, width, height, weight, max_speed, operational_speed, traction, type, voltage, frequency, operator, bitola, combustivel) VALUES (5623, 'Paz', 'Siemens', 1995, 2, 'Bo-Bo', 5600, 19.2, 3, 4.375, 87, 220, 70, 300, 'Electric', 25, 50, 'Medway', 1668, NULL);
+INSERT INTO locomotive (id_locomotive, name, make, service, number_bogies, bogies, power, length, width, height, weight, max_speed, operational_speed, traction, type, voltage, frequency, operator, bitola, combustivel) VALUES (5630, 'Helena', 'Siemens', 1996, 2, 'Bo-Bo', 5600, 19.2, 3, 4.375, 87, 220, 70, 300, 'Electric', 25, 50, 'Medway', 1668, NULL);
+INSERT INTO locomotive (id_locomotive, name, make, service, number_bogies, bogies, power, length, width, height, weight, max_speed, operational_speed, traction, type, voltage, frequency, operator, bitola, combustivel) VALUES (1903, 'Eva', 'Sorefame - Alsthom', 1981, 2, 'Co-Co', 1623, 19.084, 3.062, 4.31, 117, 100, 42.5, 396, 'Diesel', NULL, NULL, 'Medway', 1668, 4882);
 
-INSERT INTO Operator (Name, Short name, VATNumber) VALUES ('Medway - Operador Ferroviário de Mercadorias, S.A', 'Medway', 'PT509017800');
+-- Insert into locomotive_operator (assuming short_name_operator as 1 for number type)
+INSERT INTO locomotive_operator (operator_id, locomotive_id, short_name_operator) VALUES (1, 5621, 1);
+INSERT INTO locomotive_operator (operator_id, locomotive_id, short_name_operator) VALUES (1, 5623, 1);
+INSERT INTO locomotive_operator (operator_id, locomotive_id, short_name_operator) VALUES (1, 5630, 1);
+INSERT INTO locomotive_operator (operator_id, locomotive_id, short_name_operator) VALUES (1, 1903, 1);
 
+-- Insert into wagon_model (ignoring weight field as not present in schema)
+INSERT INTO wagon_model (id_model, model_wagon, maker, number_bogies, bogies, lenght, width, height, max_speed, payload, volume, type, bitola) VALUES (1245, 'Tadgs 32 94 082 3', 'Metalsines', 2, 'Duplo', 17240, 3072, 4270, 120, 56, 75, 'Cereal wagon', 1668);
+INSERT INTO wagon_model (id_model, model_wagon, maker, number_bogies, bogies, lenght, width, height, max_speed, payload, volume, type, bitola) VALUES (1278, 'Tdgs 41 94 074 1', 'Equimetal', 2, 'Duplo', 9640, 3120, 4165.5, 100, 26.2, 38, 'Cereal wagon', 1668);
+INSERT INTO wagon_model (id_model, model_wagon, maker, number_bogies, bogies, lenght, width, height, max_speed, payload, volume, type, bitola) VALUES (1325, 'Gabs 81 94 181 1', 'Sepsa Cometna', 2, 'Duplo', 21700, 3180, 4170, 100, 50.2, 110, 'Covered wagon with sliding door', 1668);
+INSERT INTO wagon_model (id_model, model_wagon, maker, number_bogies, bogies, lenght, width, height, max_speed, payload, volume, type, bitola) VALUES (1104, 'Regmms 32 94 356 3', 'Metalsines', 2, 'Duplo', 14040, 3104, 2535, 120, 60.6, 76.3, 'Container wagon (max 40'' HC)', 1668);
+INSERT INTO wagon_model (id_model, model_wagon, maker, number_bogies, bogies, lenght, width, height, max_speed, payload, volume, type, bitola) VALUES (985, 'Lgs 22 94 441 6', 'Metalsines', 1, 'Simples', 13860, 2850, 1060, 120, 28.1, 76.3, 'Container wagon (max 40'' HC)', 1668);
+INSERT INTO wagon_model (id_model, model_wagon, maker, number_bogies, bogies, lenght, width, height, max_speed, payload, volume, type, bitola) VALUES (987, 'Sgnss 12 94 455 2', 'Emef', 2, 'Duplo', 18116, 2950, 1030, 120, 68.4, 76.3, 'Container wagon (max 40'' HC)', 1668);
+INSERT INTO wagon_model (id_model, model_wagon, maker, number_bogies, bogies, lenght, width, height, max_speed, payload, volume, type, bitola) VALUES (988, 'Sgnss 12 94 455 2', 'Emef', 2, 'Duplo', 18116, 2950, 1030, 120, 68.4, 76.3, 'Container wagon (max 40'' HC)', 1435);
 
-INSERT INTO Locomotive (Number, Name, Make, Model, Service, Number Bogies, Bogies, Power, Length, Width, Height, Weight (t), Max Speed, Operational Speed, Traction (KN), Type, Voltage, Frequency, Operator, Bitola, Combustível (l)) VALUES (5621, 'Inês', 'Siemens', 'Eurosprinter', 1995, 2, 'Bo-Bo', 5600, 19.2, 3.0, 4.375, 87, 220, 70.0, 300, 'Electric', '25 KV', '50 Hz', 'Medway', 1668, NULL);
-INSERT INTO Locomotive (Number, Name, Make, Model, Service, Number Bogies, Bogies, Power, Length, Width, Height, Weight (t), Max Speed, Operational Speed, Traction (KN), Type, Voltage, Frequency, Operator, Bitola, Combustível (l)) VALUES (5623, 'Paz', 'Siemens', 'Eurosprinter', 1995, 2, 'Bo-Bo', 5600, 19.2, 3.0, 4.375, 87, 220, 70.0, 300, 'Electric', '25 KV', '50 Hz', 'Medway', 1668, NULL);
-INSERT INTO Locomotive (Number, Name, Make, Model, Service, Number Bogies, Bogies, Power, Length, Width, Height, Weight (t), Max Speed, Operational Speed, Traction (KN), Type, Voltage, Frequency, Operator, Bitola, Combustível (l)) VALUES (5630, 'Helena', 'Siemens', 'Eurosprinter', 1996, 2, 'Bo-Bo', 5600, 19.2, 3.0, 4.375, 87, 220, 70.0, 300, 'Electric', '25 KV', '50 Hz', 'Medway', 1668, NULL);
-INSERT INTO Locomotive (Number, Name, Make, Model, Service, Number Bogies, Bogies, Power, Length, Width, Height, Weight (t), Max Speed, Operational Speed, Traction (KN), Type, Voltage, Frequency, Operator, Bitola, Combustível (l)) VALUES (1903, 'Eva', '	Sorefame - Alsthom', 'CP 1900', 1981, 2, 'Co-Co', 1623, 19.084, 3.062, 4.31, 117, 100, 42.5, 396, 'Diesel', NULL, NULL, 'Medway', 1668, 4882.0);
+-- Insert into wagon (converting number to numeric by removing spaces)
+INSERT INTO wagon (number, model, operator, service_year, model_id) VALUES (3563077, 'Regmms 32 94 356 3', 'Medway', 1987, 1104);
+INSERT INTO wagon (number, model, operator, service_year, model_id) VALUES (3563078, 'Regmms 32 94 356 3', 'Medway', 1987, 1104);
+INSERT INTO wagon (number, model, operator, service_year, model_id) VALUES (3563079, 'Regmms 32 94 356 3', 'Medway', 1987, 1104);
+INSERT INTO wagon (number, model, operator, service_year, model_id) VALUES (3563080, 'Regmms 32 94 356 3', 'Medway', 1987, 1104);
+INSERT INTO wagon (number, model, operator, service_year, model_id) VALUES (3563081, 'Regmms 32 94 356 3', 'Medway', 1987, 1104);
+INSERT INTO wagon (number, model, operator, service_year, model_id) VALUES (3563082, 'Regmms 32 94 356 3', 'Medway', 1987, 1104);
+INSERT INTO wagon (number, model, operator, service_year, model_id) VALUES (3563083, 'Regmms 32 94 356 3', 'Medway', 1987, 1104);
+INSERT INTO wagon (number, model, operator, service_year, model_id) VALUES (3563084, 'Regmms 32 94 356 3', 'Medway', 1987, 1104);
+INSERT INTO wagon (number, model, operator, service_year, model_id) VALUES (3563085, 'Regmms 32 94 356 3', 'Medway', 1987, 1104);
+INSERT INTO wagon (number, model, operator, service_year, model_id) VALUES (3563086, 'Regmms 32 94 356 3', 'Medway', 1987, 1104);
+INSERT INTO wagon (number, model, operator, service_year, model_id) VALUES (3563087, 'Regmms 32 94 356 3', 'Medway', 1987, 1104);
+INSERT INTO wagon (number, model, operator, service_year, model_id) VALUES (3563088, 'Regmms 32 94 356 3', 'Medway', 1987, 1104);
+INSERT INTO wagon (number, model, operator, service_year, model_id) VALUES (3563089, 'Regmms 32 94 356 3', 'Medway', 1987, 1104);
+INSERT INTO wagon (number, model, operator, service_year, model_id) VALUES (3563090, 'Regmms 32 94 356 3', 'Medway', 1987, 1104);
+INSERT INTO wagon (number, model, operator, service_year, model_id) VALUES (3563091, 'Regmms 32 94 356 3', 'Medway', 1987, 1104);
+INSERT INTO wagon (number, model, operator, service_year, model_id) VALUES (3563092, 'Regmms 32 94 356 3', 'Medway', 1987, 1104);
+INSERT INTO wagon (number, model, operator, service_year, model_id) VALUES (823045, 'Tadgs 32 94 082 3', 'Medway', 1990, 1245);
+INSERT INTO wagon (number, model, operator, service_year, model_id) VALUES (823046, 'Tadgs 32 94 082 3', 'Medway', 1990, 1245);
+INSERT INTO wagon (number, model, operator, service_year, model_id) VALUES (823047, 'Tadgs 32 94 082 3', 'Medway', 1990, 1245);
+INSERT INTO wagon (number, model, operator, service_year, model_id) VALUES (823048, 'Tadgs 32 94 082 3', 'Medway', 1990, 1245);
+INSERT INTO wagon (number, model, operator, service_year, model_id) VALUES (741001, 'Tdgs 41 94 074 1', 'Medway', 1977, 1278);
+INSERT INTO wagon (number, model, operator, service_year, model_id) VALUES (741002, 'Tdgs 41 94 074 1', 'Medway', 1977, 1278);
+INSERT INTO wagon (number, model, operator, service_year, model_id) VALUES (741003, 'Tdgs 41 94 074 1', 'Medway', 1977, 1278);
+INSERT INTO wagon (number, model, operator, service_year, model_id) VALUES (741004, 'Tdgs 41 94 074 1', 'Medway', 1977, 1278);
+INSERT INTO wagon (number, model, operator, service_year, model_id) VALUES (741005, 'Tdgs 41 94 074 1', 'Medway', 1977, 1278);
+INSERT INTO wagon (number, model, operator, service_year, model_id) VALUES (741006, 'Tdgs 41 94 074 1', 'Medway', 1977, 1278);
+INSERT INTO wagon (number, model, operator, service_year, model_id) VALUES (1811010, 'Gabs 81 94 181 1', 'Medway', 1977, 1325);
+INSERT INTO wagon (number, model, operator, service_year, model_id) VALUES (1811011, 'Gabs 81 94 181 1', 'Medway', 1977, 1325);
+INSERT INTO wagon (number, model, operator, service_year, model_id) VALUES (1811012, 'Gabs 81 94 181 1', 'Medway', 1977, 1325);
+INSERT INTO wagon (number, model, operator, service_year, model_id) VALUES (1811013, 'Gabs 81 94 181 1', 'Medway', 1977, 1325);
+INSERT INTO wagon (number, model, operator, service_year, model_id) VALUES (1811014, 'Gabs 81 94 181 1', 'Medway', 1977, 1325);
 
+-- Insert into wagon_operator (assuming short_name_operator as 1 for number type)
+INSERT INTO wagon_operator (operator_id, wagon_number, short_name_operator) VALUES (1, 3563077, 1);
+INSERT INTO wagon_operator (operator_id, wagon_number, short_name_operator) VALUES (1, 3563078, 1);
+INSERT INTO wagon_operator (operator_id, wagon_number, short_name_operator) VALUES (1, 3563079, 1);
+INSERT INTO wagon_operator (operator_id, wagon_number, short_name_operator) VALUES (1, 3563080, 1);
+INSERT INTO wagon_operator (operator_id, wagon_number, short_name_operator) VALUES (1, 3563081, 1);
+INSERT INTO wagon_operator (operator_id, wagon_number, short_name_operator) VALUES (1, 3563082, 1);
+INSERT INTO wagon_operator (operator_id, wagon_number, short_name_operator) VALUES (1, 3563083, 1);
+INSERT INTO wagon_operator (operator_id, wagon_number, short_name_operator) VALUES (1, 3563084, 1);
+INSERT INTO wagon_operator (operator_id, wagon_number, short_name_operator) VALUES (1, 3563085, 1);
+INSERT INTO wagon_operator (operator_id, wagon_number, short_name_operator) VALUES (1, 3563086, 1);
+INSERT INTO wagon_operator (operator_id, wagon_number, short_name_operator) VALUES (1, 3563087, 1);
+INSERT INTO wagon_operator (operator_id, wagon_number, short_name_operator) VALUES (1, 3563088, 1);
+INSERT INTO wagon_operator (operator_id, wagon_number, short_name_operator) VALUES (1, 3563089, 1);
+INSERT INTO wagon_operator (operator_id, wagon_number, short_name_operator) VALUES (1, 3563090, 1);
+INSERT INTO wagon_operator (operator_id, wagon_number, short_name_operator) VALUES (1, 3563091, 1);
+INSERT INTO wagon_operator (operator_id, wagon_number, short_name_operator) VALUES (1, 3563092, 1);
+INSERT INTO wagon_operator (operator_id, wagon_number, short_name_operator) VALUES (1, 823045, 1);
+INSERT INTO wagon_operator (operator_id, wagon_number, short_name_operator) VALUES (1, 823046, 1);
+INSERT INTO wagon_operator (operator_id, wagon_number, short_name_operator) VALUES (1, 823047, 1);
+INSERT INTO wagon_operator (operator_id, wagon_number, short_name_operator) VALUES (1, 823048, 1);
+INSERT INTO wagon_operator (operator_id, wagon_number, short_name_operator) VALUES (1, 741001, 1);
+INSERT INTO wagon_operator (operator_id, wagon_number, short_name_operator) VALUES (1, 741002, 1);
+INSERT INTO wagon_operator (operator_id, wagon_number, short_name_operator) VALUES (1, 741003, 1);
+INSERT INTO wagon_operator (operator_id, wagon_number, short_name_operator) VALUES (1, 741004, 1);
+INSERT INTO wagon_operator (operator_id, wagon_number, short_name_operator) VALUES (1, 741005, 1);
+INSERT INTO wagon_operator (operator_id, wagon_number, short_name_operator) VALUES (1, 741006, 1);
+INSERT INTO wagon_operator (operator_id, wagon_number, short_name_operator) VALUES (1, 1811010, 1);
+INSERT INTO wagon_operator (operator_id, wagon_number, short_name_operator) VALUES (1, 1811011, 1);
+INSERT INTO wagon_operator (operator_id, wagon_number, short_name_operator) VALUES (1, 1811012, 1);
+INSERT INTO wagon_operator (operator_id, wagon_number, short_name_operator) VALUES (1, 1811013, 1);
+INSERT INTO wagon_operator (operator_id, wagon_number, short_name_operator) VALUES (1, 1811014, 1);
 
-INSERT INTO Wagon_Model (ID, Model, Maker, Number Bogies, Bogies, Length, Width, Height, Weight (t), Max Speed, Payload (t), Volume (m3), Type, Bitola) VALUES (1245, 'Tadgs 32 94 082 3', 'Metalsines', 2, 'Duplo', 17240, 3072, 4270.0, 24.0, 120, 56.0, 75.0, 'Cereal wagon', 1668);
-INSERT INTO Wagon_Model (ID, Model, Maker, Number Bogies, Bogies, Length, Width, Height, Weight (t), Max Speed, Payload (t), Volume (m3), Type, Bitola) VALUES (1278, 'Tdgs 41 94 074 1', 'Equimetal', 2, 'Duplo', 9640, 3120, 4165.5, 13.8, 100, 26.2, 38.0, 'Cereal wagon', 1668);
-INSERT INTO Wagon_Model (ID, Model, Maker, Number Bogies, Bogies, Length, Width, Height, Weight (t), Max Speed, Payload (t), Volume (m3), Type, Bitola) VALUES (1325, 'Gabs 81 94 181 1', 'Sepsa Cometna', 2, 'Duplo', 21700, 3180, 4170.0, 29.8, 100, 50.2, 110.0, 'Covered wagon with sliding door', 1668);
-INSERT INTO Wagon_Model (ID, Model, Maker, Number Bogies, Bogies, Length, Width, Height, Weight (t), Max Speed, Payload (t), Volume (m3), Type, Bitola) VALUES (1104, 'Regmms 32 94 356 3', 'Metalsines', 2, 'Duplo', 14040, 3104, 2535.0, 21.2, 120, 60.6, 76.3, 'Container wagon (max 40'''' HC)', 1668);
-INSERT INTO Wagon_Model (ID, Model, Maker, Number Bogies, Bogies, Length, Width, Height, Weight (t), Max Speed, Payload (t), Volume (m3), Type, Bitola) VALUES (985, 'Lgs 22 94 441 6', 'Metalsines', 1, 'Simples', 13860, 2850, 1060.0, 11.9, 120, 28.1, 76.3, 'Container wagon (max 40'''' HC)', 1668);
-INSERT INTO Wagon_Model (ID, Model, Maker, Number Bogies, Bogies, Length, Width, Height, Weight (t), Max Speed, Payload (t), Volume (m3), Type, Bitola) VALUES (987, 'Sgnss 12 94 455 2', 'Emef', 2, 'Duplo', 18116, 2950, 1030.0, 21.6, 120, 68.4, 76.3, 'Container wagon (max 40'''' HC)', 1668);
-INSERT INTO Wagon_Model (ID, Model, Maker, Number Bogies, Bogies, Length, Width, Height, Weight (t), Max Speed, Payload (t), Volume (m3), Type, Bitola) VALUES (988, 'Sgnss 12 94 455 2', 'Emef', 2, 'Duplo', 18116, 2950, 1030.0, 21.6, 120, 68.4, 76.3, 'Container wagon (max 40'''' HC)', 1435);
-
-
-INSERT INTO Wagon (Number, Model, Operator, Service Year) VALUES ('356 3 077', 'Regmms 32 94 356 3', 'Medway', 1987);
-INSERT INTO Wagon (Number, Model, Operator, Service Year) VALUES ('356 3 078', 'Regmms 32 94 356 3', 'Medway', 1987);
-INSERT INTO Wagon (Number, Model, Operator, Service Year) VALUES ('356 3 079', 'Regmms 32 94 356 3', 'Medway', 1987);
-INSERT INTO Wagon (Number, Model, Operator, Service Year) VALUES ('356 3 080', 'Regmms 32 94 356 3', 'Medway', 1987);
-INSERT INTO Wagon (Number, Model, Operator, Service Year) VALUES ('356 3 081', 'Regmms 32 94 356 3', 'Medway', 1987);
-INSERT INTO Wagon (Number, Model, Operator, Service Year) VALUES ('356 3 082', 'Regmms 32 94 356 3', 'Medway', 1987);
-INSERT INTO Wagon (Number, Model, Operator, Service Year) VALUES ('356 3 083', 'Regmms 32 94 356 3', 'Medway', 1987);
-INSERT INTO Wagon (Number, Model, Operator, Service Year) VALUES ('356 3 084', 'Regmms 32 94 356 3', 'Medway', 1987);
-INSERT INTO Wagon (Number, Model, Operator, Service Year) VALUES ('356 3 085', 'Regmms 32 94 356 3', 'Medway', 1987);
-INSERT INTO Wagon (Number, Model, Operator, Service Year) VALUES ('356 3 086', 'Regmms 32 94 356 3', 'Medway', 1987);
-INSERT INTO Wagon (Number, Model, Operator, Service Year) VALUES ('356 3 087', 'Regmms 32 94 356 3', 'Medway', 1987);
-INSERT INTO Wagon (Number, Model, Operator, Service Year) VALUES ('356 3 088', 'Regmms 32 94 356 3', 'Medway', 1987);
-INSERT INTO Wagon (Number, Model, Operator, Service Year) VALUES ('356 3 089', 'Regmms 32 94 356 3', 'Medway', 1987);
-INSERT INTO Wagon (Number, Model, Operator, Service Year) VALUES ('356 3 090', 'Regmms 32 94 356 3', 'Medway', 1987);
-INSERT INTO Wagon (Number, Model, Operator, Service Year) VALUES ('356 3 091', 'Regmms 32 94 356 3', 'Medway', 1987);
-INSERT INTO Wagon (Number, Model, Operator, Service Year) VALUES ('356 3 092', 'Regmms 32 94 356 3', 'Medway', 1987);
-INSERT INTO Wagon (Number, Model, Operator, Service Year) VALUES ('082 3 045', 'Tadgs 32 94 082 3', 'Medway', 1990);
-INSERT INTO Wagon (Number, Model, Operator, Service Year) VALUES ('082 3 046', 'Tadgs 32 94 082 3', 'Medway', 1990);
-INSERT INTO Wagon (Number, Model, Operator, Service Year) VALUES ('082 3 047', 'Tadgs 32 94 082 3', 'Medway', 1990);
-INSERT INTO Wagon (Number, Model, Operator, Service Year) VALUES ('082 3 048', 'Tadgs 32 94 082 3', 'Medway', 1990);
-INSERT INTO Wagon (Number, Model, Operator, Service Year) VALUES ('074 1 001', 'Tdgs 41 94 074 1', 'Medway', 1977);
-INSERT INTO Wagon (Number, Model, Operator, Service Year) VALUES ('074 1 002', 'Tdgs 41 94 074 1', 'Medway', 1977);
-INSERT INTO Wagon (Number, Model, Operator, Service Year) VALUES ('074 1 003', 'Tdgs 41 94 074 1', 'Medway', 1977);
-INSERT INTO Wagon (Number, Model, Operator, Service Year) VALUES ('074 1 004', 'Tdgs 41 94 074 1', 'Medway', 1977);
-INSERT INTO Wagon (Number, Model, Operator, Service Year) VALUES ('074 1 005', 'Tdgs 41 94 074 1', 'Medway', 1977);
-INSERT INTO Wagon (Number, Model, Operator, Service Year) VALUES ('074 1 006', 'Tdgs 41 94 074 1', 'Medway', 1977);
-INSERT INTO Wagon (Number, Model, Operator, Service Year) VALUES ('181 1 010', 'Gabs 81 94 181 1', 'Medway', 1977);
-INSERT INTO Wagon (Number, Model, Operator, Service Year) VALUES ('181 1 011', 'Gabs 81 94 181 1', 'Medway', 1977);
-INSERT INTO Wagon (Number, Model, Operator, Service Year) VALUES ('181 1 012', 'Gabs 81 94 181 1', 'Medway', 1977);
-INSERT INTO Wagon (Number, Model, Operator, Service Year) VALUES ('181 1 013', 'Gabs 81 94 181 1', 'Medway', 1977);
-INSERT INTO Wagon (Number, Model, Operator, Service Year) VALUES ('181 1 014', 'Gabs 81 94 181 1', 'Medway', 1977);
-
+-- Insert into wagon_model_wagon (assuming model field is model_id for simplicity)
+INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1104, 3563077, 1104);
+INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1104, 3563078, 1104);
+INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1104, 3563079, 1104);
+INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1104, 3563080, 1104);
+INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1104, 3563081, 1104);
+INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1104, 3563082, 1104);
+INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1104, 3563083, 1104);
+INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1104, 3563084, 1104);
+INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1104, 3563085, 1104);
+INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1104, 3563086, 1104);
+INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1104, 3563087, 1104);
+INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1104, 3563088, 1104);
+INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1104, 3563089, 1104);
+INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1104, 3563090, 1104);
+INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1104, 3563091, 1104);
+INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1104, 3563092, 1104);
+INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1245, 823045, 1245);
+INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1245, 823046, 1245);
+INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1245, 823047, 1245);
+INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1245, 823048, 1245);
+INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1278, 741001, 1278);
+INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1278, 741002, 1278);
+INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1278, 741003, 1278);
+INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1278, 741004, 1278);
+INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1278, 741005, 1278);
+INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1278, 741006, 1278);
+INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1325, 1811010, 1325);
+INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1325, 1811011, 1325);
+INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1325, 1811012, 1325);
+INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1325, 1811013, 1325);
+INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1325, 1811014, 1325);
