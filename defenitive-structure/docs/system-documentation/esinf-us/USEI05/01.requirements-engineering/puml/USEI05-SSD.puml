@@ -5,44 +5,26 @@ skinparam shadowing false
 
 autonumber
 
-actor "Quality Operator" as Operator
+actor "Warehouse Operator" as Operator
 participant ":System" as System
 
 activate Operator
 
-    Operator -> System : requestReturnsProcessing(returnsFile)
-    activate System
+Operator -> System : loadReturns(filePath)
+activate System
+System --> Operator : shows import summary and validation logs
+deactivate System
 
-        System --> Operator : confirms returns file loaded and validated
-    deactivate System
+Operator -> System : confirmQuarantineInspection()
+activate System
+System --> Operator : begins processing returns in reverse chronological order
+deactivate System
 
-    Operator -> System : startQuarantineInspection()
-    activate System
+Operator -> System : inspect each return
+activate System
 
-        System --> Operator : displays ordered list of returns (latest first)
-    deactivate System
-
-    Operator -> System : confirmInspectionStart()
-    activate System
-
-        System --> Operator : processes each return in reverse arrival order
-        System --> Operator : classifies reason (customer-remorse, damaged, expired, cycle-count)
-        System --> Operator : restocks or discards accordingly
-        System --> Operator : inserts restocked items into warehouse (FEFO/FIFO)
-        System --> Operator : writes each action to audit log file
-    deactivate System
-
-    Operator -> System : acknowledgeProcessingResults()
-    activate System
-
-        System --> Operator : displays summary (restocked, discarded, errors)
-        System --> Operator : confirms audit log file generated (Logs/audit_log.txt)
-    deactivate System
-
-    Operator -> System : confirmOperationSuccess()
-    activate System
-
-        System --> Operator : displays operation success or failure
-    deactivate System
+System --> Operator : inspects returns and shows restock/discard results
+System --> Operator : writes audit entries
+deactivate System
 
 @enduml

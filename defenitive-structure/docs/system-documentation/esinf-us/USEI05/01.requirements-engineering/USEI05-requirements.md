@@ -1,105 +1,78 @@
-# USEI05 – Returns & Quarantine
+# USEI05 – Returns and Quarantine Management
 
 ## 1. Requirements Engineering
 
 ### 1.1. User Story Description
 
-As a **quality operator**, I want **returned goods** to be placed in **quarantine** so that I can **inspect them in reverse order (latest first)**, decide whether to **restock** or **discard** each item, and create an **audit log file** detailing all processing actions.
+As a warehouse operator, I want to process returned goods by inspecting their condition and reason for return, so that I can restock valid items or discard damaged or expired ones, while maintaining traceability through an audit log.
 
 ### 1.2. Customer Specifications and Clarifications
 
 **From the specifications document:**
 
 > **Context:**  
-> In a warehouse, returned products cannot immediately re-enter inventory. They must first be placed into **quarantine** to ensure quality and safety.  
-> This step prevents damaged or expired goods from being mixed with usable stock.  
-> Quarantined items are inspected in the **reverse order they arrived** (latest first, ties by `returnId ASC`), because these are usually the most urgent to process.  
-> After inspection, items may either be **discarded** (unsuitable) or **restocked** (safe).  
-> Every inspection must be written to a **log file** containing the relevant details.
+> Returned goods arrive at the warehouse with information regarding the SKU, quantity, return reason, timestamp, and (optionally) an expiry date.  
+> These goods must be inspected in a **quarantine process** before deciding their final fate:
+> - Returns with **reason = “damaged”** or **“expired”** → must be **discarded**.
+> - Returns with **reason = “customer-remorse”** or **“cycle-count”** → may be **restocked**.
+>
+> **Processing Rules:**
+> - Returns must be processed in **reverse chronological order** (newest first).
+> - Valid returns are transformed into new **Box** instances with:
+    >   - `boxId = "RET-" + returnId`
+>   - `receivedAt = now()`
+>   - `expiryDate` = given expiry date or `null` if not available
+> - Boxes are stored in the first available (non-full) bay of the warehouse.
+>
+> **Logging and Traceability:**
+> - Each processed return must be recorded in an **Audit Log**, noting:
+    >   - Return ID, SKU, quantity, and resulting action (`Restocked`, `Discarded`, or `FailedRestock`).
+> - All logs are timestamped and appended to `Logs/audit_log.txt`.
 
-> **Reasons for returns:**
-> - Customer remorse → Item still good → *Restock*
-> - Damaged → Unusable → *Discard*
-> - Expired → Past expiry → *Discard*
-> - Cycle count → Mismatch found → *Restock*
+**From the client clarifications:**
 
-> **Audit Log Example:**
-> ```
-> 2025-09-22 14:32 | returnId=R105 | sku=SKU123 | action=Restocked | qty=8
-> 2025-09-22 14:40 | returnId=R106 | sku=SKU200 | action=Discarded
-> ```
-
-**From client clarifications:**
-> - “Restocked” products must be inserted as **new boxes** with ID `"RET-" + returnId` into the warehouse according to the **FEFO/FIFO insertion rules** defined in USEI01.
-> - Discarded products are not stored again; they only appear in the audit log.
-> - Each processed return (restocked or discarded) must generate a **single line** in the log file.
-> - Timestamp ordering is **descending**, then by `returnId ASC` (for deterministic order).
+> Returns are integrated into the existing warehouse structure, using the same placement logic as unloading (USEI01).  
+> The purpose of the quarantine is only to decide whether the item re-enters inventory or not — no reinspection is done afterward.  
+> FEFO/FIFO logic applies later, during dispatch operations.
 
 ---
 
 ### 1.3. Acceptance Criteria
 
-| ID | Acceptance Criterion |
-|----|----------------------|
-| **AC1** | All returns are first loaded and validated (no invalid SKUs, dates, or quantities). |
-| **AC2** | Returns are processed **in reverse chronological order** (latest first, ties by `returnId ASC`). |
-| **AC3** | Each return is **classified** by its reason: `customer-remorse` and `cycle-count` → *Restock*; `damaged` and `expired` → *Discard*. |
-| **AC4** | **Restocked** items are inserted as new boxes (`boxId="RET-" + returnId`) into the appropriate bay using FEFO/FIFO rules. |
-| **AC5** | **Discarded** items are not reinserted into inventory. |
-| **AC6** | Each inspection generates one line in an external **audit log file** containing timestamp, returnId, SKU, action, and qty. |
-| **AC7** | System continues processing even if some returns are invalid (log error and skip). |
+- **AC1:** The system must read return data from `returns.csv` and validate all fields.
+- **AC2:** Returns must be processed in **reverse chronological order** (most recent first).
+- **AC3:** Returns marked as *damaged* or *expired* must be **discarded** (not restocked).
+- **AC4:** Returns marked as *customer-remorse* or *cycle-count* must be **restocked** as new boxes.
+- **AC5:** Each restocked box must receive a unique ID in the form `"RET-" + returnId`.
+- **AC6:** The result of every inspection (discard/restock) must be logged in `audit_log.txt`.
 
 ---
 
-### 1.4. Found-out Dependencies
+### 1.4. Found out Dependencies
 
-| Dependency | Description |
-|-------------|--------------|
-| **USEI01** | FEFO/FIFO storage logic for inserting new boxes (restocked items). |
-| **ImportLogger** | For deterministic reporting of errors and skipped lines during CSV parsing. |
-| **WarehouseManager** | Used to insert new boxes into the warehouse structure. |
-| **Items Catalog** | Needed to validate SKUs in returns.csv. |
+- Depends on **USEI01 – Warehouse Loading**, since the warehouse, aisles, and bays must exist before restocking can occur.
+- Depends on the **Item Catalog** imported earlier (through `ImportItems`) to validate that all SKUs in `returns.csv` are known.
 
 ---
 
 ### 1.5. Input and Output Data
 
-#### **Input Data**
-- **File:** `returns.csv`  
-  | Column | Type | Description |
-  |----------|--------|--------------|
-  | `returnId` | String | Unique return ID |
-  | `sku` | String | Product SKU |
-  | `qty` | Integer | Quantity returned |
-  | `reason` | Enum | One of {customer-remorse, damaged, expired, cycle-count} |
-  | `timestamp` | ISO8601 datetime | When the return arrived |
-  | `expiryDate` | ISO8601 date or empty | Expiry date (optional) |
+**Input Data:**
 
-- **Existing Data:**
-    - Warehouse inventory (from USEI01)
-    - Items catalog (from `items.csv`)
+- **Typed data:**
+    - CSV file: `returns.csv`, containing the following columns:  
+      `returnId, sku, qty, reason, timestamp, expiryDate(optional)`
+    - Warehouse structure (Aisles, Bays, Items)
+    - Item catalog (`Map<String, Item>`)
 
-#### **Output Data**
-- **Updated Warehouse Inventory:**  
-  Restocked items inserted according to FEFO/FIFO rules.
-- **Audit Log File:**  
-  `Logs/audit_log.txt` – one line per processed return.
+- **Generated data:**
+    - List of validated `ReturnItem` objects (sorted newest first)
 
-Example:
-2025-09-22 14:32 | returnId=RET00003 | sku=SKU0003 | action=Restocked | qty=17
-2025-09-22 14:40 | returnId=RET00002 | sku=SKU0008 | action=Discarded | qty=18
+**Output Data:**
+
+- Updated `Warehouse` inventory with new boxes (for restocked returns)
+- Log file `Logs/audit_log.txt` containing:  
+  `timestamp | returnId | sku | action | qty`
+- Console summary showing the result of the operation (success, errors, inventory snapshot)
 
 
----
-
-### 1.6. System Sequence Diagram (SSD)
-
-![System Sequence Diagram](svg/USEI05-SSD.svg)
-
----
-
-### 1.7. Other Relevant Remarks
-
-- The inspection process must be **deterministic**: the same `returns.csv` input always yields the same processing order and log output.
-- This feature reuses existing warehouse logic, so **no direct access** to CSV or in-memory structures bypassing the `WarehouseManager` is allowed.
-- The log file acts as an **immutable audit trail**, ensuring accountability for each inspection.
