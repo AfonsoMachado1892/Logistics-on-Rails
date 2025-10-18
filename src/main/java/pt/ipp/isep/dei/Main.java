@@ -81,6 +81,25 @@ public class Main {
 
         saveEligibilityCSV(outputStrict, "Logs/eligibility_strict.csv");
         saveAllocationCSV(outputStrict, "Logs/allocation_strict.csv");
+
+
+        // === USEI05 – RETURNS & QUARANTINE ===
+
+        System.out.println("\n=== USEI05 – RETURNS & QUARANTINE ===");
+
+        ReturnImporter returnImporter = new ReturnImporter(logger, importer.getItems());
+        List<ReturnItem> returns = returnImporter.loadReturns("warehouseMngt/train_station_dataset/returns.csv");
+
+        // Create the audit logger and quarantine manager
+        AuditLogger auditLogger = new AuditLogger("Logs/audit_log.txt");
+        QuarantineManager quarantineManager = new QuarantineManager(warehouse, auditLogger);
+
+        // Process all returns
+        quarantineManager.processReturns(returns);
+
+        System.out.println("Returns processed successfully. Audit log generated at Logs/audit_log.txt");
+        manager.printInventory(); //apenas para testar
+
     }
 
     /**
