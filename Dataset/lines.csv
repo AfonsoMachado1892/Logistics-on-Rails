@@ -1,0 +1,8 @@
+ID	Name	Owner	Start ID	Start	End ID	End	Gauge
+1	Ramal São Bento - Campanhã	IP	7	Porto São Bento	5	Porto Campanhã	1668
+2	Ramal Camapanhã - Nine	IP	5	Porto Campanhã	20	Nine	1668
+3	Ramal Nine - Barcelos	IP	20	Nine	8	Barcelos	1668
+4	Ramal Barcelos - Viana	IP	8	Barcelos	17	Viana do Castelo	1668
+5	Ramal viana - Caminha	IP	17	Viana do Castelo	21	Caminha	1668
+6	Ramal Caminha - Torre	IP	21	Caminha	16	São Pedro da Torre	1668
+7	Ramal Torre - Valença	IP	16	São Pedro da Torre	11	Valença	1668
