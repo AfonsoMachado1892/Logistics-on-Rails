@@ -9,6 +9,7 @@ import java.util.Scanner;
 /**
  * Main console user interface for the Cargo Handling System
  * Implements USLP02 - User-friendly text-based interface
+ * Updated to support USLP03 - Travel Time Calculation
  */
 public class ConsoleUI {
 
@@ -35,7 +36,7 @@ public class ConsoleUI {
         while (running) {
             try {
                 mainMenu.display();
-                int choice = validator.readInt("Enter your choice: ", 0, 7);
+                int choice = validator.readInt("Enter your choice: ", 0, 8);  // ← ATUALIZADO: 0-8
 
                 if (choice == 0) {
                     if (confirmExit()) {
@@ -65,6 +66,7 @@ public class ConsoleUI {
         System.out.println("  • Import and manage warehouse data");
         System.out.println("  • Process wagon unloading operations");
         System.out.println("  • Manage order eligibility and allocation");
+        System.out.println("  • Calculate travel times between stations");  // ← NOVO
         System.out.println();
     }
 
