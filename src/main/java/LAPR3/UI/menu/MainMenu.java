@@ -17,7 +17,8 @@ public class MainMenu {
     private final DataImportMenu dataImportMenu;
     private final WagonOperationsMenu wagonMenu;
     private final OrderManagementMenu orderMenu;
-    private final ReturnsManagementMenu returnsMenu;  // ← NOVO
+    private final ReturnsManagementMenu returnsMenu;
+    private final PickingManagementMenu pickingMenu;  // ← NOVO
 
     public MainMenu(Scanner scanner, DataController dataController, InputValidator validator) {
         this.scanner = scanner;
@@ -27,7 +28,8 @@ public class MainMenu {
         this.dataImportMenu = new DataImportMenu(scanner, dataController, validator);
         this.wagonMenu = new WagonOperationsMenu(scanner, dataController, validator);
         this.orderMenu = new OrderManagementMenu(scanner, dataController, validator);
-        this.returnsMenu = new ReturnsManagementMenu(scanner, dataController, validator);  // ← NOVO
+        this.returnsMenu = new ReturnsManagementMenu(scanner, dataController, validator);
+        this.pickingMenu = new PickingManagementMenu(scanner, dataController, validator);  // ← NOVO
     }
 
     public void display() {
@@ -43,9 +45,10 @@ public class MainMenu {
         System.out.println("│  1. Data Import & Management                    │");
         System.out.println("│  2. Wagon Operations (USEI01)                   │");
         System.out.println("│  3. Order Management (USEI02)                   │");
-        System.out.println("│  4. Returns & Quarantine (USEI05)               │");  // ← NOVO
-        System.out.println("│  5. View Current Inventory                      │");  // ← Renumerado
-        System.out.println("│  6. View Logs                                   │");  // ← Renumerado
+        System.out.println("│  4. Picking Plans (USEI03)                      │");  // ← NOVO
+        System.out.println("│  5. Returns & Quarantine (USEI05)               │");  // ← Renumerado
+        System.out.println("│  6. View Current Inventory                      │");  // ← Renumerado
+        System.out.println("│  7. View Logs                                   │");  // ← Renumerado
         System.out.println("│  0. Exit                                        │");
         System.out.println("└─────────────────────────────────────────────────┘");
         System.out.println();
@@ -56,9 +59,10 @@ public class MainMenu {
             case 1 -> dataImportMenu.show();
             case 2 -> wagonMenu.show();
             case 3 -> orderMenu.show();
-            case 4 -> returnsMenu.show();      // ← NOVO
-            case 5 -> viewInventory();         // ← Renumerado
-            case 6 -> viewLogs();              // ← Renumerado
+            case 4 -> pickingMenu.show();      // ← NOVO
+            case 5 -> returnsMenu.show();      // ← Renumerado
+            case 6 -> viewInventory();         // ← Renumerado
+            case 7 -> viewLogs();              // ← Renumerado
             default -> System.out.println("❌ Invalid option!");
         }
     }
