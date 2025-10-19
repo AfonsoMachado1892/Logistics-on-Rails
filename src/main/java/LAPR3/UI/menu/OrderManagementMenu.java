@@ -1,12 +1,11 @@
 package LAPR3.UI.menu;
 
 import LAPR3.controller.DataController;
+import LAPR3.controller.OrderController;
 import LAPR3.UI.utils.InputValidator;
-import LAPR3.UI.utils.TableFormatter;
 import ESINF.DTO.AllocationOutput;
 import ESINF.model.Allocation;
 import ESINF.model.OrderEligibility;
-import ESINF.service.AllocationManager;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -14,19 +13,20 @@ import java.util.Scanner;
 
 /**
  * Submenu for order management operations (USEI02)
+ * Uses OrderController to access backend AllocationManager
  */
 public class OrderManagementMenu {
 
     private final Scanner scanner;
     private final DataController dataController;
+    private final OrderController orderController;
     private final InputValidator validator;
-    private final TableFormatter formatter;
 
     public OrderManagementMenu(Scanner scanner, DataController dataController, InputValidator validator) {
         this.scanner = scanner;
         this.dataController = dataController;
         this.validator = validator;
-        this.formatter = new TableFormatter();
+        this.orderController = new OrderController(dataController);
     }
 
     public void show() {
@@ -35,7 +35,7 @@ public class OrderManagementMenu {
             int choice = validator.readInt("Enter your choice: ", 0, 4);
 
             if (choice == 0) {
-                return; // Back to main menu
+                return;
             }
 
             try {
@@ -81,10 +81,8 @@ public class OrderManagementMenu {
         System.out.println("In STRICT mode, a line is ELIGIBLE only if fully allocated.");
         System.out.println();
 
-        AllocationManager manager = new AllocationManager(dataController.getWarehouseManager());
-
         System.out.println("⏳ Processing orders in strict mode...");
-        AllocationOutput output = manager.allocateOrders(dataController.getOrders(), true);
+        AllocationOutput output = orderController.allocateOrders(true);
 
         displayResults(output, "STRICT");
 
@@ -102,10 +100,8 @@ public class OrderManagementMenu {
         System.out.println("In PARTIAL mode, lines can be partially allocated.");
         System.out.println();
 
-        AllocationManager manager = new AllocationManager(dataController.getWarehouseManager());
-
         System.out.println("⏳ Processing orders in partial mode...");
-        AllocationOutput output = manager.allocateOrders(dataController.getOrders(), false);
+        AllocationOutput output = orderController.allocateOrders(false);
 
         displayResults(output, "PARTIAL");
 
@@ -120,12 +116,10 @@ public class OrderManagementMenu {
 
         if (!validatePrerequisites()) return;
 
-        AllocationManager manager = new AllocationManager(dataController.getWarehouseManager());
-
         System.out.println("⏳ Processing orders in both modes...\n");
 
-        AllocationOutput strict = manager.allocateOrders(dataController.getOrders(), true);
-        AllocationOutput partial = manager.allocateOrders(dataController.getOrders(), false);
+        AllocationOutput strict = orderController.allocateOrders(true);
+        AllocationOutput partial = orderController.allocateOrders(false);
 
         displayComparison(strict, partial);
 
@@ -153,10 +147,8 @@ public class OrderManagementMenu {
         System.out.println();
 
         System.out.println("Orders by priority:");
-
-        // Solução 1: Usar variável final explícita para cada iteração
         for (int i = 1; i <= 3; i++) {
-            final int priorityValue = i; // Variável efetivamente final
+            final int priorityValue = i;
             long count = orders.stream().filter(o -> o.getPriority() == priorityValue).count();
             String label = switch (priorityValue) {
                 case 1 -> "High";
@@ -173,7 +165,6 @@ public class OrderManagementMenu {
         System.out.println("RESULTS - " + mode + " MODE");
         System.out.println("═".repeat(80));
 
-        // Eligibility results
         System.out.println("\n📋 ORDER ELIGIBILITY:");
         System.out.println("─".repeat(80));
         System.out.printf("%-10s | %-6s | %-10s | %-8s | %-8s | %-15s%n",
@@ -191,7 +182,6 @@ public class OrderManagementMenu {
         }
         System.out.println("─".repeat(80));
 
-        // Statistics
         long eligible = output.results().stream().filter(r -> r.getStatus().equals("ELIGIBLE")).count();
         long partial = output.results().stream().filter(r -> r.getStatus().equals("PARTIAL")).count();
         long undispatchable = output.results().stream().filter(r -> r.getStatus().equals("UNDISPATCHABLE")).count();
@@ -202,7 +192,6 @@ public class OrderManagementMenu {
         System.out.println("  ✗ Undispatchable: " + undispatchable);
         System.out.println("  Total lines: " + output.results().size());
 
-        // Allocations
         if (!output.allocations().isEmpty()) {
             System.out.println("\n📦 ALLOCATION DETAILS (first 20):");
             System.out.println("─".repeat(90));
@@ -265,7 +254,6 @@ public class OrderManagementMenu {
             String eligFile = "Logs/eligibility_" + mode + ".csv";
             String allocFile = "Logs/allocation_" + mode + ".csv";
 
-            // Save eligibility
             try (FileWriter writer = new FileWriter(eligFile)) {
                 writer.write("orderId,lineNo,sku,requestedQty,allocatedQty,status\n");
                 for (OrderEligibility res : output.results()) {
@@ -275,7 +263,6 @@ public class OrderManagementMenu {
                 }
             }
 
-            // Save allocations
             try (FileWriter writer = new FileWriter(allocFile)) {
                 writer.write("orderId,lineNo,sku,qty,boxId,aisle,bay\n");
                 for (Allocation alloc : output.allocations()) {

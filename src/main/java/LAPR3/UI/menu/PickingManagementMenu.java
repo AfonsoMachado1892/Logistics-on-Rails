@@ -1,6 +1,7 @@
 package LAPR3.UI.menu;
 
 import LAPR3.controller.DataController;
+import LAPR3.controller.OrderController;
 import LAPR3.controller.PickingController;
 import LAPR3.UI.utils.InputValidator;
 import ESINF.DTO.AllocationOutput;
@@ -21,6 +22,7 @@ public class PickingManagementMenu {
     private final DataController dataController;
     private final PickingController pickingController;
     private final InputValidator validator;
+    private final OrderController orderController;
 
     private AllocationOutput currentAllocation;
 
@@ -28,7 +30,8 @@ public class PickingManagementMenu {
         this.scanner = scanner;
         this.dataController = dataController;
         this.validator = validator;
-        this.pickingController = new PickingController(dataController);
+        this.orderController = new OrderController(dataController);
+        this.pickingController = new PickingController(dataController, orderController);
     }
 
     public void show() {
@@ -97,7 +100,6 @@ public class PickingManagementMenu {
         System.out.println("This will run order allocation to generate allocations for picking.");
         System.out.println();
 
-        // Ask for mode
         System.out.println("Select allocation mode:");
         System.out.println("  1. Strict (only fully allocated orders)");
         System.out.println("  2. Partial (allow partial allocations)");
@@ -108,14 +110,8 @@ public class PickingManagementMenu {
         System.out.println("\n⏳ Running allocation in " +
                 (strictMode ? "STRICT" : "PARTIAL") + " mode...");
 
-        AllocationManager allocationManager = new AllocationManager(
-                dataController.getWarehouseManager()
-        );
-
-        currentAllocation = allocationManager.allocateOrders(
-                dataController.getOrders(),
-                strictMode
-        );
+        // USA ORDERCONTROLLER ← CORRETO!
+        currentAllocation = orderController.allocateOrders(strictMode);
 
         System.out.println("✓ Allocation completed!");
         System.out.println("  • Total allocations: " + currentAllocation.allocations().size());

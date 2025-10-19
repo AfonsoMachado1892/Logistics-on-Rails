@@ -2,21 +2,23 @@ package LAPR3.controller;
 
 import ESINF.model.*;
 import ESINF.DTO.AllocationOutput;
-import ESINF.service.AllocationManager;
 
 import java.util.List;
 
 /**
  * Controller for picking plans operations (USEI03)
+ * Integrates with OrderController for USEI02 allocations
  */
 public class PickingController {
 
     private final DataController dataController;
+    private final OrderController orderController;
     private List<Trolley> lastPickingPlan;
     private PickingPlan.Heuristic lastHeuristic;
 
-    public PickingController(DataController dataController) {
+    public PickingController(DataController dataController, OrderController orderController) {
         this.dataController = dataController;
+        this.orderController = orderController;
     }
 
     /**
@@ -38,46 +40,19 @@ public class PickingController {
             throw new IllegalArgumentException("Heuristic must be specified!");
         }
 
-        // Create picking plan
         PickingPlan pickingPlan = new PickingPlan(trolleyCapacity, dataController.getItems());
 
-        // Generate plan
         List<Trolley> trolleys = pickingPlan.generatePickingPlan(
                 allocationOutput.allocations(),
                 heuristic
         );
 
-        // Store for later use
         this.lastPickingPlan = trolleys;
         this.lastHeuristic = heuristic;
 
-        // Print statistics
         pickingPlan.printStatistics(trolleys, heuristic);
 
         return trolleys;
-    }
-
-    /**
-     * Generate picking plan directly from orders (combines USEI02 + USEI03)
-     */
-    public List<Trolley> generatePickingPlanFromOrders(List<Order> orders,
-                                                       boolean strictMode,
-                                                       double trolleyCapacity,
-                                                       PickingPlan.Heuristic heuristic) {
-
-        if (!dataController.isWarehouseSelected()) {
-            throw new IllegalStateException("Warehouse must be selected!");
-        }
-
-        // Step 1: Run allocation (USEI02)
-        AllocationManager allocationManager = new AllocationManager(
-                dataController.getWarehouseManager()
-        );
-
-        AllocationOutput allocationOutput = allocationManager.allocateOrders(orders, strictMode);
-
-        // Step 2: Generate picking plan (USEI03)
-        return generatePickingPlan(allocationOutput, trolleyCapacity, heuristic);
     }
 
     /**
@@ -91,7 +66,6 @@ public class PickingController {
 
         PickingPlan pickingPlan = new PickingPlan(trolleyCapacity, dataController.getItems());
 
-        // FF
         System.out.println("═══ FIRST FIT (FF) ═══");
         List<Trolley> ff = pickingPlan.generatePickingPlan(
                 allocationOutput.allocations(),
@@ -99,7 +73,6 @@ public class PickingController {
         );
         pickingPlan.printStatistics(ff, PickingPlan.Heuristic.FF);
 
-        // FFD
         System.out.println("═══ FIRST FIT DECREASING (FFD) ═══");
         List<Trolley> ffd = pickingPlan.generatePickingPlan(
                 allocationOutput.allocations(),
@@ -107,7 +80,6 @@ public class PickingController {
         );
         pickingPlan.printStatistics(ffd, PickingPlan.Heuristic.FFD);
 
-        // BFD
         System.out.println("═══ BEST FIT DECREASING (BFD) ═══");
         List<Trolley> bfd = pickingPlan.generatePickingPlan(
                 allocationOutput.allocations(),
@@ -115,7 +87,6 @@ public class PickingController {
         );
         pickingPlan.printStatistics(bfd, PickingPlan.Heuristic.BFD);
 
-        // Comparison summary
         printComparisonSummary(ff, ffd, bfd);
     }
 
@@ -138,7 +109,6 @@ public class PickingController {
 
         System.out.println("─".repeat(50));
 
-        // Best heuristic
         int minTrolleys = Math.min(ff.size(), Math.min(ffd.size(), bfd.size()));
         String best = "";
         if (ff.size() == minTrolleys) best = "FF";
@@ -147,7 +117,6 @@ public class PickingController {
 
         System.out.println("\n💡 Best heuristic (fewest trolleys): " + best);
 
-        // Best utilization
         double maxAvg = Math.max(ffAvg, Math.max(ffdAvg, bfdAvg));
         String bestUtil = "";
         if (Math.abs(ffAvg - maxAvg) < 0.01) bestUtil = "FF";
@@ -157,16 +126,10 @@ public class PickingController {
         System.out.println("💡 Best heuristic (highest utilization): " + bestUtil);
     }
 
-    /**
-     * Get last generated picking plan
-     */
     public List<Trolley> getLastPickingPlan() {
         return lastPickingPlan;
     }
 
-    /**
-     * Check if picking plan was generated
-     */
     public boolean hasPickingPlan() {
         return lastPickingPlan != null && !lastPickingPlan.isEmpty();
     }
