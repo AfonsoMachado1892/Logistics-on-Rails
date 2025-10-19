@@ -92,7 +92,7 @@ public class Main {
 
         // Create the audit logger and quarantine manager
         AuditLogger auditLogger = new AuditLogger("Logs/audit_log.txt");
-        QuarantineManager quarantineManager = new QuarantineManager(warehouse, auditLogger);
+        QuarantineManager quarantineManager = new QuarantineManager(warehouse, auditLogger, importer.getItems());
 
         // Process all returns
         quarantineManager.processReturns(returns);
