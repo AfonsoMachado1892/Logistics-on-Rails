@@ -53,7 +53,7 @@ public class MainMenu {
         System.out.println("│  2. Wagon Operations (USEI01)                   │");
         System.out.println("│  3. Order Management (USEI02)                   │");
         System.out.println("│  4. Picking Plans (USEI03)                      │");
-        System.out.println("│  5. Pick Path Sequencing (USEI04)                │");
+        System.out.println("│  5. Pick Path Sequencing (USEI04)               │");
         System.out.println("│  6. Returns & Quarantine (USEI05)               │");
         System.out.println("│  7. View Current Inventory                      │");
         System.out.println("│  8. View Logs                                   │");
@@ -73,7 +73,7 @@ public class MainMenu {
             case 2 -> wagonMenu.show();
             case 3 -> orderMenu.show();
             case 4 -> pickingMenu.show();
-            case 5 -> returnsMenu.show();
+            case 5 -> pickPathMenu.show();
             case 6 -> viewInventory();
             case 7 -> viewLogs();
             case 8 -> travelTimeMenu.show();  // ← NOVO: USLP03
