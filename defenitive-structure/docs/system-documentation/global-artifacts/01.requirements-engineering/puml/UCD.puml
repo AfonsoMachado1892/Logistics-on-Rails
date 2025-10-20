@@ -3,51 +3,97 @@
 skinparam packageStyle rectangle
 'skinparam shadowing false
 
-
-
 title Use Case Diagram
 
 left to right direction
 
-    actor Editor
-    actor Player
-    actor ProductOwner
+    actor DatabaseAdministrator
+    actor InventoryManager
+    actor LogisticsPlanner
+    actor SystemUser
 
+usecase "USBD01 - Create a data dictionary/glossary" as USBD01
+DatabaseAdministrator --> USBD01
 
-usecase "UC001 - Create a Map" as UC001
-Editor --> UC001
+usecase "USBD02 - Create the relational model (logical level)" as USBD02
+DatabaseAdministrator --> USBD02
 
-usecase "UC002 - Add an Industry" as UC002
-Editor --> UC002
+usecase "USBD03 - Instantiate the relational model using SQL DDL code" as USBD03
+DatabaseAdministrator --> USBD03
 
-usecase "UC003 - Add a City" as UC003
-Editor --> UC003
+usecase "USBD04 - Insert provided data into the new database" as USBD04
+DatabaseAdministrator --> USBD04
 
-usecase "UC004 - Create a Scenario" as UC004
-Editor --> UC004
+usecase "USBD05 - List all line segments of lines directly connecting two endpoints" as USBD05
+SystemUser --> USBD05
 
-usecase "UC005 - Build a Station" as UC005
-Player --> UC005
+usecase "USBD06 - List all line segments of a given gauge, including the line they belong to" as USBD06
+SystemUser --> USBD06
 
-usecase "UC006 - Upgrade a Station" as UC006
-Player --> UC006
+usecase "USBD07 - List all line segments of a given owner, including the line they belong to" as USBD07
+SystemUser --> USBD07
 
-usecase "UC007 - List all Stations" as UC007
-Player --> UC007
+usecase "USBD08 - List all locomotives of a given type" as USBD08
+SystemUser --> USBD08
 
-usecase "UC008 - Build a Railway Line" as UC008
-Player --> UC008
+usecase "USBD09 - List all locomotives of a given gauge" as USBD09
+SystemUser --> USBD09
 
-usecase "UC009 - Buy a Train" as UC009
-Player --> UC009
+usecase "USBD10 - List all wagons of a given type" as USBD10
+SystemUser --> USBD10
 
-usecase "UC010 - Assign a Train" as UC010
-Player --> UC010
+usecase "USBD11 - List all wagons of a given gauge" as USBD11
+SystemUser --> USBD11
 
-usecase "UC011 - List all Trains" as UC011
-Player --> UC011
+usecase "USBD12 - List all wagons of a given type and gauge that belong to a given operator" as USBD12
+SystemUser --> USBD12
 
-usecase "UC012 - Create a Simulator" as UC012
-ProductOwner --> UC012
+usecase "USBD13 - List all locomotives of a given type and gauge that belong to a given operator" as USBD13
+SystemUser --> USBD13
+
+usecase "USBD14 - Know the total number of kilometers of electrified rail tracks registered in the system" as USBD14
+SystemUser --> USBD14
+
+usecase "USBD15 - Know how many lines depart from a given endpoint" as USBD15
+SystemUser --> USBD15
+
+usecase "USBD16 - Know the minimum length of double-track segments in a given line" as USBD16
+SystemUser --> USBD16
+
+usecase "USBD17 - Know the average length of the segments in a given line, by track type" as USBD17
+SystemUser --> USBD17
+
+usecase "USBD18 - Know the number of segments in a given line, by track type" as USBD18
+SystemUser --> USBD18
+
+usecase "USBD19 - Know the number of segments of a given owner, by track type" as USBD19
+SystemUser --> USBD19
+
+usecase "USBD20 - Know the number of segments of each gauge size registered in the system" as USBD20
+SystemUser --> USBD20
+
+usecase "USEI01 - Wagons Unloading (Inventory replenishment)" as USEI01
+InventoryManager --> USEI01
+
+usecase "USEI02 - Order Eligibility & Allocation" as USEI02
+InventoryManager --> USEI02
+
+usecase "USEI03 - Picking Plans" as USEI03
+InventoryManager --> USEI03
+
+usecase "USEI04 - Pick Path Sequencing" as USEI04
+InventoryManager --> USEI04
+
+usecase "USEI05 - Returns & Quarantine" as USEI05
+InventoryManager --> USEI05
+
+usecase "USLP01 - Create the domain model (conceptual level)" as USLP01
+LogisticsPlanner --> USLP01
+
+usecase "USLP02 - Access Cargo Handling functionality at a Railway Terminal via a text-based interface" as USLP02
+LogisticsPlanner --> USLP02
+
+usecase "USLP03 - Calculate estimated travel time between two stations with a direct connection and a selected locomotive" as USLP03
+LogisticsPlanner --> USLP03
 
 @enduml
