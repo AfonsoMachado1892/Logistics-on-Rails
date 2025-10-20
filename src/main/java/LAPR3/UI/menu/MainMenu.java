@@ -74,7 +74,7 @@ public class MainMenu {
             case 3 -> orderMenu.show();
             case 4 -> pickingMenu.show();
             case 5 -> pickPathMenu.show();
-            case 6 -> viewInventory();
+            case 6 -> returnsMenu.show();
             case 7 -> viewLogs();
             case 8 -> travelTimeMenu.show();  // ← NOVO: USLP03
             default -> System.out.println("Invalid option!");
