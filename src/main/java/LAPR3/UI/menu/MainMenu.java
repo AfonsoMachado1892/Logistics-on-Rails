@@ -20,6 +20,7 @@ public class MainMenu {
     private final OrderManagementMenu orderMenu;
     private final ReturnsManagementMenu returnsMenu;
     private final PickingManagementMenu pickingMenu;
+    private final PickPathSequencingMenu pickPathMenu;  // ← NOVO: USEI04
     private final TravelTimeMenu travelTimeMenu;  // ← NOVO: USLP03
 
     public MainMenu(Scanner scanner, DataController dataController, InputValidator validator) {
@@ -32,6 +33,7 @@ public class MainMenu {
         this.orderMenu = new OrderManagementMenu(scanner, dataController, validator);
         this.returnsMenu = new ReturnsManagementMenu(scanner, dataController, validator);
         this.pickingMenu = new PickingManagementMenu(scanner, dataController, validator);
+        this.pickPathMenu = new PickPathSequencingMenu(scanner, dataController, validator);  // ← NOVO: USEI04
         this.travelTimeMenu = new TravelTimeMenu(scanner, validator);  // ← NOVO: USLP03
     }
 
@@ -51,13 +53,14 @@ public class MainMenu {
         System.out.println("│  2. Wagon Operations (USEI01)                   │");
         System.out.println("│  3. Order Management (USEI02)                   │");
         System.out.println("│  4. Picking Plans (USEI03)                      │");
-        System.out.println("│  5. Returns & Quarantine (USEI05)               │");
-        System.out.println("│  6. View Current Inventory                      │");
-        System.out.println("│  7. View Logs                                   │");
+        System.out.println("│  5. Pick Path Sequencing (USEI04)                │");
+        System.out.println("│  6. Returns & Quarantine (USEI05)               │");
+        System.out.println("│  7. View Current Inventory                      │");
+        System.out.println("│  8. View Logs                                   │");
         System.out.println("├─────────────────────────────────────────────────┤");
         System.out.println("│  RAILWAY OPERATIONS                             │");  // ← NOVO
         System.out.println("├─────────────────────────────────────────────────┤");  // ← NOVO
-        System.out.println("│  8. Travel Time Calculation (USLP03)            │");  // ← NOVO: USLP03
+        System.out.println("│  9. Travel Time Calculation (USLP03)            │");  // ← NOVO: USLP03
         System.out.println("├─────────────────────────────────────────────────┤");
         System.out.println("│  0. Exit                                        │");
         System.out.println("└─────────────────────────────────────────────────┘");
