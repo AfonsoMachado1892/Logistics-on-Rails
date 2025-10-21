@@ -12,19 +12,40 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 
 /**
- * Reads and validates the returns.csv file.
+ * Imports and validates data from the returns.csv file.
+ * Creates a list of valid {@link ReturnItem} objects and logs any errors or warnings.
  */
 public class ReturnImporter {
 
+    /** Logger for recording import messages. */
     private final ImportLogger logger;
+
+    /** Catalog of valid items, used to validate SKUs. */
     private final Map<String, Item> itemCatalog;
+
+    /** List of successfully imported returns. */
     private final List<ReturnItem> returns = new ArrayList<>();
 
+    /**
+     * Creates a new ReturnImporter.
+     *
+     * @param logger logger for reporting errors and info
+     * @param itemCatalog map of valid SKUs and their corresponding items
+     */
     public ReturnImporter(ImportLogger logger, Map<String, Item> itemCatalog) {
         this.logger = logger;
         this.itemCatalog = itemCatalog;
     }
 
+    /**
+     * Loads and validates the returns from a CSV file.
+     * Each valid row is converted into a {@link ReturnItem}.
+     * Invalid rows are skipped with appropriate error logging.
+     *
+     * @param filePath path to the returns.csv file
+     * @return list of valid ReturnItem objects
+     * @throws IOException if the file cannot be read
+     */
     public List<ReturnItem> loadReturns(String filePath) throws IOException {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String header = br.readLine();

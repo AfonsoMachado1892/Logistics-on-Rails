@@ -9,15 +9,30 @@ import java.util.List;
 import java.util.Scanner;
 
 /**
- * Submenu for returns and quarantine management (USEI05)
+ * Handles the user interface for returns and quarantine management (USEI05).
+ * Allows loading, viewing, processing, and auditing of product returns.
  */
 public class ReturnsManagementMenu {
 
+    /** Console input scanner. */
     private final Scanner scanner;
+
+    /** Reference to the shared data controller. */
     private final DataController dataController;
+
+    /** Controller for handling returns logic. */
     private final ReturnsController returnsController;
+
+    /** Input validation utility. */
     private final InputValidator validator;
 
+    /**
+     * Creates a new ReturnsManagementMenu.
+     *
+     * @param scanner scanner for console input
+     * @param dataController shared data controller
+     * @param validator input validation utility
+     */
     public ReturnsManagementMenu(Scanner scanner, DataController dataController, InputValidator validator) {
         this.scanner = scanner;
         this.dataController = dataController;
@@ -25,6 +40,10 @@ public class ReturnsManagementMenu {
         this.returnsController = new ReturnsController(dataController);
     }
 
+    /**
+     * Displays the Returns & Quarantine Management menu loop.
+     * Handles user interaction and executes selected actions.
+     */
     public void show() {
         while (true) {
             displayMenu();
@@ -37,7 +56,7 @@ public class ReturnsManagementMenu {
             try {
                 handleChoice(choice);
             } catch (Exception e) {
-                System.err.println("❌ Error: " + e.getMessage());
+                System.err.println(" Error: " + e.getMessage());
                 e.printStackTrace();
             }
 
@@ -45,6 +64,9 @@ public class ReturnsManagementMenu {
         }
     }
 
+    /**
+     * Prints the main menu options.
+     */
     private void displayMenu() {
         System.out.println("\n╔══════════════════════════════════════════════════╗");
         System.out.println("║      RETURNS & QUARANTINE MANAGEMENT (USEI05)    ║");
@@ -60,6 +82,11 @@ public class ReturnsManagementMenu {
         System.out.println();
     }
 
+    /**
+     * Executes the selected menu option.
+     *
+     * @param choice selected option number
+     */
     private void handleChoice(int choice) {
         switch (choice) {
             case 1 -> loadReturns();
@@ -69,11 +96,15 @@ public class ReturnsManagementMenu {
         }
     }
 
+    /**
+     * Loads the returns file (returns.csv) into memory.
+     * Displays a summary of valid and invalid records.
+     */
     private void loadReturns() {
         System.out.println("\n═══ LOAD RETURNS ═══");
 
         if (!dataController.isItemsLoaded()) {
-            System.out.println("❌ Items must be loaded first!");
+            System.out.println(" Items must be loaded first!");
             return;
         }
 
@@ -81,27 +112,31 @@ public class ReturnsManagementMenu {
         String path = validator.readFilePath("Enter returns CSV path", defaultPath);
 
         try {
-            System.out.println("⏳ Loading returns...");
+            System.out.println(" Loading returns...");
             returnsController.loadReturns(path);
 
             int count = returnsController.getReturnsCount();
-            System.out.println("✓ Successfully loaded " + count + " return(s)!");
+            System.out.println(" Successfully loaded " + count + " return(s)!");
 
             if (count > 0) {
-                System.out.println("\n📊 Returns Summary:");
+                System.out.println("\n Returns Summary:");
                 returnsController.printReturnsSummary();
             }
 
         } catch (Exception e) {
-            System.err.println("❌ Error loading returns: " + e.getMessage());
+            System.err.println(" Error loading returns: " + e.getMessage());
         }
     }
 
+    /**
+     * Displays all items currently in quarantine awaiting inspection.
+     * Shows up to 20 most recent returns and basic statistics.
+     */
     private void viewQuarantineItems() {
         System.out.println("\n═══ QUARANTINE ITEMS ═══");
 
         if (!returnsController.hasReturns()) {
-            System.out.println("❌ No returns loaded!");
+            System.out.println(" No returns loaded!");
             System.out.println("Please load returns first (option 1).");
             return;
         }
@@ -109,7 +144,7 @@ public class ReturnsManagementMenu {
         List<ReturnItem> returns = returnsController.getReturns();
 
         System.out.println("Total items in quarantine: " + returns.size());
-        System.out.println("\n📦 Items awaiting inspection (newest first):");
+        System.out.println("\n Items awaiting inspection (newest first):");
         System.out.println("─".repeat(100));
         System.out.printf("%-12s | %-10s | %-5s | %-15s | %-20s | %-12s%n",
                 "ReturnID", "SKU", "Qty", "Reason", "Timestamp", "Expiry");
@@ -134,7 +169,7 @@ public class ReturnsManagementMenu {
         System.out.println("─".repeat(100));
 
         // Statistics by reason
-        System.out.println("\n📊 Returns by Reason:");
+        System.out.println("\n Returns by Reason:");
         long damaged = returns.stream().filter(r -> r.getReason().equalsIgnoreCase("damaged")).count();
         long expired = returns.stream().filter(r -> r.getReason().equalsIgnoreCase("expired")).count();
         long remorse = returns.stream().filter(r -> r.getReason().equalsIgnoreCase("customer-remorse")).count();
@@ -146,6 +181,10 @@ public class ReturnsManagementMenu {
         System.out.println("  • Cycle Count: " + cycleCount + " (can be restocked)");
     }
 
+    /**
+     * Processes all loaded returns through the quarantine inspection procedure.
+     * Restocks or discards items based on their condition and reason.
+     */
     private void processReturns() {
         System.out.println("\n═══ PROCESS RETURNS ═══");
 
@@ -154,30 +193,34 @@ public class ReturnsManagementMenu {
         int count = returnsController.getReturnsCount();
         System.out.println("Items to process: " + count);
         System.out.println();
-        System.out.println("ℹ️  Processing order: Latest first (LIFO - newest returns inspected first)");
+        System.out.println("ℹ  Processing order: Latest first (LIFO - newest returns inspected first)");
         System.out.println();
         System.out.println("Actions:");
         System.out.println("  • Damaged/Expired → Discard");
         System.out.println("  • Customer Remorse/Cycle Count → Restock (if possible)");
         System.out.println();
 
-        boolean confirm = validator.readConfirmation("⚠️  Proceed with processing all returns?");
+        boolean confirm = validator.readConfirmation("  Proceed with processing all returns?");
         if (!confirm) {
             System.out.println("Operation cancelled.");
             return;
         }
 
-        System.out.println("\n⏳ Processing returns...");
+        System.out.println("\n Processing returns...");
         System.out.println("─".repeat(80));
 
         returnsController.processReturns();
 
         System.out.println("─".repeat(80));
         System.out.println("✓ All returns processed successfully!");
-        System.out.println("\n💡 TIP: Check audit log (option 4) for detailed processing results.");
-        System.out.println("💡 TIP: View inventory (main menu → option 4) to see restocked items.");
+        System.out.println("\n TIP: Check audit log (option 4) for detailed processing results.");
+        System.out.println(" TIP: View inventory (main menu → option 4) to see restocked items.");
     }
 
+    /**
+     * Displays the audit log of return processing operations.
+     * Shows recent entries and statistics (restocked, discarded, failed).
+     */
     private void viewAuditLog() {
         System.out.println("\n═══ RETURNS AUDIT LOG ═══");
 
@@ -186,7 +229,7 @@ public class ReturnsManagementMenu {
         try {
             java.nio.file.Path path = java.nio.file.Paths.get(auditPath);
             if (!java.nio.file.Files.exists(path)) {
-                System.out.println("❌ No audit log found yet.");
+                System.out.println(" No audit log found yet.");
                 System.out.println("Process returns first (option 3) to generate the audit log.");
                 return;
             }
@@ -208,34 +251,39 @@ public class ReturnsManagementMenu {
             }
 
             System.out.println("─".repeat(100));
-            System.out.println("\n💾 Full log available at: " + auditPath);
+            System.out.println("\n Full log available at: " + auditPath);
 
             // Statistics
             long restocked = lines.stream().filter(l -> l.contains("action=Restocked")).count();
             long discarded = lines.stream().filter(l -> l.contains("action=Discarded")).count();
             long failed = lines.stream().filter(l -> l.contains("action=FailedRestock")).count();
 
-            System.out.println("\n📊 Processing Summary:");
+            System.out.println("\n Processing Summary:");
             System.out.println("  ✓ Restocked: " + restocked);
             System.out.println("  ✗ Discarded: " + discarded);
             if (failed > 0) {
-                System.out.println("  ⚠ Failed to restock: " + failed + " (warehouse full?)");
+                System.out.println("  Failed to restock: " + failed + " (warehouse full?)");
             }
 
         } catch (Exception e) {
-            System.err.println("❌ Error reading audit log: " + e.getMessage());
+            System.err.println(" Error reading audit log: " + e.getMessage());
         }
     }
 
+    /**
+     * Verifies that the warehouse and returns data are ready for processing.
+     *
+     * @return true if prerequisites are met, false otherwise
+     */
     private boolean validatePrerequisites() {
         if (!dataController.isWarehouseSelected()) {
-            System.out.println("❌ No warehouse selected!");
+            System.out.println(" No warehouse selected!");
             System.out.println("Please select a warehouse from the Data Import menu first.");
             return false;
         }
 
         if (!returnsController.hasReturns()) {
-            System.out.println("❌ No returns loaded!");
+            System.out.println(" No returns loaded!");
             System.out.println("Please load returns first (option 1).");
             return false;
         }
@@ -243,6 +291,9 @@ public class ReturnsManagementMenu {
         return true;
     }
 
+    /**
+     * Waits for the user to press ENTER before continuing.
+     */
     private void pause() {
         System.out.println("\nPress ENTER to continue...");
         scanner.nextLine();

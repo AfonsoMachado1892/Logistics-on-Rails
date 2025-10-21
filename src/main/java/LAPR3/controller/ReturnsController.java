@@ -10,20 +10,37 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Controller for returns and quarantine operations
+ * Controls the loading and processing of product returns
+ * and manages the quarantine inspection workflow.
+ * Implements USEI05 - Returns & Quarantine.
  */
 public class ReturnsController {
 
+    /** Reference to the data controller for warehouse and item data. */
     private final DataController dataController;
+
+    /** List of loaded return items. */
     private List<ReturnItem> returns;
+
+    /** Flag indicating whether returns have been successfully loaded. */
     private boolean returnsLoaded = false;
 
+    /**
+     * Creates a new ReturnsController.
+     *
+     * @param dataController shared data controller containing warehouses and items
+     */
     public ReturnsController(DataController dataController) {
         this.dataController = dataController;
     }
 
     /**
-     * Load returns from CSV file
+     * Loads returns data from the provided CSV file.
+     * Validates entries and stores them for quarantine processing.
+     *
+     * @param filePath path to the returns.csv file
+     * @throws IOException if the file cannot be read
+     * @throws IllegalStateException if items have not been loaded first
      */
     public void loadReturns(String filePath) throws IOException {
         if (!dataController.isItemsLoaded()) {
@@ -36,12 +53,15 @@ public class ReturnsController {
         this.returns = importer.loadReturns(filePath);
         this.returnsLoaded = true;
 
-        // Save log
+        // Save import log
         logger.saveToFile("Logs/import_log.txt");
     }
 
     /**
-     * Process all returns through quarantine inspection
+     * Processes all loaded returns through the quarantine inspection process.
+     * Returns are inspected in reverse chronological order (latest first).
+     *
+     * @throws IllegalStateException if returns are not loaded or no warehouse is selected
      */
     public void processReturns() {
         if (!returnsLoaded || returns == null || returns.isEmpty()) {
@@ -69,28 +89,35 @@ public class ReturnsController {
     }
 
     /**
-     * Get loaded returns
+     * Returns the list of loaded returns.
+     *
+     * @return list of return items, or null if none loaded
      */
     public List<ReturnItem> getReturns() {
         return returns;
     }
 
     /**
-     * Get count of loaded returns
+     * Gets the total number of loaded returns.
+     *
+     * @return number of loaded returns
      */
     public int getReturnsCount() {
         return returns != null ? returns.size() : 0;
     }
 
     /**
-     * Check if returns are loaded
+     * Checks whether returns have been successfully loaded.
+     *
+     * @return true if returns are loaded, false otherwise
      */
     public boolean hasReturns() {
         return returnsLoaded && returns != null && !returns.isEmpty();
     }
 
     /**
-     * Print summary of returns
+     * Prints a simple summary of the returns list,
+     * showing how many are to be restocked or discarded.
      */
     public void printReturnsSummary() {
         if (!hasReturns()) return;

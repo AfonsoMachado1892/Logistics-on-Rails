@@ -10,14 +10,26 @@ import java.util.Map;
 
 /**
  * Controls the quarantine inspection process for returned goods.
- * Implements USEI05 - Returns & Quarantine
+ * Implements USEI05 - Returns & Quarantine.
  */
 public class QuarantineManager {
 
+    /** Reference to the warehouse for restocking items. */
     private final Warehouse warehouse;
+
+    /** Logger used to write audit records for all quarantine actions. */
     private final AuditLogger auditLogger;
+
+    /** Catalog of all valid items (SKUs) in the warehouse. */
     private final Map<String, Item> itemCatalog;
 
+    /**
+     * Creates a new QuarantineManager.
+     *
+     * @param warehouse warehouse where restocked items are stored
+     * @param auditLogger logger for audit records
+     * @param itemCatalog catalog of valid items (SKUs)
+     */
     public QuarantineManager(Warehouse warehouse, AuditLogger auditLogger,
                              Map<String, Item> itemCatalog) {
         this.warehouse = warehouse;
@@ -27,7 +39,9 @@ public class QuarantineManager {
 
     /**
      * Processes all returns in reverse chronological order (LIFO - latest first).
-     * Returns are already sorted by ReturnImporter.
+     * Returns are already sorted by {@link ESINF.IO.ReturnImporter}.
+     *
+     * @param returnsList list of returned items to inspect
      */
     public void processReturns(List<ReturnItem> returnsList) {
         for (ReturnItem ret : returnsList) {
@@ -35,6 +49,12 @@ public class QuarantineManager {
         }
     }
 
+    /**
+     * Processes a single return item.
+     * Determines if it should be restocked or discarded and logs the result.
+     *
+     * @param ret the return item to process
+     */
     private void processReturn(ReturnItem ret) {
         // Validate SKU exists in catalog
         if (!itemCatalog.containsKey(ret.getSku())) {
@@ -55,6 +75,12 @@ public class QuarantineManager {
         }
     }
 
+    /**
+     * Handles the restocking of a valid returned item.
+     * If the item has expired since the return, it is discarded instead.
+     *
+     * @param ret the return item to restock
+     */
     private void restockItem(ReturnItem ret) {
         // Check if product expired since return
         if (ret.getExpiryDate() != null && ret.getExpiryDate().isBefore(LocalDate.now())) {
@@ -79,11 +105,10 @@ public class QuarantineManager {
     }
 
     /**
-     * Tries to restock a box following FEFO/FIFO insertion rules.
-     * Strategy:
-     * 1. Try to find bay with same SKU (keeps SKUs together)
-     * 2. If not found, use first available bay
-     * The PriorityQueue in Bay automatically maintains FEFO/FIFO order.
+     * Attempts to restock a box following FEFO/FIFO insertion rules.
+     *
+     * @param box the box to restock
+     * @return true if restocking succeeded, false otherwise
      */
     private boolean tryRestock(Box box) {
         try {
@@ -91,7 +116,7 @@ public class QuarantineManager {
             for (Aisle aisle : warehouse.getAisles().values()) {
                 for (Bay bay : aisle.getBays().values()) {
                     if (!bay.isFull() && hasSameSku(bay, box.getSku())) {
-                        bay.addBox(box);  // PriorityQueue maintains FEFO/FIFO order
+                        bay.addBox(box);
                         box.setBay(bay);
                         return true;
                     }
@@ -102,7 +127,7 @@ public class QuarantineManager {
             for (Aisle aisle : warehouse.getAisles().values()) {
                 for (Bay bay : aisle.getBays().values()) {
                     if (!bay.isFull()) {
-                        bay.addBox(box);  // PriorityQueue maintains FEFO/FIFO order
+                        bay.addBox(box);
                         box.setBay(bay);
                         return true;
                     }
@@ -117,7 +142,11 @@ public class QuarantineManager {
     }
 
     /**
-     * Checks if bay contains boxes with the given SKU
+     * Checks whether a bay contains boxes with the same SKU.
+     *
+     * @param bay the bay to check
+     * @param sku the SKU to look for
+     * @return true if the bay contains the given SKU
      */
     private boolean hasSameSku(Bay bay, String sku) {
         if (bay.isEmpty()) return false;
