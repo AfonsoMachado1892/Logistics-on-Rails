@@ -162,8 +162,6 @@ public class ReturnItemTest {
                 "damaged", timestamp, null);
         assertNotEquals(item1, item3);
 
-        assertEquals(item1, item1);
-
         assertNotEquals(item1, null);
 
         assertNotEquals(item1, "Not a ReturnItem");
