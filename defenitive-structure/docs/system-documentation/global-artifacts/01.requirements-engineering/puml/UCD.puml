@@ -24,53 +24,17 @@ DatabaseAdministrator --> USBD03
 usecase "USBD04 - Insert provided data into the new database" as USBD04
 DatabaseAdministrator --> USBD04
 
-usecase "USBD05 - List all line segments of lines directly connecting two endpoints" as USBD05
-SystemUser --> USBD05
-
 usecase "USBD06 - List all line segments of a given gauge, including the line they belong to" as USBD06
 SystemUser --> USBD06
-
-usecase "USBD07 - List all line segments of a given owner, including the line they belong to" as USBD07
-SystemUser --> USBD07
-
-usecase "USBD08 - List all locomotives of a given type" as USBD08
-SystemUser --> USBD08
-
-usecase "USBD09 - List all locomotives of a given gauge" as USBD09
-SystemUser --> USBD09
-
-usecase "USBD10 - List all wagons of a given type" as USBD10
-SystemUser --> USBD10
 
 usecase "USBD11 - List all wagons of a given gauge" as USBD11
 SystemUser --> USBD11
 
-usecase "USBD12 - List all wagons of a given type and gauge that belong to a given operator" as USBD12
-SystemUser --> USBD12
-
-usecase "USBD13 - List all locomotives of a given type and gauge that belong to a given operator" as USBD13
-SystemUser --> USBD13
-
-usecase "USBD14 - Know the total number of kilometers of electrified rail tracks registered in the system" as USBD14
-SystemUser --> USBD14
-
 usecase "USBD15 - Know how many lines depart from a given endpoint" as USBD15
 SystemUser --> USBD15
 
-usecase "USBD16 - Know the minimum length of double-track segments in a given line" as USBD16
-SystemUser --> USBD16
-
 usecase "USBD17 - Know the average length of the segments in a given line, by track type" as USBD17
 SystemUser --> USBD17
-
-usecase "USBD18 - Know the number of segments in a given line, by track type" as USBD18
-SystemUser --> USBD18
-
-usecase "USBD19 - Know the number of segments of a given owner, by track type" as USBD19
-SystemUser --> USBD19
-
-usecase "USBD20 - Know the number of segments of each gauge size registered in the system" as USBD20
-SystemUser --> USBD20
 
 usecase "USEI01 - Wagons Unloading (Inventory replenishment)" as USEI01
 InventoryManager --> USEI01
