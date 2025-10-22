@@ -1,0 +1,19 @@
+@startuml USEI01_Unload_Wagons
+
+actor "Station Storage\nManager" as Manager
+participant ":System" as System
+
+Manager -> System : requestUnloadWagons()
+activate Manager
+
+System --> Manager : showWagonsCount(count)
+
+Manager -> System : confirmUnload()
+
+
+System --> Manager : showSuccessMessage()
+System --> Manager : displayInventorySummary()
+
+deactivate System
+
+@enduml
