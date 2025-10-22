@@ -8,7 +8,6 @@ _Specifies functionalities that:
 
 - **Authentication and Authorization**: Ensuring that users have the correct permissions to access specific functions.
 - **Logging and Audit Trails**: Recording system activities for tracking changes and ensuring resilience.
-- **Multilingual Support**: Providing language options for different user regions.
 - **Data Backup**: Automating backups to prevent data loss and system failures.
 - **System Notifications**: Sending alerts about unusual or critical events from user actions.
 
@@ -18,7 +17,6 @@ _Evaluates the user interface. It has several subcategories, among them: error p
 
 - **Intuitive Navigation**: Ensuring that features and menus are easy to find, access, and use.
 - **Errors and Recovery**: Show clear error messages and a way to solve them.
-- **User Customization**: Allow users to customize their experience by changing themes, settings, and layouts.
 - **Comprehensive Documentation**: Offering tutorials, explanations, and clear information to assist users.
 - **Accessibility Compliance**: Supporting users with disabilities through high-contrast modes, keyboard navigation, and screen readers.
 
@@ -26,7 +24,7 @@ _Evaluates the user interface. It has several subcategories, among them: error p
 
 _Refers to the integrity, compliance, and interoperability of the software. The requirements to be considered are: frequency and severity of failure, possibility of recovery, possibility of prediction, accuracy, average time between failures._
 
-- **Data Consistency**: Ensure that data remains accurate and up-to-date across all modules.
+- **Data Consistency**: Ensure that data remains accurate and up to date across all modules.
 - **Error Detection**: Identify and solve errors before they affect some functionality.
 - **Disaster Recovery Planning**: Preparing for unexpected failures and errors with recovery protocols.
 - **Automated Monitoring**: Tools to track system performance and detect issues that could affect functionality.
@@ -44,7 +42,7 @@ _Evaluates the performance requirements of the software, namely: response time, 
 
 ## Supportability
 
-_The supportability requirements gather several characteristics, such as: testability, adaptability, maintainability, compatibility, configurability, installability, scalability, and more._
+_The supportability requirements gather several characteristics, such as testability, adaptability, maintainability, compatibility, configurability, installability, scalability, and more._
 
 - **Modular Architecture**: Facilitating modifications or updates without affecting the entire system.
 - **Automated Testing**: Providing easy execution of integrated tests.
@@ -67,8 +65,8 @@ _Specifies or constrains the system design process. Examples may include: progra
 
 _Specifies or constrains the code or construction of a system such as: mandatory standards/patterns, implementation languages, database integrity, resource limits, operating system._
 
-- **Programming Languages**: Java, PL/SQL, C/Assembly.
-- **Database Integrity**: The database will be the main repository of information for the system and must reflect necessary data integrity, maintained in a remote database management system (DBMS).
+- **Programming Languages**: Java, SQL, C/Assembly.
+- **Database Integrity**: The database will be the main repository of information for the system and must reflect necessary data integrity, maintained in a remote database management system.
 - **Security Protocols**: Basic input validation to avoid unsafe practices; no specific security protocols for sensitive data or network communication.
 - **Resource Limits**: The system should run efficiently on standard machines with at least 4 GB of RAM and a dual-core processor, avoiding excessive CPU or memory usage.
 - **Operating System Compatibility**: Windows, MacOS, and Linux.
@@ -84,7 +82,7 @@ _Specifies or constrains the features inherent to the interaction of the system 
 
 ### Physical Constraints
 
-_Specifies a limitation or physical requirement regarding the hardware used to house the system, as for example: material, shape, size, or weight._
+_Specifies a limitation or physical requirement regarding the hardware used to house the system, as for example, material, shape, size, or weight._
 
 - **Hardware Specifications**: Designed to run on standard personal computers or laptops.
 - **Storage Requirements**: Minimal disk space required, including all necessary files and dependencies.
