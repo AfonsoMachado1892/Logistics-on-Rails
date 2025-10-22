@@ -1,134 +1,127 @@
 # OO Analysis
-The construction process of the domain model is based on the client specifications, especially the nouns (for _concepts_) and verbs (for _relations_) used.
-## Rationale to identify domain conceptual classes
 
-To identify domain conceptual classes, we started by listing candidate conceptual classes inspired by the categories suggested in the book *"Applying UML and Patterns: An Introduction to Object-Oriented Analysis and Design and Iterative Development"*.
+The construction of the domain model is based on the client specifications, extracting nouns (for _concepts_) and verbs (for _relations_).
+
 ---
+
+## Rationale to Identify Domain Conceptual Classes
+
+To identify domain conceptual classes, candidate conceptual classes were listed inspired by the categories suggested by Larman in *"Applying UML and Patterns: An Introduction to Object-Oriented Analysis and Design and Iterative Development"*.
+
+---
+
 ### _Conceptual Class Category List_
+
 **Business Transactions**
-- Freight Dispatching
-- Train Assignment
-- Station Construction
-- Line Segment Maintenance
+- Freight
+- Route
+- RouteSegment
 
 **Transaction Line Items**
 - Locomotive
 - Wagon
-- Cargo
+- FreightWagon
 
 **Product/Service related to a Transaction or Transaction Line Item**
 - Train
-- RailwayLine
-- Station
 - Freight Service
+- Route
 
 **Transaction Records**
-- Maintenance Log
-- Dispatch Record
+- Freight (records a transport operation)
 
 **Roles of People or Organizations**
-- LogisticsOperator
-- DatabaseAdministrator
-- InventoryManager
-- SystemUser
+- Operator
 
 **Places**
 - Station
-- Terminal
-- FreightYard
-- RailwayLineSegment
-- Endpoint
+- RailwayLine
+- LineSegment
+- Facility
 
 **Noteworthy Events**
-- Cargo Loading
-- Cargo Unloading
-- Train Scheduling
-- Line Segment Construction
-- Freight Dispatch
-- Route Planning
+- Freight dispatching
+- Freight arrival
+- Route execution
 
 **Physical Objects**
 - Train
 - Locomotive
 - Wagon
-- Cargo
-- RailwayLineSegment
-- Track
+- WagonModel
+- LineSegment
+- RailwayLine
+- Station
 
 **Descriptions of Things**
-- LineSegment (e.g., gauge, weight limit, speed limit)
-- Locomotive (e.g., type, gauge)
-- Wagon (e.g., type, capacity)
+- WagonModel (technical characteristics of wagons)
+- Gauge (track and gauge description)
+- Locomotive (technical specifications)
 
 **Catalogs**
-- Types of Locomotives
-- Types of Wagons
-- Types of Cargo
-- Types of RailwayLineSegments
+- WagonModel
+- Gauge types
 
 **Containers**
-- Terminal
-- FreightYard
-- RailwayNetwork
+- RailwayLine (contains LineSegments)
+- Route (contains RouteSegments)
 
 **Elements of Containers**
-- Station
-- Track
-- Cargo
 - LineSegment
+- RouteSegment
+- Wagon
 
 **Organizations**
-- TrainOperator
-- RailwayInfrastructureOwner
+- Operator
 
 **Other External/Collaborating Systems**
-- Simulator
-- WarehouseManagementSystem
+- N/A
 
-**Records of finance, work, contracts, legal matters**
-- MaintenanceSchedule
-- OperationLog
-
-**Financial Instruments**
+**Records of Finance, Work, Contracts, Legal Matters**
 - N/A
 
 **Documents mentioned/used to perform some work**
-- DispatchOrder
-- MaintenanceReport
-
-## Rationale to identify associations between conceptual classes
-An association is a relationship between instances of objects that indicates a relevant connection and that is worth remembering, or it is derivable from the List of Common Associations:
-- *A* is physically or logically part of *B*
-- *A* is physically or logically contained in *B*
-- *A* is a description for *B*
-- *A* is known/logged/recorded in *B*
-- *A* uses, manages, or owns *B*
-- *A* is related to a transaction of *B*
+- Possibly derived from Freight or Route, but not directly represented
 
 ---
-| Concept (A)          | Association           | Concept (B)           |
-|-----------------------|-----------------------|-----------------------|
-| LogisticsOperator    | manages               | Train                 |
-| LogisticsOperator    | schedules             | Route                 |
-| TrainOperator        | owns                  | Train                 |
-| Train                | contains              | Locomotive            |
-| Train                | carries               | Cargo                 |
-| Station              | contains              | Cargo                 |
-| Station              | connects to           | RailwayLineSegment    |
-| RailwayLineSegment   | connects              | Station               |
-| RailwayLineSegment   | part of               | RailwayNetwork        |
-| Terminal             | contains              | Station               |
-| FreightYard          | handles               | Cargo                 |
-| Cargo                | transported by        | Train                 |
-| Endpoint             | connected by          | RailwayLineSegment    |
-| RailwayInfrastructureOwner | maintains       | RailwayLineSegment    |
-| Simulator            | simulates             | Route                 |
-| WarehouseManagementSystem | manages         | Cargo                |
-| DatabaseAdministrator | records               | MaintenanceLog        |
-| InventoryManager     | oversees              | Cargo                 |
-| SystemUser           | views                 | DispatchRecord        |
 
-## Domain Model
-*Do NOT forget to identify concept attributes too.*
-*Insert below the Domain Model Diagram in an SVG format*
-![Domain Model](../01.requirements-engineering/svg/DM.svg)
+## Rationale to Identify Associations Between Conceptual Classes
+
+Associations were identified based on semantic relations observed between classes, according to common association patterns:
+- *A* is part of *B*
+- *A* is contained in *B*
+- *A* is described by *B*
+- *A* uses or operates *B*
+- *A* is related to the transaction of *B*
+
+---
+
+| Concept (A) | Association | Concept (B) |
+|--------------|-------------|-------------|
+| Operator | operates | Locomotive  |
+| Operator | operates | Wagon       |
+| Operator | manages | Train       |
+| Train | uses | Locomotive  |
+| Train | pulls | Wagon       |
+| WagonModel | defines | Wagon       |
+| RailwayLine | composed of | LineSegment |
+| LineSegment | start | Station     |
+| LineSegment | end | Station     |
+| Gauge | defines | LineSegment |
+| Gauge | supports | Locomotive  |
+| Gauge | supports | Wagon       |
+| Freight | includes | Wagon       |
+| Freight | includes | FreightWagon |
+| Freight | follows | Route       |
+| Freight | origin | Station     |
+| Freight | destination | Station     |
+| Wagon | assigned to | FreightWagon |
+| Route | consists of | RouteSegment |
+| RouteSegment | references | LineSegment |
+| Station | dispatches/receives | Freight     |
+
+---
+
+## Domain Model Diagram
+
+![Domain Model](../02.analysis/svg/domain-model.svg)
