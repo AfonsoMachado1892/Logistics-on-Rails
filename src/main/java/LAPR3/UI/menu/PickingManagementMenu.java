@@ -195,11 +195,9 @@ public class PickingManagementMenu {
         System.out.println("  • Total items: " +
                 trolleys.stream().mapToInt(t -> t.getAllocations().size()).sum());
 
-        // Show first 3 trolleys in detail
-        int toShow = Math.min(3, trolleys.size());
-        System.out.println("\n📦 Trolley Details (first " + toShow + "):");
 
-        for (int i = 0; i < toShow; i++) {
+
+        for (int i = 0; i <trolleys.size(); i++) {
             Trolley t = trolleys.get(i);
             System.out.println("\n" + t);
             System.out.println("─".repeat(90));
@@ -207,12 +205,9 @@ public class PickingManagementMenu {
                     "OrderID", "Line", "SKU", "Qty", "BoxID", "Aisle", "Bay");
             System.out.println("─".repeat(90));
 
-            int itemCount = 0;
+
             for (Allocation alloc : t.getAllocations()) {
-                if (itemCount++ >= 10) {
-                    System.out.println("... (" + (t.getAllocations().size() - 10) + " more items)");
-                    break;
-                }
+
                 System.out.printf("%-10s | %-6d | %-10s | %5d | %-15s | %-6s | %-6s%n",
                         alloc.getOrderId(),
                         alloc.getLineNo(),
@@ -225,9 +220,7 @@ public class PickingManagementMenu {
             System.out.println("─".repeat(90));
         }
 
-        if (trolleys.size() > 3) {
-            System.out.println("\n... (" + (trolleys.size() - 3) + " more trolleys)");
-        }
+
 
         // Utilization distribution
         System.out.println("\n📊 Utilization Distribution:");
