@@ -56,7 +56,7 @@ public class PickingManagementMenu {
 
     private void displayMenu() {
         System.out.println("\n╔══════════════════════════════════════════════════╗");
-        System.out.println("║         PICKING PLANS MANAGEMENT (USEI03)       ║");
+        System.out.println("║         PICKING PLANS MANAGEMENT (USEI03)        ║");
         System.out.println("╚══════════════════════════════════════════════════╝");
         System.out.println();
 
@@ -147,7 +147,7 @@ public class PickingManagementMenu {
 
         // Ask for trolley capacity
         System.out.println("\nTrolley Configuration:");
-        double capacity = readDouble("Enter trolley capacity (kg): ", 1.0, 1000.0);
+        double capacity = readDouble("Enter trolley capacity (min: 700kg): ", 700.0, 2000.0);
 
         System.out.println("\n⏳ Generating picking plan with " + heuristic + "...");
 
@@ -175,7 +175,7 @@ public class PickingManagementMenu {
         }
 
         // Ask for trolley capacity
-        double capacity = readDouble("Enter trolley capacity (kg): ", 1.0, 1000.0);
+        double capacity = readDouble("Enter trolley capacity (min: 700kg): ", 700.0, 2000.0);
 
         System.out.println("\n⏳ Comparing all heuristics...");
 
