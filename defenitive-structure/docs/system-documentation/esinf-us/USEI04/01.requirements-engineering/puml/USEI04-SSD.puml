@@ -10,10 +10,10 @@ participant ":System" as System
 
 activate Picker
 
-    Picker -> System : requestPickPathSequencing(setOfBays)
+    Picker -> System : requests a Pick Path Sequencing
     activate System
 
-        System --> Picker : shows sequencing strategies (A and B) and requests confirmation
+        System --> Picker : shows sequencing strategies (A or B) and requests confirmation
     deactivate System
 
     Picker -> System : confirms strategy selection
@@ -25,7 +25,7 @@ activate Picker
     Picker -> System : acknowledges processing
     activate System
 
-        System --> Picker : displays sequencedPathsAndDistances(strategyA_path, strategyA_distance, strategyB_path, strategyB_distance)
+        System --> Picker : displays sequenced paths and distances
     deactivate System
 
     Picker -> System : confirms operation success

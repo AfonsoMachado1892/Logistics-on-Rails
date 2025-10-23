@@ -8,9 +8,13 @@ title Use Case Diagram
 left to right direction
 
     actor DatabaseAdministrator
-    actor InventoryManager
+    actor InventoryManagement
     actor LogisticsPlanner
     actor SystemUser
+    actor TerminalOperator
+    actor WarehousePlanner
+    actor Picker
+    actor QualityOperator
 
 usecase "USBD01 - Create a data dictionary/glossary" as USBD01
 DatabaseAdministrator --> USBD01
@@ -37,19 +41,24 @@ usecase "USBD17 - Know the average length of the segments in a given line, by tr
 SystemUser --> USBD17
 
 usecase "USEI01 - Wagons Unloading (Inventory replenishment)" as USEI01
-InventoryManager --> USEI01
+InventoryManagement --> TerminalOperator
+TerminalOperator --> USEI01
 
 usecase "USEI02 - Order Eligibility & Allocation" as USEI02
-InventoryManager --> USEI02
+InventoryManagement --> WarehousePlanner
+WarehousePlanner --> USEI02
 
 usecase "USEI03 - Picking Plans" as USEI03
-InventoryManager --> USEI03
+InventoryManagement --> WarehousePlanner
+WarehousePlanner --> USEI03
 
 usecase "USEI04 - Pick Path Sequencing" as USEI04
-InventoryManager --> USEI04
+InventoryManagement --> Picker
+Picker --> USEI04
 
 usecase "USEI05 - Returns & Quarantine" as USEI05
-InventoryManager --> USEI05
+InventoryManagement --> QualityOperator
+QualityOperator --> USEI05
 
 usecase "USLP01 - Create the domain model (conceptual level)" as USLP01
 LogisticsPlanner --> USLP01
