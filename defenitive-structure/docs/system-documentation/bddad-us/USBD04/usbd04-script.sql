@@ -170,6 +170,7 @@ INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1325, 1811012,
 INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1325, 1811013, 1325);
 INSERT INTO wagon_model_wagon (model_id, wagon_id, model) VALUES (1325, 1811014, 1325);
 
+-- falta corrigir
 INSERT INTO line_facility (id_facility_start_id, name_facility_start_name, id_facility_end_id, name_facility_end_name) VALUES (7, 'Porto São Bento', 5, 'Porto Campanhã');
 INSERT INTO line_facility (id_facility_start_id, name_facility_start_name, id_facility_end_id, name_facility_end_name) VALUES (5, 'Porto Campanhã', 20, 'Nine');
 INSERT INTO line_facility (id_facility_start_id, name_facility_start_name, id_facility_end_id, name_facility_end_name) VALUES (20, 'Nine', 8, 'Barcelos');
@@ -178,8 +179,8 @@ INSERT INTO line_facility (id_facility_start_id, name_facility_start_name, id_fa
 INSERT INTO line_facility (id_facility_start_id, name_facility_start_name, id_facility_end_id, name_facility_end_name) VALUES (21, 'Caminha', 16, 'São Pedro da Torre');
 INSERT INTO line_facility (id_facility_start_id, name_facility_start_name, id_facility_end_id, name_facility_end_name) VALUES (16, 'São Pedro da Torre', 11, 'Valença');
 
-INSERT INTO Gauge (id_gauge, width) OVERRIDING SYSTEM VALUE VALUES (1, 1668);
-INSERT INTO Gauge (id_gauge, width) OVERRIDING SYSTEM VALUE VALUES (2, 1435);
+INSERT INTO Gauge (id_gauge, width) VALUES (1, 1668);
+INSERT INTO Gauge (id_gauge, width) VALUES (2, 1435);
 
 INSERT INTO Gauge_line (gauge_id, line_id) VALUES (1, 1);
 INSERT INTO Gauge_line (gauge_id, line_id) VALUES (1, 2);
