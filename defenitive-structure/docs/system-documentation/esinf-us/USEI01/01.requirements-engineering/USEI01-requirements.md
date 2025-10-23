@@ -30,7 +30,11 @@ management system (WMS). This ensures:
 
 **From the client clarifications:**
 
-> No clarifications were made up to now.
+> Regarding the products in the bays, a bay may contain boxes of different SKUs. The bay’s LinkedList is a single ordered list (by expiry↑, receivedAt↑, boxId↑) across all SKUs.
+> You do not model physical obstruction within a bay. Think of bays as shelves with direct access to any box by ID. The FEFO order is a preference for which box should be consumed first, not a LIFO/queue constraint. You simply update or remove the target box’s node in the bay list; nothing else moves.
+> The relocation must be requested.
+> The waggon boxes of a train can be stored in more than one warehouse at the same railway station. Use existing warehouses with a fixed precedence (e.g., warehouseId ASC), filling them to capacity before moving on to the next warehouse.
+> If all the warehouses are full, you must log the wagons that could not be unloaded.
 ### 1.3. Acceptance Criteria
 
 * **AC1:** Stock initialization/unloading wagons- The file wagons.csv contains the avail
@@ -76,8 +80,9 @@ management system (WMS). This ensures:
 
 ### 1.6. System Sequence Diagram (SSD)
 
-![System Sequence Diagram](svg/US006-SSD.svg)
+![System Sequence Diagram](svg/USEI01_Unload-0.svg)
 
+![System Sequence Diagram](svg/USEI01_Dispatch-0.svg)
 **_Other alternatives might exist._**
 
 ### 1.7 Other Relevant Remarks

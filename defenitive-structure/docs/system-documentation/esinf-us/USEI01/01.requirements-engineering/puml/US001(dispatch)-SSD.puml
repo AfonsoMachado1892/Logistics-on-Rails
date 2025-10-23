@@ -1,0 +1,30 @@
+@startuml USEI01_Dispatch_Products
+
+actor "Station Storage\nManager" as Manager
+participant ":System" as System
+
+Manager -> System : requestDispatch()
+activate Manager
+
+System --> Manager : requestSKU()
+
+Manager -> System : provideSKU(sku)
+
+System --> Manager : showAvailableStock(sku, quantity)
+
+System --> Manager : requestQuantity()
+
+Manager -> System : provideQuantity(qty)
+
+System --> Manager : requestConfirmation()
+
+Manager -> System : confirmDispatch()
+
+
+
+System --> Manager : showDispatchedBoxes(boxes)
+System --> Manager : showSuccessMessage()
+
+deactivate System
+
+@enduml
