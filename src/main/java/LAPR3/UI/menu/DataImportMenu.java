@@ -41,9 +41,9 @@ public class DataImportMenu {
             try {
                 handleChoice(choice);
             } catch (IOException e) {
-                System.err.println("❌ Error loading file: " + e.getMessage());
+                System.err.println("Error loading file: " + e.getMessage());
             } catch (Exception e) {
-                System.err.println("❌ Unexpected error: " + e.getMessage());
+                System.err.println("Unexpected error: " + e.getMessage());
             }
 
             pause();
@@ -84,7 +84,7 @@ public class DataImportMenu {
         System.out.println("\n═══ LOAD ITEMS ═══");
         String path = validator.readFilePath("Enter items CSV path", DEFAULT_ITEMS);
 
-        System.out.println("⏳ Loading items...");
+        System.out.println("Loading items...");
         dataController.loadItems(path);
 
         int count = dataController.getItems().size();
@@ -95,7 +95,7 @@ public class DataImportMenu {
         System.out.println("\n═══ LOAD BAYS ═══");
         String path = validator.readFilePath("Enter bays CSV path", DEFAULT_BAYS);
 
-        System.out.println("⏳ Loading bays...");
+        System.out.println("Loading bays...");
         dataController.loadBays(path);
 
         int count = dataController.getWarehouses().size();
@@ -106,13 +106,13 @@ public class DataImportMenu {
         System.out.println("\n═══ LOAD WAGONS ═══");
 
         if (!dataController.isItemsLoaded()) {
-            System.out.println("❌ Items must be loaded first!");
+            System.out.println("Items must be loaded first!");
             return;
         }
 
         String path = validator.readFilePath("Enter wagons CSV path", DEFAULT_WAGONS);
 
-        System.out.println("⏳ Loading wagons...");
+        System.out.println("Loading wagons...");
         dataController.loadWagons(path);
 
         int count = dataController.getWagons().size();
@@ -123,14 +123,14 @@ public class DataImportMenu {
         System.out.println("\n═══ LOAD ORDERS ═══");
 
         if (!dataController.isItemsLoaded()) {
-            System.out.println("❌ Items must be loaded first!");
+            System.out.println("Items must be loaded first!");
             return;
         }
 
         String ordersPath = validator.readFilePath("Enter orders CSV path", DEFAULT_ORDERS);
         String linesPath = validator.readFilePath("Enter order lines CSV path", DEFAULT_ORDER_LINES);
 
-        System.out.println("⏳ Loading orders...");
+        System.out.println("Loading orders...");
         dataController.loadOrders(ordersPath, linesPath);
 
         int count = dataController.getOrders().size();
@@ -144,7 +144,7 @@ public class DataImportMenu {
         String baysPath = validator.readFilePath("Bays CSV path", DEFAULT_BAYS);
         String wagonsPath = validator.readFilePath("Wagons CSV path", DEFAULT_WAGONS);
 
-        System.out.println("\n⏳ Loading all base data...");
+        System.out.println("\nLoading all base data...");
         dataController.loadAllBaseData(itemsPath, baysPath, wagonsPath);
 
         System.out.println("✓ All base data loaded successfully!");
@@ -157,14 +157,14 @@ public class DataImportMenu {
         System.out.println("\n═══ SELECT WAREHOUSE ═══");
 
         if (!dataController.isBaysLoaded()) {
-            System.out.println("❌ No warehouses loaded yet!");
+            System.out.println("No warehouses loaded yet!");
             return;
         }
 
         List<String> warehouses = dataController.getAvailableWarehouses();
 
         if (warehouses.isEmpty()) {
-            System.out.println("❌ No warehouses available!");
+            System.out.println("No warehouses available!");
             return;
         }
 
@@ -180,7 +180,7 @@ public class DataImportMenu {
         if (dataController.setCurrentWarehouse(selectedId)) {
             System.out.println("✓ Warehouse " + selectedId + " selected!");
         } else {
-            System.out.println("❌ Failed to select warehouse!");
+            System.out.println("Failed to select warehouse!");
         }
     }
 

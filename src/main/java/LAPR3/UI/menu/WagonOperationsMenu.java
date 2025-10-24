@@ -35,7 +35,7 @@ public class WagonOperationsMenu {
             try {
                 handleChoice(choice);
             } catch (Exception e) {
-                System.err.println("❌ Error: " + e.getMessage());
+                System.err.println("Error: " + e.getMessage());
             }
 
             pause();
@@ -72,19 +72,19 @@ public class WagonOperationsMenu {
 
         WarehouseManager manager = dataController.getWarehouseManager();
 
-        System.out.println("📦 Wagons to unload: " + dataController.getWagons().size());
+        System.out.println("Wagons to unload: " + dataController.getWagons().size());
 
-        boolean confirm = validator.readConfirmation("\n⚠️  Proceed with unloading?");
+        boolean confirm = validator.readConfirmation("\nProceed with unloading?");
         if (!confirm) {
             System.out.println("Operation cancelled.");
             return;
         }
 
-        System.out.println("\n⏳ Unloading wagons...");
+        System.out.println("\nUnloading wagons...");
         manager.unloadWagons(dataController.getWagons());
 
         System.out.println("✓ Wagons unloaded successfully!");
-        System.out.println("\n📊 Inventory updated. Use option 3 to view details.");
+        System.out.println("\nInventory updated. Use option 3 to view details.");
     }
 
     private void dispatchProducts() {
@@ -97,12 +97,12 @@ public class WagonOperationsMenu {
         String sku = validator.readString("Enter SKU to dispatch: ");
         int qty = validator.readInt("Enter quantity: ", 1, Integer.MAX_VALUE);
 
-        System.out.println("\n⏳ Dispatching " + qty + " units of SKU=" + sku + "...");
+        System.out.println("\nDispatching " + qty + " units of SKU=" + sku + "...");
 
         List<Box> dispatched = manager.dispatch(sku, qty);
 
         if (dispatched.isEmpty()) {
-            System.out.println("❌ No products dispatched. Check if SKU exists and has sufficient stock.");
+            System.out.println("No products dispatched. Check if SKU exists and has sufficient stock.");
             return;
         }
 
@@ -131,13 +131,13 @@ public class WagonOperationsMenu {
 
     private boolean validatePrerequisites() {
         if (!dataController.isWarehouseSelected()) {
-            System.out.println("❌ No warehouse selected!");
+            System.out.println("No warehouse selected!");
             System.out.println("Please select a warehouse from the Data Import menu first.");
             return false;
         }
 
         if (!dataController.isWagonsLoaded()) {
-            System.out.println("❌ No wagons loaded!");
+            System.out.println("No wagons loaded!");
             System.out.println("Please load wagons from the Data Import menu first.");
             return false;
         }

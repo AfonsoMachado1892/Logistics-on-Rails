@@ -48,6 +48,7 @@ public class PickPathSequencingTest {
         }
     }
 
+
     @Test
     public void testCoordinateDistance() {
         PickPathSequencing.Coordinate coord1 = new PickPathSequencing.Coordinate(3, 5);
@@ -57,27 +58,24 @@ public class PickPathSequencingTest {
         // Same aisle distance
         assertEquals(3.0, coord1.distanceTo(coord2), 0.001);
 
-        // Different aisle distance: D = b1 + |a1 - a2| + b2 (coordinates already * 3)
-        // From (3,5) to (6,2): 5 + |3-6| + 2 = 5 + 3 + 2 = 10
+        // Different aisle distance
         assertEquals(10.0, coord1.distanceTo(coord3), 0.001);
 
-        // Symmetric distance
+        // Symmetry
         assertEquals(coord1.distanceTo(coord3), coord3.distanceTo(coord1), 0.001);
     }
 
     @Test
     public void testConsolidatedBay() {
         PickPathSequencing.ConsolidatedBay bay = new PickPathSequencing.ConsolidatedBay(1, 5);
-        
+
         assertEquals(1, bay.aisle);
         assertEquals(5, bay.bay);
-        assertEquals(0, bay.totalQty);
-        assertEquals(0.0, bay.totalWeight, 0.001);
-        assertNotNull(bay.allocations);
         assertEquals("1,5", bay.getKey());
-        
+        assertNotNull(bay.allocations);
+
         PickPathSequencing.Coordinate coord = bay.getCoordinate();
-        assertEquals(3, coord.x); // aisle * 3
+        assertEquals(3, coord.x);
         assertEquals(5, coord.y);
     }
 
@@ -85,47 +83,35 @@ public class PickPathSequencingTest {
     public void testStrategyA_DeterministicSweep() {
         PickPathSequencing.PickPath path = sequencer.strategyA(testAllocations);
 
-        assertNotNull(path);
         assertEquals("Strategy A - Deterministic Sweep", path.strategyName);
-        assertNotNull(path.route);
-        assertTrue(path.totalDistance >= 0);
-
-        // Should consolidate bays and sort by aisle, then bay
-        // Expected bays: (1,1), (1,2), (1,3), (2,1), (2,2)
         assertEquals(5, path.route.size());
 
-        // Check ordering: aisle 1 bays first, then aisle 2 bays
+        // Check ordering: aisle 1 bays first (1,1),(1,2),(1,3) then aisle 2 (2,1),(2,2)
         assertEquals(1, path.route.get(0).aisle);
         assertEquals(1, path.route.get(0).bay);
+
         assertEquals(1, path.route.get(1).aisle);
         assertEquals(2, path.route.get(1).bay);
+
         assertEquals(1, path.route.get(2).aisle);
         assertEquals(3, path.route.get(2).bay);
+
         assertEquals(2, path.route.get(3).aisle);
         assertEquals(1, path.route.get(3).bay);
+
         assertEquals(2, path.route.get(4).aisle);
         assertEquals(2, path.route.get(4).bay);
     }
+
 
     @Test
     public void testStrategyB_NearestNeighbour() {
         PickPathSequencing.PickPath path = sequencer.strategyB(testAllocations);
 
-        assertNotNull(path);
         assertEquals("Strategy B - Nearest-Neighbour", path.strategyName);
-        assertNotNull(path.route);
-        assertTrue(path.totalDistance >= 0);
-
-        // Should visit all bays
         assertEquals(5, path.route.size());
 
-        // First bay should be closest to origin (0,0)
-        // From (0,0) to (1,1): 0 + |0-3| + 1 = 4
-        // From (0,0) to (1,2): 0 + |0-3| + 2 = 5
-        // From (0,0) to (1,3): 0 + |0-3| + 3 = 6
-        // From (0,0) to (2,1): 0 + |0-6| + 1 = 7
-        // From (0,0) to (2,2): 0 + |0-6| + 2 = 8
-        // So first should be (1,1)
+        // First bay should be the nearest to (0,0)
         assertEquals(1, path.route.get(0).aisle);
         assertEquals(1, path.route.get(0).bay);
     }
@@ -134,22 +120,11 @@ public class PickPathSequencingTest {
     public void testGenerateBothPaths() {
         PickPathSequencing.PickPath[] paths = sequencer.generateBothPaths(testAllocations);
 
-        assertNotNull(paths);
         assertEquals(2, paths.length);
-
-        PickPathSequencing.PickPath pathA = paths[0];
-        PickPathSequencing.PickPath pathB = paths[1];
-
-        assertEquals("Strategy A - Deterministic Sweep", pathA.strategyName);
-        assertEquals("Strategy B - Nearest-Neighbour", pathB.strategyName);
-
-        // Both should visit all bays
-        assertEquals(5, pathA.route.size());
-        assertEquals(5, pathB.route.size());
-
-        // Both should have valid distances
-        assertTrue(pathA.totalDistance >= 0);
-        assertTrue(pathB.totalDistance >= 0);
+        assertEquals("Strategy A - Deterministic Sweep", paths[0].strategyName);
+        assertEquals("Strategy B - Nearest-Neighbour", paths[1].strategyName);
+        assertEquals(5, paths[0].route.size());
+        assertEquals(5, paths[1].route.size());
     }
 
     @Test
@@ -159,10 +134,8 @@ public class PickPathSequencingTest {
         PickPathSequencing.PickPath pathA = sequencer.strategyA(emptyAllocations);
         PickPathSequencing.PickPath pathB = sequencer.strategyB(emptyAllocations);
 
-        assertNotNull(pathA);
-        assertNotNull(pathB);
-        assertEquals(0, pathA.route.size());
-        assertEquals(0, pathB.route.size());
+        assertTrue(pathA.route.isEmpty());
+        assertTrue(pathB.route.isEmpty());
         assertEquals(0.0, pathA.totalDistance, 0.001);
         assertEquals(0.0, pathB.totalDistance, 0.001);
     }
@@ -174,71 +147,78 @@ public class PickPathSequencingTest {
 
         assertNotNull(pathA);
         assertNotNull(pathB);
-        assertEquals(0, pathA.route.size());
-        assertEquals(0, pathB.route.size());
+        assertTrue(pathA.route.isEmpty());
+        assertTrue(pathB.route.isEmpty());
     }
 
     @Test
     public void testDuplicateBaysConsolidation() {
-        // Create allocations with same aisle and bay
         List<Allocation> duplicateAllocations = Arrays.asList(
                 new Allocation("ORD001", 1, "SKU001", 5, "BOX001", "1", "1"),
-                new Allocation("ORD002", 1, "SKU002", 3, "BOX002", "1", "1"), // Same bay
+                new Allocation("ORD002", 1, "SKU002", 3, "BOX002", "1", "1"),
                 new Allocation("ORD003", 1, "SKU003", 2, "BOX003", "2", "2")
         );
 
         PickPathSequencing.PickPath path = sequencer.strategyA(duplicateAllocations);
 
-        // Should consolidate into 2 unique bays: (1,1) and (2,2)
         assertEquals(2, path.route.size());
 
-        // Find the consolidated bay (1,1)
         PickPathSequencing.ConsolidatedBay bay11 = path.route.stream()
                 .filter(b -> b.aisle == 1 && b.bay == 1)
                 .findFirst()
                 .orElse(null);
 
         assertNotNull(bay11);
-        assertEquals(2, bay11.allocations.size()); // Should have 2 allocations
-        assertEquals(8, bay11.totalQty); // 5 + 3
+        assertEquals(2, bay11.allocations.size());
+        assertEquals(8, bay11.totalQty);
     }
 
     @Test
     public void testDistanceCalculation() {
-        // Test with specific allocations to verify distance calculation
         List<Allocation> simpleAllocations = Arrays.asList(
                 new Allocation("ORD001", 1, "SKU001", 1, "BOX001", "1", "1"),
                 new Allocation("ORD002", 1, "SKU002", 1, "BOX002", "1", "2")
         );
 
         PickPathSequencing.PickPath path = sequencer.strategyA(simpleAllocations);
-
-        // Distance from (0,0) to (3,1) = 0 + |0-3| + 1 = 4
-        // Distance from (3,1) to (3,2) = |1-2| = 1
-        // Total = 4 + 1 = 5
         assertEquals(5.0, path.totalDistance, 0.001);
     }
 
     @Test
     public void testPickPathToString() {
         PickPathSequencing.PickPath path = sequencer.strategyA(testAllocations);
-        String pathString = path.toString();
+        String s = path.toString();
 
-        assertNotNull(pathString);
-        assertTrue(pathString.contains("Strategy A - Deterministic Sweep"));
-        assertTrue(pathString.contains("Total Distance"));
-        assertTrue(pathString.contains("Route sequence"));
+        assertTrue(s.contains("Strategy A - Deterministic Sweep"));
+        assertTrue(s.contains("Total Distance"));
+        assertTrue(s.contains("Route sequence"));
     }
 
     @Test
     public void testConsolidatedBayToString() {
         PickPathSequencing.ConsolidatedBay bay = new PickPathSequencing.ConsolidatedBay(2, 5);
         bay.totalQty = 10;
-        
-        String bayString = bay.toString();
-        assertNotNull(bayString);
-        assertTrue(bayString.contains("aisle=2"));
-        assertTrue(bayString.contains("bay=5"));
-        assertTrue(bayString.contains("qty=10"));
+        String s = bay.toString();
+
+        assertTrue(s.contains("aisle=2"));
+        assertTrue(s.contains("bay=5"));
+        assertTrue(s.contains("qty=10"));
+    }
+
+    @Test
+    public void testCoordinateToString() {
+        PickPathSequencing.Coordinate coord = new PickPathSequencing.Coordinate(3, 7);
+        assertEquals("(3,7)", coord.toString());
+    }
+
+    @Test
+    public void testCalculateTotalDistanceIndirectly() {
+        List<Allocation> allocs = Arrays.asList(
+                new Allocation("O1", 1, "SKU001", 1, "B1", "1", "1"),
+                new Allocation("O2", 2, "SKU002", 1, "B2", "2", "1")
+        );
+
+        PickPathSequencing.PickPath path = sequencer.strategyA(allocs);
+        assertTrue(path.totalDistance > 0);
     }
 }

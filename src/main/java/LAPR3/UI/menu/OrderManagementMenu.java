@@ -41,7 +41,7 @@ public class OrderManagementMenu {
             try {
                 handleChoice(choice);
             } catch (Exception e) {
-                System.err.println("❌ Error: " + e.getMessage());
+                System.err.println("Error: " + e.getMessage());
                 e.printStackTrace();
             }
 
@@ -81,12 +81,12 @@ public class OrderManagementMenu {
         System.out.println("In STRICT mode, a line is ELIGIBLE only if fully allocated.");
         System.out.println();
 
-        System.out.println("⏳ Processing orders in strict mode...");
+        System.out.println("Processing orders in strict mode...");
         AllocationOutput output = orderController.allocateOrders(true);
 
         displayResults(output, "STRICT");
 
-        boolean save = validator.readConfirmation("\n💾 Save results to CSV?");
+        boolean save = validator.readConfirmation("\nSave results to CSV?");
         if (save) {
             saveResults(output, "strict");
         }
@@ -100,12 +100,12 @@ public class OrderManagementMenu {
         System.out.println("In PARTIAL mode, lines can be partially allocated.");
         System.out.println();
 
-        System.out.println("⏳ Processing orders in partial mode...");
+        System.out.println("Processing orders in partial mode...");
         AllocationOutput output = orderController.allocateOrders(false);
 
         displayResults(output, "PARTIAL");
 
-        boolean save = validator.readConfirmation("\n💾 Save results to CSV?");
+        boolean save = validator.readConfirmation("\nSave results to CSV?");
         if (save) {
             saveResults(output, "partial");
         }
@@ -116,14 +116,14 @@ public class OrderManagementMenu {
 
         if (!validatePrerequisites()) return;
 
-        System.out.println("⏳ Processing orders in both modes...\n");
+        System.out.println("Processing orders in both modes...\n");
 
         AllocationOutput strict = orderController.allocateOrders(true);
         AllocationOutput partial = orderController.allocateOrders(false);
 
         displayComparison(strict, partial);
 
-        boolean save = validator.readConfirmation("\n💾 Save both results to CSV?");
+        boolean save = validator.readConfirmation("\nSave both results to CSV?");
         if (save) {
             saveResults(strict, "strict");
             saveResults(partial, "partial");
@@ -134,7 +134,7 @@ public class OrderManagementMenu {
         System.out.println("\n═══ ORDER STATISTICS ═══");
 
         if (!dataController.isOrdersLoaded()) {
-            System.out.println("❌ No orders loaded!");
+            System.out.println("No orders loaded!");
             return;
         }
 
@@ -165,7 +165,7 @@ public class OrderManagementMenu {
         System.out.println("RESULTS - " + mode + " MODE");
         System.out.println("═".repeat(80));
 
-        System.out.println("\n📋 ORDER ELIGIBILITY:");
+        System.out.println("\nORDER ELIGIBILITY:");
         System.out.println("─".repeat(80));
         System.out.printf("%-10s | %-6s | %-10s | %-8s | %-8s | %-15s%n",
                 "OrderID", "Line", "SKU", "Requested", "Allocated", "Status");
@@ -186,14 +186,14 @@ public class OrderManagementMenu {
         long partial = output.results().stream().filter(r -> r.getStatus().equals("PARTIAL")).count();
         long undispatchable = output.results().stream().filter(r -> r.getStatus().equals("UNDISPATCHABLE")).count();
 
-        System.out.println("\n📊 SUMMARY:");
+        System.out.println("\n SUMMARY:");
         System.out.println("  ✓ Eligible: " + eligible);
         System.out.println("  ⚠ Partial: " + partial);
         System.out.println("  ✗ Undispatchable: " + undispatchable);
         System.out.println("  Total lines: " + output.results().size());
 
         if (!output.allocations().isEmpty()) {
-            System.out.println("\n📦 ALLOCATION DETAILS (first 20):");
+            System.out.println("\n ALLOCATION DETAILS (first 20):");
             System.out.println("─".repeat(90));
             System.out.printf("%-10s | %-6s | %-10s | %-5s | %-15s | %-6s | %-6s%n",
                     "OrderID", "Line", "SKU", "Qty", "BoxID", "Aisle", "Bay");
@@ -230,18 +230,18 @@ public class OrderManagementMenu {
         long partialPartial = partial.results().stream().filter(r -> r.getStatus().equals("PARTIAL")).count();
         long partialUndispatchable = partial.results().stream().filter(r -> r.getStatus().equals("UNDISPATCHABLE")).count();
 
-        System.out.println("\n📊 STRICT MODE:");
+        System.out.println("\n STRICT MODE:");
         System.out.println("  ✓ Eligible: " + strictEligible);
         System.out.println("  ✗ Undispatchable: " + strictUndispatchable);
         System.out.println("  Total allocations: " + strict.allocations().size());
 
-        System.out.println("\n📊 PARTIAL MODE:");
+        System.out.println("\n PARTIAL MODE:");
         System.out.println("  ✓ Eligible: " + partialEligible);
         System.out.println("  ⚠ Partial: " + partialPartial);
         System.out.println("  ✗ Undispatchable: " + partialUndispatchable);
         System.out.println("  Total allocations: " + partial.allocations().size());
 
-        System.out.println("\n💡 INSIGHTS:");
+        System.out.println("\n INSIGHTS:");
         int difference = partial.allocations().size() - strict.allocations().size();
         if (difference > 0) {
             System.out.println("  • Partial mode allows " + difference + " more allocations");
@@ -277,19 +277,19 @@ public class OrderManagementMenu {
             System.out.println("  • " + allocFile);
 
         } catch (IOException e) {
-            System.err.println("❌ Error saving files: " + e.getMessage());
+            System.err.println("Error saving files: " + e.getMessage());
         }
     }
 
     private boolean validatePrerequisites() {
         if (!dataController.isWarehouseSelected()) {
-            System.out.println("❌ No warehouse selected!");
+            System.out.println("No warehouse selected!");
             System.out.println("Please select a warehouse from the Data Import menu first.");
             return false;
         }
 
         if (!dataController.isOrdersLoaded()) {
-            System.out.println("❌ No orders loaded!");
+            System.out.println("No orders loaded!");
             System.out.println("Please load orders from the Data Import menu first.");
             return false;
         }

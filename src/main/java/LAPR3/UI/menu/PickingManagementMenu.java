@@ -46,7 +46,7 @@ public class PickingManagementMenu {
             try {
                 handleChoice(choice);
             } catch (Exception e) {
-                System.err.println("❌ Error: " + e.getMessage());
+                System.err.println("Error: " + e.getMessage());
                 e.printStackTrace();
             }
 
@@ -62,10 +62,10 @@ public class PickingManagementMenu {
 
         // Show current allocation status
         if (currentAllocation != null) {
-            System.out.println("📊 Current Allocation: " +
+            System.out.println("Current Allocation: " +
                     currentAllocation.allocations().size() + " allocations loaded");
         } else {
-            System.out.println("⚠️  No allocation loaded (run option 1 first)");
+            System.out.println("No allocation loaded (run option 1 first)");
         }
         System.out.println();
 
@@ -107,7 +107,7 @@ public class PickingManagementMenu {
         int modeChoice = validator.readInt("Mode: ", 1, 2);
         boolean strictMode = (modeChoice == 1);
 
-        System.out.println("\n⏳ Running allocation in " +
+        System.out.println("\nRunning allocation in " +
                 (strictMode ? "STRICT" : "PARTIAL") + " mode...");
 
         // USA ORDERCONTROLLER ← CORRETO!
@@ -128,20 +128,20 @@ public class PickingManagementMenu {
             System.out.println("  • Partial orders: " + partial);
         }
 
-        System.out.println("\n💡 Now you can generate picking plans (options 2-5)");
+        System.out.println("\nNow you can generate picking plans (options 2-5)");
     }
 
     private void generatePickingPlan(PickingPlan.Heuristic heuristic) {
         System.out.println("\n═══ GENERATE PICKING PLAN - " + heuristic + " ═══");
 
         if (currentAllocation == null) {
-            System.out.println("❌ No allocation available!");
+            System.out.println("No allocation available!");
             System.out.println("Please run option 1 first to generate allocations.");
             return;
         }
 
         if (currentAllocation.allocations().isEmpty()) {
-            System.out.println("❌ No allocations to pack!");
+            System.out.println("No allocations to pack!");
             return;
         }
 
@@ -149,7 +149,7 @@ public class PickingManagementMenu {
         System.out.println("\nTrolley Configuration:");
         double capacity = readDouble("Enter trolley capacity (min: 700kg): ", 700.0, 2000.0);
 
-        System.out.println("\n⏳ Generating picking plan with " + heuristic + "...");
+        System.out.println("\nGenerating picking plan with " + heuristic + "...");
 
         List<Trolley> trolleys = pickingController.generatePickingPlan(
                 currentAllocation,
@@ -164,20 +164,20 @@ public class PickingManagementMenu {
         System.out.println("\n═══ COMPARE ALL HEURISTICS ═══");
 
         if (currentAllocation == null) {
-            System.out.println("❌ No allocation available!");
+            System.out.println("No allocation available!");
             System.out.println("Please run option 1 first to generate allocations.");
             return;
         }
 
         if (currentAllocation.allocations().isEmpty()) {
-            System.out.println("❌ No allocations to pack!");
+            System.out.println("No allocations to pack!");
             return;
         }
 
         // Ask for trolley capacity
         double capacity = readDouble("Enter trolley capacity (min: 700kg): ", 700.0, 2000.0);
 
-        System.out.println("\n⏳ Comparing all heuristics...");
+        System.out.println("\nComparing all heuristics...");
 
         pickingController.compareHeuristics(currentAllocation, capacity);
     }
@@ -190,7 +190,7 @@ public class PickingManagementMenu {
             return;
         }
 
-        System.out.println("\n📊 Summary:");
+        System.out.println("\n Summary:");
         System.out.println("  • Total trolleys: " + trolleys.size());
         System.out.println("  • Total items: " +
                 trolleys.stream().mapToInt(t -> t.getAllocations().size()).sum());
@@ -223,7 +223,7 @@ public class PickingManagementMenu {
 
 
         // Utilization distribution
-        System.out.println("\n📊 Utilization Distribution:");
+        System.out.println("\n Utilization Distribution:");
         for (Trolley t : trolleys) {
             int barLength = (int)(t.getUtilization() * 50);
             String bar = "█".repeat(barLength) + "░".repeat(50 - barLength);
@@ -236,7 +236,7 @@ public class PickingManagementMenu {
         System.out.println("\n═══ EXPORT PICKING PLAN ═══");
 
         if (!pickingController.hasPickingPlan()) {
-            System.out.println("❌ No picking plan generated yet!");
+            System.out.println("No picking plan generated yet!");
             System.out.println("Generate a picking plan first (options 2-4).");
             return;
         }
@@ -271,19 +271,19 @@ public class PickingManagementMenu {
                     trolleys.stream().mapToInt(t -> t.getAllocations().size()).sum());
 
         } catch (IOException e) {
-            System.err.println("❌ Error writing file: " + e.getMessage());
+            System.err.println("Error writing file: " + e.getMessage());
         }
     }
 
     private boolean validatePrerequisites() {
         if (!dataController.isWarehouseSelected()) {
-            System.out.println("❌ No warehouse selected!");
+            System.out.println("No warehouse selected!");
             System.out.println("Please select a warehouse from the Data Import menu first.");
             return false;
         }
 
         if (!dataController.isOrdersLoaded()) {
-            System.out.println("❌ No orders loaded!");
+            System.out.println("No orders loaded!");
             System.out.println("Please load orders from the Data Import menu first.");
             return false;
         }
@@ -298,21 +298,21 @@ public class PickingManagementMenu {
                 String input = scanner.nextLine().trim();
 
                 if (input.isEmpty()) {
-                    System.out.println("❌ Input cannot be empty.");
+                    System.out.println("Input cannot be empty.");
                     continue;
                 }
 
                 double value = Double.parseDouble(input);
 
                 if (value < min || value > max) {
-                    System.out.printf("❌ Value must be between %.1f and %.1f.%n", min, max);
+                    System.out.printf("Value must be between %.1f and %.1f.%n", min, max);
                     continue;
                 }
 
                 return value;
 
             } catch (NumberFormatException e) {
-                System.out.println("❌ Invalid number format.");
+                System.out.println("Invalid number format.");
             }
         }
     }

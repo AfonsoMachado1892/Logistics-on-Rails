@@ -23,21 +23,21 @@ public class InputValidator {
                 String input = scanner.nextLine().trim();
 
                 if (input.isEmpty()) {
-                    System.out.println("❌ Input cannot be empty. Please try again.");
+                    System.out.println("Input cannot be empty. Please try again.");
                     continue;
                 }
 
                 int value = Integer.parseInt(input);
 
                 if (value < min || value > max) {
-                    System.out.printf("❌ Value must be between %d and %d. Please try again.%n", min, max);
+                    System.out.printf("Value must be between %d and %d. Please try again.%n", min, max);
                     continue;
                 }
 
                 return value;
 
             } catch (NumberFormatException e) {
-                System.out.println("❌ Invalid number format. Please enter a valid integer.");
+                System.out.println("Invalid number format. Please enter a valid integer.");
             }
         }
     }
@@ -51,7 +51,7 @@ public class InputValidator {
             String input = scanner.nextLine().trim();
 
             if (input.isEmpty()) {
-                System.out.println("❌ Input cannot be empty. Please try again.");
+                System.out.println("Input cannot be empty. Please try again.");
                 continue;
             }
 
@@ -83,7 +83,7 @@ public class InputValidator {
             } else if (input.equals("n") || input.equals("no")) {
                 return false;
             } else {
-                System.out.println("❌ Please enter 'y' or 'n'.");
+                System.out.println("Please enter 'y' or 'n'.");
             }
         }
     }

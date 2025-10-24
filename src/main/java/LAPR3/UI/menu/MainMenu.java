@@ -58,9 +58,9 @@ public class MainMenu {
         System.out.println("│  7. View Current Inventory                      │");
         System.out.println("│  8. View Logs                                   │");
         System.out.println("├─────────────────────────────────────────────────┤");
-        System.out.println("│  RAILWAY OPERATIONS                             │");  // ← NOVO
-        System.out.println("├─────────────────────────────────────────────────┤");  // ← NOVO
-        System.out.println("│  9. Travel Time Calculation (USLP03)            │");  // ← NOVO: USLP03
+        System.out.println("│  RAILWAY OPERATIONS                             │");
+        System.out.println("├─────────────────────────────────────────────────┤");
+        System.out.println("│  9. Travel Time Calculation (USLP03)            │");
         System.out.println("├─────────────────────────────────────────────────┤");
         System.out.println("│  0. Exit                                        │");
         System.out.println("└─────────────────────────────────────────────────┘");
@@ -76,7 +76,7 @@ public class MainMenu {
             case 5 -> pickPathMenu.show();
             case 6 -> returnsMenu.show();
             case 7 -> viewLogs();
-            case 8 -> travelTimeMenu.show();  // ← NOVO: USLP03
+            case 8 -> travelTimeMenu.show(); 
             default -> System.out.println("Invalid option!");
         }
     }
@@ -123,6 +123,6 @@ public class MainMenu {
         }
 
         System.out.println("─".repeat(80));
-        System.out.println("\n💾 Full log saved to: Logs/import_log.txt");
+        System.out.println("\nFull log saved to: Logs/import_log.txt");
     }
 }
