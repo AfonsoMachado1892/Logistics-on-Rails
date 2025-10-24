@@ -266,18 +266,25 @@ public class PickPathSequencingMenu {
         System.out.println("─".repeat(60));
 
         // Determine best strategy
-        String bestStrategy;
-        double improvement;
-        if (pathB.totalDistance < pathA.totalDistance) {
-            bestStrategy = "Nearest-Neighbour";
-            improvement = ((pathA.totalDistance - pathB.totalDistance) / pathA.totalDistance) * 100;
+        if (Math.abs(pathA.totalDistance - pathB.totalDistance) < 0.0001) {
+            System.out.println("\n💡 Both strategies yield the same total distance!");
+            System.out.println("💡 No improvement — they are equally efficient.");
         } else {
-            bestStrategy = "Deterministic Sweep";
-            improvement = ((pathB.totalDistance - pathA.totalDistance) / pathB.totalDistance) * 100;
+            String bestStrategy;
+            double improvement;
+
+            if (pathB.totalDistance < pathA.totalDistance) {
+                bestStrategy = "Nearest-Neighbour";
+                improvement = ((pathA.totalDistance - pathB.totalDistance) / pathA.totalDistance) * 100;
+            } else {
+                bestStrategy = "Deterministic Sweep";
+                improvement = ((pathB.totalDistance - pathA.totalDistance) / pathB.totalDistance) * 100;
+            }
+
+            System.out.println("\n💡 Best strategy: " + bestStrategy);
+            System.out.printf("💡 Improvement: %.1f%% distance reduction%n", improvement);
         }
 
-        System.out.println("\n💡 Best strategy: " + bestStrategy);
-        System.out.printf("💡 Improvement: %.1f%% distance reduction%n", improvement);
     }
 
     private void exportPickPaths() {
