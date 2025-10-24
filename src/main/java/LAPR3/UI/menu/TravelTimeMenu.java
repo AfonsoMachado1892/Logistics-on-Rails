@@ -97,7 +97,7 @@ public class TravelTimeMenu {
             System.out.println("   • Segments: " + segmentRepository.count());
             System.out.println("   • Locomotives: " + locomotiveRepository.count());
         } else {
-            System.out.println("⚠️  Data Status: Not loaded - Please load data first (Option 1)");
+            System.out.println("Data Status: Not loaded - Please load data first (Option 1)");
         }
         System.out.println();
 
@@ -132,7 +132,7 @@ public class TravelTimeMenu {
         String segmentsPath = validator.readFilePath("Segments CSV path", DEFAULT_SEGMENTS);
         String locomotivesPath = validator.readFilePath("Locomotives CSV path", DEFAULT_LOCOMOTIVES);
 
-        System.out.println("\n⏳ Loading railway network data...\n");
+        System.out.println("\nLoading railway network data...\n");
 
         facilityRepository.loadFromCSV(facilitiesPath);
         lineRepository.loadFromCSV(linesPath);
@@ -337,7 +337,7 @@ public class TravelTimeMenu {
             return;
         }
 
-        System.out.println("📊 Data Statistics:");
+        System.out.println("Data Statistics:");
         System.out.println("─".repeat(50));
         System.out.printf("  Facilities:  %3d stations/terminals%n", facilityRepository.count());
         System.out.printf("  Lines:       %3d railway lines%n", lineRepository.count());
@@ -356,7 +356,7 @@ public class TravelTimeMenu {
         int electricLocos = locomotiveRepository.findByType(Locomotive.LocomotiveType.ELECTRIC).size();
         int dieselLocos = locomotiveRepository.findByType(Locomotive.LocomotiveType.DIESEL).size();
 
-        System.out.println("\n🌐 Network Statistics:");
+        System.out.println("\nNetwork Statistics:");
         System.out.println("─".repeat(50));
         System.out.printf("  Total Track Length:     %.2f km%n", totalDistance);
         System.out.printf("  Electrification:        %s%n", allElectrified ? "100%" : "Partial");

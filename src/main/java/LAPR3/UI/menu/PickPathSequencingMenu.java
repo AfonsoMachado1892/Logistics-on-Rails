@@ -45,7 +45,7 @@ public class PickPathSequencingMenu {
             try {
                 handleChoice(choice);
             } catch (Exception e) {
-                System.err.println("❌ Error: " + e.getMessage());
+                System.err.println("Error: " + e.getMessage());
                 e.printStackTrace();
             }
 
@@ -77,17 +77,17 @@ public class PickPathSequencingMenu {
 
     private void displayCurrentStatus() {
         if (currentAllocation != null) {
-            System.out.println("📊 Allocation: " + currentAllocation.allocations().size() + " allocations loaded");
+            System.out.println("Allocation: " + currentAllocation.allocations().size() + " allocations loaded");
         } else {
-            System.out.println("⚠️  No allocation loaded (run option 1 first)");
+            System.out.println("No allocation loaded (run option 1 first)");
         }
 
         if (currentPickingPlan != null && !currentPickingPlan.isEmpty()) {
-            System.out.println("📦 Picking Plan: " + currentPickingPlan.size() + " trolleys ready");
+            System.out.println("Picking Plan: " + currentPickingPlan.size() + " trolleys ready");
             int totalItems = currentPickingPlan.stream().mapToInt(t -> t.getAllocations().size()).sum();
             System.out.println("   Total items: " + totalItems);
         } else {
-            System.out.println("⚠️  No picking plan loaded (run option 2 first)");
+            System.out.println("No picking plan loaded (run option 2 first)");
         }
     }
 
@@ -137,7 +137,7 @@ public class PickPathSequencingMenu {
                     Allocation alloc = new Allocation(orderId, lineNo, sku, qty, boxId, aisle, bay);
                     allocations.add(alloc);
                 } catch (Exception e) {
-                    System.err.println("⚠️ Error parsing line: " + line);
+                    System.err.println("Error parsing line: " + line);
                 }
             }
 
@@ -145,10 +145,10 @@ public class PickPathSequencingMenu {
 
             System.out.println("✓ Loaded allocation from file: " + path);
             System.out.println("  • Total allocations: " + allocations.size());
-            System.out.println("💡 You can now load or generate a Picking Plan (option 2)");
+            System.out.println("You can now load or generate a Picking Plan (option 2)");
 
         } catch (Exception e) {
-            System.err.println("❌ Error reading file: " + e.getMessage());
+            System.err.println("Error reading file: " + e.getMessage());
         }
     }
 
@@ -186,7 +186,7 @@ public class PickPathSequencingMenu {
                     trolley.addAllocation(alloc);
 
                 } catch (Exception e) {
-                    System.err.println("⚠️ Error parsing line: " + line);
+                    System.err.println("Error parsing line: " + line);
                 }
             }
 
@@ -197,10 +197,10 @@ public class PickPathSequencingMenu {
             System.out.println("  • Total trolleys: " + trolleys.size());
             int totalItems = trolleys.stream().mapToInt(t -> t.getAllocations().size()).sum();
             System.out.println("  • Total items: " + totalItems);
-            System.out.println("💡 You can now run pick path sequencing (options 3–5)");
+            System.out.println("You can now run pick path sequencing (options 3–5)");
 
         } catch (Exception e) {
-            System.err.println("❌ Error reading file: " + e.getMessage());
+            System.err.println("Error reading file: " + e.getMessage());
         }
     }
 
@@ -210,7 +210,7 @@ public class PickPathSequencingMenu {
 
         if (!validatePickingPlan()) return;
 
-        System.out.println("⏳ Executing Deterministic Sweep strategy...");
+        System.out.println("Executing Deterministic Sweep strategy...");
         System.out.println("   (Orders bays by aisle ascending, then bay ascending)");
 
         List<Allocation> allAllocations = getAllAllocations();
@@ -226,7 +226,7 @@ public class PickPathSequencingMenu {
 
         if (!validatePickingPlan()) return;
 
-        System.out.println("⏳ Executing Nearest-Neighbour strategy...");
+        System.out.println("Executing Nearest-Neighbour strategy...");
         System.out.println("   (Greedy algorithm: always go to nearest unvisited bay)");
 
         List<Allocation> allAllocations = getAllAllocations();
@@ -242,7 +242,7 @@ public class PickPathSequencingMenu {
 
         if (!validatePickingPlan()) return;
 
-        System.out.println("⏳ Comparing both pick path strategies...");
+        System.out.println("Comparing both pick path strategies...");
 
         List<Allocation> allAllocations = getAllAllocations();
         PickPathSequencing sequencer = new PickPathSequencing(dataController.getItems());
@@ -252,7 +252,7 @@ public class PickPathSequencingMenu {
         PickPathSequencing.PickPath pathB = paths[1];
 
         System.out.println("\n╔══════════════════════════════════════════════════╗");
-        System.out.println("║              STRATEGY COMPARISON                  ║");
+        System.out.println("║              STRATEGY COMPARISON                 ║");
         System.out.println("╚══════════════════════════════════════════════════╝");
 
         System.out.printf("%-25s | %-15s | %-10s%n", "Strategy", "Total Distance", "Bays Visited");
@@ -267,8 +267,8 @@ public class PickPathSequencingMenu {
 
         // Determine best strategy
         if (Math.abs(pathA.totalDistance - pathB.totalDistance) < 0.0001) {
-            System.out.println("\n💡 Both strategies yield the same total distance!");
-            System.out.println("💡 No improvement — they are equally efficient.");
+            System.out.println("\nBoth strategies yield the same total distance!");
+            System.out.println("No improvement — they are equally efficient.");
         } else {
             String bestStrategy;
             double improvement;
@@ -281,8 +281,8 @@ public class PickPathSequencingMenu {
                 improvement = ((pathB.totalDistance - pathA.totalDistance) / pathB.totalDistance) * 100;
             }
 
-            System.out.println("\n💡 Best strategy: " + bestStrategy);
-            System.out.printf("💡 Improvement: %.1f%% distance reduction%n", improvement);
+            System.out.println("\nBest strategy: " + bestStrategy);
+            System.out.printf("Improvement: %.1f%% distance reduction%n", improvement);
         }
 
     }
@@ -324,7 +324,7 @@ public class PickPathSequencingMenu {
             System.out.println("✓ Pick paths exported to: " + path);
 
         } catch (java.io.IOException e) {
-            System.err.println("❌ Error writing file: " + e.getMessage());
+            System.err.println("Error writing file: " + e.getMessage());
         }
     }
 
@@ -383,13 +383,13 @@ public class PickPathSequencingMenu {
 
     private boolean validatePrerequisites() {
         if (!dataController.isWarehouseSelected()) {
-            System.out.println("❌ No warehouse selected!");
+            System.out.println("No warehouse selected!");
             System.out.println("Please select a warehouse from the Data Import menu first.");
             return false;
         }
 
         if (!dataController.isOrdersLoaded()) {
-            System.out.println("❌ No orders loaded!");
+            System.out.println("No orders loaded!");
             System.out.println("Please load orders from the Data Import menu first.");
             return false;
         }
@@ -399,7 +399,7 @@ public class PickPathSequencingMenu {
 
     private boolean validatePickingPlan() {
         if (currentPickingPlan == null || currentPickingPlan.isEmpty()) {
-            System.out.println("❌ No picking plan available!");
+            System.out.println("No picking plan available!");
             System.out.println("Please run options 1 and 2 first to generate allocations and picking plan.");
             return false;
         }
@@ -414,21 +414,21 @@ public class PickPathSequencingMenu {
                 String input = scanner.nextLine().trim();
 
                 if (input.isEmpty()) {
-                    System.out.println("❌ Input cannot be empty.");
+                    System.out.println("Input cannot be empty.");
                     continue;
                 }
 
                 double value = Double.parseDouble(input);
 
                 if (value < min || value > max) {
-                    System.out.printf("❌ Value must be between %.1f and %.1f.%n", min, max);
+                    System.out.printf("Value must be between %.1f and %.1f.%n", min, max);
                     continue;
                 }
 
                 return value;
 
             } catch (NumberFormatException e) {
-                System.out.println("❌ Invalid number format.");
+                System.out.println("Invalid number format.");
             }
         }
     }
