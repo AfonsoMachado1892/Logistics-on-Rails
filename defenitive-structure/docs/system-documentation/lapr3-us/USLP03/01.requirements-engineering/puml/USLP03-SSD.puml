@@ -1,0 +1,63 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Traffic Dispatcher" as User
+participant ":System" as System
+
+activate User
+
+    User -> System : requests to open the Application Menu
+    activate System
+        System --> User : displays menu options (1–6, 0 to exit)
+    deactivate System
+
+    User -> System : selects option 1 (Load Railway Network Data)
+    activate System
+        System --> User : requests file paths for Facilities, Lines, Segments, Locomotives
+    deactivate System
+
+    User -> System : provides file paths
+    activate System
+        System --> User : validates and loads CSV data
+        System --> User : displays success message and entity counts\n(or error message if import fails)
+    deactivate System
+
+    User -> System : selects option 2 (Calculate Travel Time)
+    activate System
+        System --> User : displays list of Facilities and requests origin
+    deactivate System
+
+    User -> System : selects origin Facility
+    activate System
+        System --> User : displays list of Facilities and requests destination
+    deactivate System
+
+    User -> System : selects destination Facility
+    activate System
+        System --> User : displays list of available Locomotives
+    deactivate System
+
+    User -> System : selects Locomotive
+    activate System
+        System --> User : checks for connecting Line
+        alt Line exists
+            System --> User : calculates and displays total travel time, distance, and speed
+            System --> User : displays per-segment travel times, distances, and speeds
+            System --> User : requests if results should be saved to file
+            User -> System : confirms save option
+            System --> User : saves results and confirms success
+        else No line found
+            System --> User : displays "No direct line found between Stations"
+        end
+    deactivate System
+
+    User -> System : selects option 0 (Back to Main Menu)
+    activate System
+        System --> User : returns to main menu
+    deactivate System
+
+@enduml
