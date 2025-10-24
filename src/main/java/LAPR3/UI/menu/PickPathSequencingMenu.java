@@ -8,9 +8,7 @@ import ESINF.DTO.AllocationOutput;
 import ESINF.model.*;
 import ESINF.model.PickPathSequencing;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * Menu for Pick Path Sequencing (USEI04)
@@ -66,8 +64,8 @@ public class PickPathSequencingMenu {
         System.out.println();
 
         System.out.println("┌─────────────────────────────────────────────────┐");
-        System.out.println("│  1. Generate Allocation (USEI02)                │");
-        System.out.println("│  2. Generate Picking Plan (USEI03)              │");
+        System.out.println("│  1. Load Allocation (USEI02)                    │");
+        System.out.println("│  2. Load Picking Plan (USEI03)                  │");
         System.out.println("│  3. Strategy A - Deterministic Sweep            │");
         System.out.println("│  4. Strategy B - Nearest-Neighbour              │");
         System.out.println("│  5. Compare Both Strategies                     │");
@@ -95,8 +93,8 @@ public class PickPathSequencingMenu {
 
     private void handleChoice(int choice) {
         switch (choice) {
-            case 1 -> generateAllocation();
-            case 2 -> generatePickingPlan();
+            case 1 -> loadAllocationFromCSV();
+            case 2 -> loadPickingPlanFromCSV();
             case 3 -> executeStrategyA();
             case 4 -> executeStrategyB();
             case 5 -> compareStrategies();
@@ -104,90 +102,108 @@ public class PickPathSequencingMenu {
         }
     }
 
-    private void generateAllocation() {
-        System.out.println("\n═══ GENERATE ALLOCATION (USEI02) ═══");
-
-        if (!validatePrerequisites()) return;
-
-        System.out.println("This will run order allocation to generate allocations for picking.");
-        System.out.println();
+    private void loadAllocationFromCSV() {
+        System.out.println("\n═══ LOAD ALLOCATION FROM CSV ═══");
 
         System.out.println("Select allocation mode:");
-        System.out.println("  1. Strict (only fully allocated orders)");
-        System.out.println("  2. Partial (allow partial allocations)");
+        System.out.println("  1. Strict (default: allocation_strict.csv)");
+        System.out.println("  2. Partial (default: allocation_partial.csv)");
 
-        int modeChoice = validator.readInt("Mode: ", 1, 2);
-        boolean strictMode = (modeChoice == 1);
+        int mode = validator.readInt("Mode: ", 1, 2);
+        String defaultPath = (mode == 1) ? "Logs/allocation_strict.csv" : "Logs/allocation_partial.csv";
+        String path = validator.readFilePath("Enter allocation CSV path", defaultPath);
 
-        System.out.println("\n⏳ Running allocation in " +
-                (strictMode ? "STRICT" : "PARTIAL") + " mode...");
+        try (Scanner fileScanner = new Scanner(new java.io.File(path))) {
+            List<Allocation> allocations = new ArrayList<>();
 
-        currentAllocation = orderController.allocateOrders(strictMode);
+            if (fileScanner.hasNextLine()) fileScanner.nextLine(); // skip header
 
-        System.out.println("✓ Allocation completed!");
-        System.out.println("  • Total allocations: " + currentAllocation.allocations().size());
+            while (fileScanner.hasNextLine()) {
+                String line = fileScanner.nextLine().trim();
+                if (line.isEmpty()) continue;
 
-        long eligible = currentAllocation.results().stream()
-                .filter(r -> r.getStatus().equals("ELIGIBLE"))
-                .count();
-        long partial = currentAllocation.results().stream()
-                .filter(r -> r.getStatus().equals("PARTIAL"))
-                .count();
+                String[] fields = line.split(",");
+                if (fields.length < 8) continue; // invalid line
 
-        System.out.println("  • Eligible orders: " + eligible);
-        if (!strictMode) {
-            System.out.println("  • Partial orders: " + partial);
+                try {
+                    String orderId = fields[1];
+                    int lineNo = Integer.parseInt(fields[2]);
+                    String sku = fields[3];
+                    int qty = Integer.parseInt(fields[4]);
+                    String boxId = fields[5];
+                    String aisle = fields[6];
+                    String bay = fields[7];
+
+                    Allocation alloc = new Allocation(orderId, lineNo, sku, qty, boxId, aisle, bay);
+                    allocations.add(alloc);
+                } catch (Exception e) {
+                    System.err.println("⚠️ Error parsing line: " + line);
+                }
+            }
+
+            currentAllocation = new AllocationOutput(new ArrayList<OrderEligibility>(), allocations);
+
+            System.out.println("✓ Loaded allocation from file: " + path);
+            System.out.println("  • Total allocations: " + allocations.size());
+            System.out.println("💡 You can now load or generate a Picking Plan (option 2)");
+
+        } catch (Exception e) {
+            System.err.println("❌ Error reading file: " + e.getMessage());
         }
-
-        System.out.println("\n💡 Now you can generate a picking plan (option 2)");
     }
 
-    private void generatePickingPlan() {
-        System.out.println("\n═══ GENERATE PICKING PLAN (USEI03) ═══");
+    private void loadPickingPlanFromCSV() {
+        System.out.println("\n═══ LOAD PICKING PLAN FROM CSV ═══");
 
-        if (currentAllocation == null) {
-            System.out.println("❌ No allocation available!");
-            System.out.println("Please run option 1 first to generate allocations.");
-            return;
+        String defaultPath = "Logs/picking_plan.csv";
+        String path = validator.readFilePath("Enter picking plan CSV path", defaultPath);
+
+        try (Scanner fileScanner = new Scanner(new java.io.File(path))) {
+            Map<Integer, Trolley> trolleyMap = new HashMap<>();
+
+            if (fileScanner.hasNextLine()) fileScanner.nextLine(); // skip header
+
+            while (fileScanner.hasNextLine()) {
+                String line = fileScanner.nextLine().trim();
+                if (line.isEmpty()) continue;
+
+                String[] fields = line.split(",");
+                if (fields.length < 8) continue;
+
+                try {
+                    int trolleyId = Integer.parseInt(fields[0]);
+                    String orderId = fields[1];
+                    int lineNo = Integer.parseInt(fields[2]);
+                    String sku = fields[3];
+                    int qty = Integer.parseInt(fields[4]);
+                    String boxId = fields[5];
+                    String aisle = fields[6];
+                    String bay = fields[7];
+
+                    Allocation alloc = new Allocation(orderId, lineNo, sku, qty, boxId, aisle, bay);
+
+                    Trolley trolley = trolleyMap.computeIfAbsent(trolleyId, Trolley::new);
+                    trolley.addAllocation(alloc);
+
+                } catch (Exception e) {
+                    System.err.println("⚠️ Error parsing line: " + line);
+                }
+            }
+
+            List<Trolley> trolleys = new ArrayList<>(trolleyMap.values());
+            currentPickingPlan = trolleys;
+
+            System.out.println("✓ Loaded picking plan from file: " + path);
+            System.out.println("  • Total trolleys: " + trolleys.size());
+            int totalItems = trolleys.stream().mapToInt(t -> t.getAllocations().size()).sum();
+            System.out.println("  • Total items: " + totalItems);
+            System.out.println("💡 You can now run pick path sequencing (options 3–5)");
+
+        } catch (Exception e) {
+            System.err.println("❌ Error reading file: " + e.getMessage());
         }
-
-        if (currentAllocation.allocations().isEmpty()) {
-            System.out.println("❌ No allocations to pack!");
-            return;
-        }
-
-        System.out.println("\nSelect packing heuristic:");
-        System.out.println("  1. First Fit (FF)");
-        System.out.println("  2. First Fit Decreasing (FFD)");
-        System.out.println("  3. Best Fit Decreasing (BFD)");
-
-        int heuristicChoice = validator.readInt("Heuristic: ", 1, 3);
-        PickingPlan.Heuristic heuristic = switch (heuristicChoice) {
-            case 1 -> PickingPlan.Heuristic.FF;
-            case 2 -> PickingPlan.Heuristic.FFD;
-            case 3 -> PickingPlan.Heuristic.BFD;
-            default -> PickingPlan.Heuristic.FF;
-        };
-
-        // Ask for trolley capacity
-        System.out.println("\nTrolley Configuration:");
-        double capacity = readDouble("Enter trolley capacity (kg): ", 1.0, 1000.0);
-
-        System.out.println("\n⏳ Generating picking plan with " + heuristic + "...");
-
-        currentPickingPlan = pickingController.generatePickingPlan(
-                currentAllocation,
-                capacity,
-                heuristic
-        );
-
-        System.out.println("✓ Picking plan generated!");
-        System.out.println("  • Total trolleys: " + currentPickingPlan.size());
-        System.out.println("  • Total items: " +
-                currentPickingPlan.stream().mapToInt(t -> t.getAllocations().size()).sum());
-
-        System.out.println("\n💡 Now you can optimize pick paths (options 3-5)");
     }
+
 
     private void executeStrategyA() {
         System.out.println("\n═══ STRATEGY A - DETERMINISTIC SWEEP ═══");
@@ -230,7 +246,7 @@ public class PickPathSequencingMenu {
 
         List<Allocation> allAllocations = getAllAllocations();
         PickPathSequencing sequencer = new PickPathSequencing(dataController.getItems());
-        
+
         PickPathSequencing.PickPath[] paths = sequencer.generateBothPaths(allAllocations);
         PickPathSequencing.PickPath pathA = paths[0];
         PickPathSequencing.PickPath pathB = paths[1];
@@ -242,9 +258,9 @@ public class PickPathSequencingMenu {
         System.out.printf("%-25s | %-15s | %-10s%n", "Strategy", "Total Distance", "Bays Visited");
         System.out.println("─".repeat(60));
 
-        System.out.printf("%-25s | %-15.2f | %-10d%n", 
+        System.out.printf("%-25s | %-15.2f | %-10d%n",
                 "Deterministic Sweep", pathA.totalDistance, pathA.route.size());
-        System.out.printf("%-25s | %-15.2f | %-10d%n", 
+        System.out.printf("%-25s | %-15.2f | %-10d%n",
                 "Nearest-Neighbour", pathB.totalDistance, pathB.route.size());
 
         System.out.println("─".repeat(60));
@@ -262,10 +278,6 @@ public class PickPathSequencingMenu {
 
         System.out.println("\n💡 Best strategy: " + bestStrategy);
         System.out.printf("💡 Improvement: %.1f%% distance reduction%n", improvement);
-
-        System.out.println("\n📊 Detailed Results:");
-        displayPickPath(pathA, "Strategy A - Deterministic Sweep");
-        displayPickPath(pathB, "Strategy B - Nearest-Neighbour");
     }
 
     private void exportPickPaths() {

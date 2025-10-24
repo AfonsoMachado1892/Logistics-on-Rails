@@ -9,6 +9,14 @@ public class Trolley {
     private double usedWeight;
     private final List<Allocation> allocations;
 
+    public Trolley(int id) {
+        this(id, 1000.0);
+    }
+
+    public void addAllocation(Allocation alloc) {
+        addAllocation(alloc, 0.0);
+    }
+
     public Trolley(int id, double capacity) {
         this.id = id;
         this.capacity = capacity;
