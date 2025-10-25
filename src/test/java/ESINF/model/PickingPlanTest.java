@@ -8,13 +8,28 @@ import java.util.*;
 
 import static org.junit.Assert.*;
 
+/**
+ * Unit tests for the {@link PickingPlan} class.
+ * <p>
+ * This test suite verifies the behavior of the PickingPlan under various scenarios,
+ * including validation of allocations, handling of invalid input, and correct trolley
+ * assignment according to different heuristics (First Fit, First Fit Decreasing, Best Fit Decreasing).
+ */
 public class PickingPlanTest {
 
+    /** A mock item catalog used across tests. */
     private Map<String, Item> itemCatalog;
+
+    /** The PickingPlan instance under test. */
     private PickingPlan pickingPlan;
+
+    /** Used to suppress console error messages during tests. */
     private final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
     private final PrintStream originalErr = System.err;
 
+    /**
+     * Initializes a basic item catalog and a default PickingPlan instance before each test.
+     */
     @Before
     public void setUp() {
         itemCatalog = new HashMap<>();
@@ -26,16 +41,19 @@ public class PickingPlanTest {
         pickingPlan = new PickingPlan(10.0, itemCatalog);
     }
 
-
+    /** Redirects System.err to suppress warnings during tests. */
     private void suppressWarnings() {
         System.setErr(new PrintStream(errContent));
     }
 
-
+    /** Restores System.err after warnings were suppressed. */
     private void restoreWarnings() {
         System.setErr(originalErr);
     }
 
+    /**
+     * Tests that allocations with negative quantities are ignored.
+     */
     @Test
     public void testInvalidAllocationWithNegativeQuantity() {
         suppressWarnings();
@@ -46,13 +64,17 @@ public class PickingPlanTest {
         );
 
         List<Trolley> trolleys = pickingPlan.generatePickingPlan(allocations, PickingPlan.Heuristic.FF);
-
         restoreWarnings();
 
         assertNotNull(trolleys);
         assertEquals(1, trolleys.size());
         assertEquals(1, trolleys.get(0).getAllocations().size());
     }
+
+    /**
+     * Tests that allocations exceeding trolley capacity are still handled,
+     * even if the trolley weight surpasses the defined limit.
+     */
     @Test
     public void testAllocationExceedsTrolleyCapacity() {
         suppressWarnings();
@@ -62,7 +84,6 @@ public class PickingPlanTest {
         );
 
         List<Trolley> trolleys = pickingPlan.generatePickingPlan(allocations, PickingPlan.Heuristic.FF);
-
         restoreWarnings();
 
         assertNotNull(trolleys);
@@ -70,6 +91,9 @@ public class PickingPlanTest {
         assertTrue(trolleys.get(0).getUsedWeight() > trolleys.get(0).getCapacity());
     }
 
+    /**
+     * Tests that allocations with unknown SKU codes are ignored.
+     */
     @Test
     public void testUnknownSKU() {
         suppressWarnings();
@@ -79,7 +103,6 @@ public class PickingPlanTest {
         );
 
         List<Trolley> trolleys = pickingPlan.generatePickingPlan(allocations, PickingPlan.Heuristic.FF);
-
         restoreWarnings();
 
         assertNotNull(trolleys);
@@ -87,6 +110,9 @@ public class PickingPlanTest {
         assertEquals(0.0, trolleys.get(0).getUsedWeight(), 0.01);
     }
 
+    /**
+     * Tests that allocations with zero quantity are ignored.
+     */
     @Test
     public void testInvalidAllocationWithZeroQuantity() {
         suppressWarnings();
@@ -97,7 +123,6 @@ public class PickingPlanTest {
         );
 
         List<Trolley> trolleys = pickingPlan.generatePickingPlan(allocations, PickingPlan.Heuristic.FF);
-
         restoreWarnings();
 
         assertNotNull(trolleys);
@@ -105,6 +130,9 @@ public class PickingPlanTest {
         assertEquals(1, trolleys.get(0).getAllocations().size());
     }
 
+    /**
+     * Tests that allocations with null SKU codes are ignored.
+     */
     @Test
     public void testAllocationWithNullSKU() {
         suppressWarnings();
@@ -115,7 +143,6 @@ public class PickingPlanTest {
         );
 
         List<Trolley> trolleys = pickingPlan.generatePickingPlan(allocations, PickingPlan.Heuristic.FF);
-
         restoreWarnings();
 
         assertNotNull(trolleys);
@@ -123,6 +150,9 @@ public class PickingPlanTest {
         assertEquals(1, trolleys.get(0).getAllocations().size());
     }
 
+    /**
+     * Tests that allocations with empty SKU codes are ignored.
+     */
     @Test
     public void testAllocationWithEmptySKU() {
         suppressWarnings();
@@ -133,7 +163,6 @@ public class PickingPlanTest {
         );
 
         List<Trolley> trolleys = pickingPlan.generatePickingPlan(allocations, PickingPlan.Heuristic.FF);
-
         restoreWarnings();
 
         assertNotNull(trolleys);
@@ -141,6 +170,9 @@ public class PickingPlanTest {
         assertEquals(1, trolleys.get(0).getAllocations().size());
     }
 
+    /**
+     * Tests that the constructor initializes correctly with valid parameters.
+     */
     @Test
     public void testConstructorWithValidParameters() {
         assertNotNull(pickingPlan);
@@ -148,21 +180,27 @@ public class PickingPlanTest {
         assertNotNull(pp);
     }
 
+    /** Tests that the constructor throws an exception for zero capacity. */
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithZeroCapacity() {
         new PickingPlan(0, itemCatalog);
     }
 
+    /** Tests that the constructor throws an exception for negative capacity. */
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithNegativeCapacity() {
         new PickingPlan(-10, itemCatalog);
     }
 
+    /** Tests that the constructor throws an exception when the catalog is null. */
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithNullCatalog() {
         new PickingPlan(10.0, null);
     }
 
+    /**
+     * Tests that passing null allocations results in an empty picking plan.
+     */
     @Test
     public void testGeneratePickingPlanWithNullAllocations() {
         suppressWarnings();
@@ -173,6 +211,9 @@ public class PickingPlanTest {
         assertTrue(result.isEmpty());
     }
 
+    /**
+     * Tests that passing an empty allocation list results in an empty picking plan.
+     */
     @Test
     public void testGeneratePickingPlanWithEmptyAllocations() {
         suppressWarnings();
@@ -184,12 +225,18 @@ public class PickingPlanTest {
         assertTrue(result.isEmpty());
     }
 
+    /**
+     * Tests that passing a null heuristic throws an exception.
+     */
     @Test(expected = IllegalArgumentException.class)
     public void testGeneratePickingPlanWithNullHeuristic() {
         List<Allocation> allocations = createSampleAllocations();
         pickingPlan.generatePickingPlan(allocations, null);
     }
 
+    /**
+     * Tests trolley packing using the First Fit heuristic.
+     */
     @Test
     public void testFirstFitHeuristic() {
         List<Allocation> allocations = Arrays.asList(
@@ -207,6 +254,9 @@ public class PickingPlanTest {
         assertEquals(1, trolleys.get(1).getAllocations().size());
     }
 
+    /**
+     * Tests trolley packing using the First Fit Decreasing heuristic.
+     */
     @Test
     public void testFirstFitDecreasingHeuristic() {
         List<Allocation> allocations = Arrays.asList(
@@ -225,6 +275,9 @@ public class PickingPlanTest {
         assertEquals(2.0, trolleys.get(1).getUsedWeight(), 0.01);
     }
 
+    /**
+     * Tests trolley packing using the Best Fit Decreasing heuristic.
+     */
     @Test
     public void testBestFitDecreasingHeuristic() {
         List<Allocation> allocations = Arrays.asList(
@@ -242,6 +295,9 @@ public class PickingPlanTest {
         }
     }
 
+    /**
+     * Tests a perfect-fit case where the trolley utilization equals 100%.
+     */
     @Test
     public void testPerfectFit() {
         List<Allocation> allocations = Arrays.asList(
@@ -256,6 +312,9 @@ public class PickingPlanTest {
         assertEquals(1.0, trolleys.get(0).getUtilization(), 0.01);
     }
 
+    /**
+     * Tests a scenario where multiple trolleys are needed to accommodate all allocations.
+     */
     @Test
     public void testMultipleTrolleysNeeded() {
         List<Allocation> allocations = Arrays.asList(
@@ -273,6 +332,9 @@ public class PickingPlanTest {
         assertEquals(10.0, trolleys.get(1).getUsedWeight(), 0.01);
     }
 
+    /**
+     * Tests that the Best Fit Decreasing heuristic produces equal or better trolley usage than First Fit.
+     */
     @Test
     public void testBFDProducesBetterPackingThanFF() {
         List<Allocation> allocations = Arrays.asList(
@@ -290,6 +352,9 @@ public class PickingPlanTest {
         assertTrue(trolleysBFD.size() <= trolleysFF.size());
     }
 
+    /**
+     * Tests that trolley IDs are assigned sequentially starting from 1.
+     */
     @Test
     public void testTrolleyNumbering() {
         List<Allocation> allocations = Arrays.asList(
@@ -304,6 +369,9 @@ public class PickingPlanTest {
         assertEquals(2, trolleys.get(1).getId());
     }
 
+    /**
+     * Tests that mixed item weights are correctly distributed among trolleys.
+     */
     @Test
     public void testMixedWeights() {
         List<Allocation> allocations = Arrays.asList(
@@ -321,6 +389,9 @@ public class PickingPlanTest {
         }
     }
 
+    /**
+     * Tests that all heuristics (FF, FFD, BFD) result in the same total weight distributed across trolleys.
+     */
     @Test
     public void testAllHeuristicsProduceSameTotalWeight() {
         List<Allocation> allocations = createSampleAllocations();
@@ -351,6 +422,11 @@ public class PickingPlanTest {
         assertEquals(totalFF, totalBFD, 0.01);
     }
 
+    /**
+     * Helper method to create a sample list of allocations used in multiple tests.
+     *
+     * @return a predefined list of {@link Allocation} objects.
+     */
     private List<Allocation> createSampleAllocations() {
         return Arrays.asList(
                 new Allocation("ORD001", 1, "SKU004", 10, "BOX001", "A1", "B1"),
@@ -359,5 +435,3 @@ public class PickingPlanTest {
         );
     }
 }
-
-
