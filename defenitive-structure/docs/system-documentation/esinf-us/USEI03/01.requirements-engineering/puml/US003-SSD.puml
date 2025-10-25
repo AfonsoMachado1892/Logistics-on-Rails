@@ -1,0 +1,27 @@
+@startuml USEI03_Picking_Plans
+
+actor "Station Storage\nManager" as Manager
+participant ":System" as System
+
+Manager -> System : requestPickingPlan()
+activate Manager
+
+System --> Manager : requestAllocation()
+
+Manager -> System : provideAllocation(Allocation)
+
+System --> Manager : requestTrolleySize()
+
+Manager --> System : provideTrolleySize(size)
+
+System --> Manager : requestPickingPlanChoice(PickingPlanOptions)
+
+Manager -> System : confirmPickingPlanChoice(choice)
+
+System --> Manager : showPickingPlan(pickingPlan)
+
+
+
+deactivate Manager
+
+@enduml
