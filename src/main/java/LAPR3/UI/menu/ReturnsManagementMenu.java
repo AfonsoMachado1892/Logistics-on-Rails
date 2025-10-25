@@ -212,9 +212,9 @@ public class ReturnsManagementMenu {
         returnsController.processReturns();
 
         System.out.println("─".repeat(80));
-        System.out.println("✓ All returns processed successfully!");
-        System.out.println("\n TIP: Check audit log (option 4) for detailed processing results.");
-        System.out.println(" TIP: View inventory (main menu → option 4) to see restocked items.");
+        System.out.println("All returns processed successfully!");
+        System.out.println("\n Check audit log (option 4) for detailed processing results.");
+        System.out.println("\n View inventory (main menu → option 4) to see restocked items.");
     }
 
     /**
