@@ -60,6 +60,7 @@ public class ReturnsController {
     /**
      * Processes all loaded returns through the quarantine inspection process.
      * Returns are inspected in reverse chronological order (latest first).
+     * After processing, the internal list of returns is cleared to prevent reprocessing.
      *
      * @throws IllegalStateException if returns are not loaded or no warehouse is selected
      */
@@ -86,6 +87,9 @@ public class ReturnsController {
         System.out.println("Processing " + returns.size() + " returns...");
         quarantineManager.processReturns(returns);
         System.out.println("Processing complete!");
+
+        // Clear the list after successful processing to prevent re-processing.
+        this.returns.clear();
     }
 
     /**
@@ -107,9 +111,9 @@ public class ReturnsController {
     }
 
     /**
-     * Checks whether returns have been successfully loaded.
+     * Checks whether returns have been successfully loaded and are pending processing.
      *
-     * @return true if returns are loaded, false otherwise
+     * @return true if returns are loaded and the list is not empty, false otherwise
      */
     public boolean hasReturns() {
         return returnsLoaded && returns != null && !returns.isEmpty();
