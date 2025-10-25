@@ -75,8 +75,9 @@ public class MainMenu {
             case 4 -> pickingMenu.show();
             case 5 -> pickPathMenu.show();
             case 6 -> returnsMenu.show();
-            case 7 -> viewLogs();
-            case 8 -> travelTimeMenu.show(); 
+            case 7 -> viewInventory();
+            case 8 -> viewLogs();
+            case 9 -> travelTimeMenu.show();
             default -> System.out.println("Invalid option!");
         }
     }
