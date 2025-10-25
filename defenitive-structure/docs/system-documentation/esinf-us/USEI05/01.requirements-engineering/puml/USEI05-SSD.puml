@@ -3,6 +3,8 @@ skinparam monochrome true
 skinparam packageStyle rectangle
 skinparam shadowing false
 
+title USEI05 - Returns & Quarantine
+
 autonumber
 
 actor "Warehouse Operator" as Operator
@@ -10,21 +12,26 @@ participant ":System" as System
 
 activate Operator
 
-Operator -> System : loadReturns(filePath)
+Operator -> System : initiates loading returns and provides file path
 activate System
-System --> Operator : shows import summary and validation logs
+System --> Operator : displays load/validation summary
 deactivate System
 
-Operator -> System : confirmQuarantineInspection()
+Operator -> System : initiates processing of all loaded returns
 activate System
-System --> Operator : begins processing returns in reverse chronological order
+System --> Operator : requests confirmation to proceed
 deactivate System
 
-Operator -> System : inspect each return
+Operator -> System : confirms processing
 activate System
-
-System --> Operator : inspects returns and shows restock/discard results
-System --> Operator : writes audit entries
+System --> Operator : displays processing completion message
 deactivate System
+
+Operator -> System : requests to view audit log
+activate System
+System --> Operator : displays detailed audit log of all actions \n(restocked, discarded, failed)
+deactivate System
+
+deactivate Operator
 
 @enduml
