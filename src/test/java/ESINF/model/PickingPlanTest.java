@@ -105,6 +105,42 @@ public class PickingPlanTest {
         assertEquals(1, trolleys.get(0).getAllocations().size());
     }
 
-  
+    @Test
+    public void testAllocationWithNullSKU() {
+        suppressWarnings();
+
+        List<Allocation> allocations = Arrays.asList(
+                new Allocation("ORD001", 1, null, 5, "BOX001", "A1", "B1"),
+                new Allocation("ORD001", 2, "SKU004", 5, "BOX002", "A1", "B2")
+        );
+
+        List<Trolley> trolleys = pickingPlan.generatePickingPlan(allocations, PickingPlan.Heuristic.FF);
+
+        restoreWarnings();
+
+        assertNotNull(trolleys);
+        assertEquals(1, trolleys.size());
+        assertEquals(1, trolleys.get(0).getAllocations().size());
+    }
+
+    @Test
+    public void testAllocationWithEmptySKU() {
+        suppressWarnings();
+
+        List<Allocation> allocations = Arrays.asList(
+                new Allocation("ORD001", 1, "", 5, "BOX001", "A1", "B1"),
+                new Allocation("ORD001", 2, "SKU004", 5, "BOX002", "A1", "B2")
+        );
+
+        List<Trolley> trolleys = pickingPlan.generatePickingPlan(allocations, PickingPlan.Heuristic.FF);
+
+        restoreWarnings();
+
+        assertNotNull(trolleys);
+        assertEquals(1, trolleys.size());
+        assertEquals(1, trolleys.get(0).getAllocations().size());
+    }
+
+    
 }
 
