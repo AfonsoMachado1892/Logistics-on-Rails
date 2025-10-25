@@ -13,7 +13,7 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 public class AllocationManagerTest {
-    
+
     private AllocationManager allocationManager;
     private WarehouseManager warehouseManager;
     private Warehouse warehouse;
