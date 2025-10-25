@@ -1,0 +1,38 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Warehouse Planner" as Manager
+participant ":System" as System
+
+activate Manager
+
+    Manager -> System : requests Order Eligibility and Allocation
+    activate System
+
+        System --> Manager : shows allocation modes (Strict, Partial, etc.) and requests selection
+    deactivate System
+
+    Manager -> System : selects allocation mode (e.g., "Strict")
+    activate System
+
+        System --> Manager : processes all open orders and allocates inventory
+    deactivate System
+
+    Manager -> System : acknowledges processing and waits for results
+    activate System
+
+        System --> Manager : displays Eligibility List and Allocation List
+        System --> Manager : prompts to save results to CSV
+    deactivate System
+
+    Manager -> System : confirms save option
+    activate System
+
+        System --> Manager : displays operation success (file saved) or failure
+    deactivate System
+
+@enduml
