@@ -29,13 +29,13 @@ public class PickingPlan {
      * @return List of trolleys with packed allocations
      */
     public List<Trolley> generatePickingPlan(List<Allocation> allocations, Heuristic heuristic) {
-        // Validation 1: Check null or empty
+
         if (allocations == null || allocations.isEmpty()) {
             System.out.println("⚠️ No allocations to pack. Returning empty picking plan.");
             return new ArrayList<>();
         }
 
-        // Validation 2: Check heuristic
+
         if (heuristic == null) {
             throw new IllegalArgumentException("Heuristic cannot be null");
         }
@@ -49,31 +49,31 @@ public class PickingPlan {
         for (Allocation a : workingList) {
             // Validation 3: Check allocation fields
             if (a == null) {
-                System.err.println("❌ Null allocation found - skipping");
+                System.err.println("Null allocation found - skipping");
                 continue;
             }
 
             if (a.getSku() == null || a.getSku().isEmpty()) {
-                System.err.println("❌ Allocation with null/empty SKU - skipping");
+                System.err.println("Allocation with null/empty SKU - skipping");
                 continue;
             }
 
             if (a.getQty() <= 0) {
-                System.err.println("❌ Allocation with invalid quantity (" + a.getQty() + ") - skipping");
+                System.err.println("Allocation with invalid quantity (" + a.getQty() + ") - skipping");
                 continue;
             }
 
             // Validation 4: Check if SKU exists in catalog
             Item item = itemCatalog.get(a.getSku());
             if (item == null) {
-                System.err.println("⚠️ Warning: SKU " + a.getSku() + " not found in catalog - assuming weight 0");
+                System.err.println("Warning: SKU " + a.getSku() + " not found in catalog - assuming weight 0");
             }
 
             double weight = (item != null ? item.getUnitWeight() : 0) * a.getQty();
 
             // Validation 5: Check if allocation exceeds trolley capacity
             if (weight > trolleyCapacity) {
-                System.err.println("⚠️ Warning: Allocation " + a.getOrderId() +
+                System.err.println("Warning: Allocation " + a.getOrderId() +
                         " line " + a.getLineNo() + " (SKU=" + a.getSku() +
                         ") exceeds trolley capacity!");
                 System.err.println("   Weight: " + String.format("%.2f", weight) +
@@ -85,10 +85,7 @@ public class PickingPlan {
             allocWeight.put(a, weight);
         }
 
-        // Validation 6: Remove invalid allocations from working list if desired
-        // (Currently we keep them but warn - they go in separate trolleys)
 
-        // Sort for FFD / BFD
         if (heuristic == Heuristic.FFD || heuristic == Heuristic.BFD) {
             workingList.sort((a1, a2) -> {
                 Double w1 = allocWeight.get(a1);
@@ -104,7 +101,7 @@ public class PickingPlan {
         for (Allocation alloc : workingList) {
             Double weight = allocWeight.get(alloc);
             if (weight == null) {
-                System.err.println("❌ No weight calculated for allocation - skipping");
+                System.err.println("No weight calculated for allocation - skipping");
                 continue;
             }
 
@@ -115,16 +112,16 @@ public class PickingPlan {
             }
         }
 
-        // Validation 7: Check if any trolleys were created
+
         if (trolleys.isEmpty() && !workingList.isEmpty()) {
-            System.err.println("⚠️ Warning: No trolleys created despite having allocations!");
+            System.err.println("Warning: No trolleys created despite having allocations!");
         }
 
         return trolleys;
     }
 
     private void placeFirstFit(List<Trolley> trolleys, Allocation alloc, double weight) {
-        // Try to fit in existing trolleys
+
         for (Trolley t : trolleys) {
             if (t.canFit(weight)) {
                 t.addAllocation(alloc, weight);
@@ -132,7 +129,7 @@ public class PickingPlan {
             }
         }
 
-        // Create new trolley if doesn't fit anywhere
+
         Trolley newTrolley = new Trolley(trolleys.size() + 1, trolleyCapacity);
         newTrolley.addAllocation(alloc, weight);
         trolleys.add(newTrolley);
@@ -142,7 +139,7 @@ public class PickingPlan {
         Trolley bestFit = null;
         double minRemaining = Double.MAX_VALUE;
 
-        // Find trolley with tightest fit
+
         for (Trolley t : trolleys) {
             if (t.canFit(weight)) {
                 double remaining = t.getCapacity() - (t.getUsedWeight() + weight);
@@ -154,7 +151,7 @@ public class PickingPlan {
         }
 
         if (bestFit == null) {
-            // Create new trolley
+            
             Trolley newTrolley = new Trolley(trolleys.size() + 1, trolleyCapacity);
             newTrolley.addAllocation(alloc, weight);
             trolleys.add(newTrolley);
