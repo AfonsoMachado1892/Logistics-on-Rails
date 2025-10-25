@@ -31,9 +31,16 @@ As a warehouse operator, I want to process returned goods by inspecting their co
 
 **From the client clarifications:**
 
-> Returns are integrated into the existing warehouse structure, using the same placement logic as unloading (USEI01).  
-> The purpose of the quarantine is only to decide whether the item re-enters inventory or not — no reinspection is done afterward.  
-> FEFO/FIFO logic applies later, during dispatch operations.
+> **Q:** Should the audit log keep a complete historical record of all inspections (i.e., new entries are appended to the same file over time), or should it be reset/overwritten each time the application runs?
+>
+> **A:** Default to append-only (keep history).
+> 
+> **Q:** Under what circumstances can a returned product be partially restocked? ("if partially restocked, include qtyRestocked and qtyDiscarded")
+> 
+> **A:** Partial restock is for reasons where unit-by-unit acceptance makes sense; expired/damaged default to full discard; always log qtyRestocked and qtyDiscarded and insert the accepted portion as a new FEFO-sorted return box.
+
+
+
 
 ---
 
@@ -51,7 +58,7 @@ As a warehouse operator, I want to process returned goods by inspecting their co
 ### 1.4. Found out Dependencies
 
 - Depends on **USEI01 – Warehouse Loading**, since the warehouse, aisles, and bays must exist before restocking can occur.
-- Depends on the **Item Catalog** imported earlier (through `ImportItems`) to validate that all SKUs in `returns.csv` are known.
+- Depends on the **Item Catalog** imported earlier to validate that all SKUs in `returns.csv` are known.
 
 ---
 
@@ -76,3 +83,12 @@ As a warehouse operator, I want to process returned goods by inspecting their co
 - Console summary showing the result of the operation (success, errors, inventory snapshot)
 
 
+### 1.6. System Sequence Diagram (SSD)
+
+![System Sequence Diagram](svg/USEI05-SSD.svg)
+
+**_Other alternatives might exist._**
+
+### 1.7 Other Relevant Remarks
+
+- Neither the SEMP3PI guide nor the Client Clarifications, "Partial restock is for reasons where unit-by-unit acceptance makes sense", clarify the criteria for a partial restock. 
