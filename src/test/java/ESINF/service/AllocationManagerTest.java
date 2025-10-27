@@ -35,7 +35,13 @@ public class AllocationManagerTest {
         now = LocalDateTime.now();
         Box box1 = new Box("BOX001", "SKU100", 50, null, now);
         Box box2 = new Box("BOX002", "SKU100", 30, null, now.plusMinutes(10));
-        Box box3 = new Box("BOX003", "SKU200", 20, LocalDate.now().plusDays(5), now);
+        Box box3 = new Box("BOX003", "SKU200", 20, LocalDate.now().plusDays(5), now); // Expira em 5 dias
+        Box box4 = new Box("BOX004", "SKU200", 15, LocalDate.now().plusDays(2), now.plusMinutes(1)); // Expira em 2 dias
+
+        box3.setBay(bay2);
+        box4.setBay(bay2);
+        bay2.addBox(box3);
+        bay2.addBox(box4);
 
         box1.setBay(bay1);
         box2.setBay(bay1);
@@ -246,6 +252,61 @@ public class AllocationManagerTest {
         assertTrue("Primeira alocação deve ser BOX001", allocations.get(0).getBoxId().equals("BOX001"));
         assertTrue("Segunda alocação deve ser BOX002", allocations.get(1).getBoxId().equals("BOX002"));
     }
+
+    @Test
+    public void testAllocateOrders_OrderSorting_ByDueDate_WhenPriorityIsEqual() {
+        // Ambas as encomendas têm prioridade 1, mas datas diferentes
+        // Stock total de SKU100 é 80
+        LocalDateTime today = LocalDateTime.now();
+
+        // Encomenda A (para amanhã) - deve ser processada primeiro
+        Order orderA = new Order("ORD-A", today.plusDays(1), 1);
+        orderA.addLine(new OrderLine("ORD-A", 1, "SKU100", 60));
+
+        // Encomenda B (para daqui a 5 dias) - deve ser processada em segundo
+        Order orderB = new Order("ORD-B", today.plusDays(5), 1);
+        orderB.addLine(new OrderLine("ORD-B", 1, "SKU100", 60));
+
+        // Adicionar fora de ordem
+        orders.add(orderB);
+        orders.add(orderA);
+
+        // Usar modo strict
+        AllocationOutput output = allocationManager.allocateOrders(orders, true);
+        List<OrderEligibility> results = output.results();
+
+        // Verificar a ordem de processamento
+        assertEquals("Primeira ordem processada deve ser ORD-A (due date)", "ORD-A", results.get(0).getOrderId());
+        assertEquals("Segunda ordem processada deve ser ORD-B", "ORD-B", results.get(1).getOrderId());
+
+        // Verificar o consumo de stock
+        // ORD-A (60 pedidos) - ELIGIBLE
+        assertEquals("ELIGIBLE", results.get(0).getStatus());
+        // ORD-B (60 pedidos) - UNDISPATCHABLE (porque ORD-A consumiu 60, só restam 20)
+        assertEquals("UNDISPATCHABLE", results.get(1).getStatus());
+    }
+
+    @Test
+    public void testAllocateOrders_PicksFEFO_FirstExpiredFirst() {
+        // Stock SKU200:
+        // BOX003: 20 unidades, expira em 5 dias
+        // BOX004: 15 unidades, expira em 2 dias (DEVE SER APANHADA PRIMEIRO)
+
+        Order order1 = new Order("ORD-FEFO", LocalDateTime.now().plusDays(1), 1);
+        // Pedir 10 unidades. Deve vir tudo da BOX004
+        order1.addLine(new OrderLine("ORD-FEFO", 1, "SKU200", 10));
+        orders.add(order1);
+
+        AllocationOutput output = allocationManager.allocateOrders(orders, true);
+
+        assertEquals(1, output.allocations().size());
+        Allocation alloc = output.allocations().get(0);
+
+        assertEquals("Alocação deve vir da BOX004 (expira primeiro)", "BOX004", alloc.getBoxId());
+        assertEquals(10, alloc.getQty());
+    }
+
+
 
     @Test
     public void testConstructor() {
