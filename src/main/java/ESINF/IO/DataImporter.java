@@ -11,13 +11,13 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 
 /**
- * Lê e valida os ficheiros CSV necessários para a USEI01:
+ * Reads and validates CSV files required for USEI01:
  * - items.csv
  * - bays.csv
  * - wagons.csv
  *
- * Rejeita registos inválidos, mas continua a carregar os válidos.
- * Produz mensagens determinísticas através do ImportLogger.
+ * Rejects invalid records but continues loading valid ones.
+ * Produces deterministic messages through the ImportLogger.
  */
 public class DataImporter {
 
@@ -28,6 +28,11 @@ public class DataImporter {
     private final List<Wagon> wagons = new ArrayList<>();
     private final Set<String> boxIds = new HashSet<>();
 
+    /**
+     * Constructs a new data importer
+     *
+     * @param logger the import logger for tracking errors and information
+     */
     public DataImporter(ImportLogger logger) {
         this.logger = logger;
     }

@@ -12,12 +12,12 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 
 /**
- * Lê e valida os ficheiros CSV necessários para a USEI02:
+ * Reads and validates CSV files required for USEI02:
  * - orders.csv
  * - order_lines.csv
  *
- * Rejeita registos inválidos, mas continua a carregar os válidos.
- * Produz mensagens determinísticas através do ImportLogger.
+ * Rejects invalid records but continues loading valid ones.
+ * Produces deterministic messages through the ImportLogger.
  */
 public class OrderImporter {
 
@@ -25,13 +25,23 @@ public class OrderImporter {
     private final List<Order> orders = new ArrayList<>();
     private final Map<String, Item> items; // Para validação de SKUs
 
+    /**
+     * Constructs a new order importer
+     *
+     * @param logger the import logger for tracking errors and information
+     * @param items map of existing items for SKU validation
+     */
     public OrderImporter(ImportLogger logger, Map<String, Item> items) {
         this.logger = logger;
         this.items = items;
     }
 
     /**
-     * Carrega encomendas e linhas de encomenda dos ficheiros CSV
+     * Loads orders and order lines from CSV files
+     *
+     * @param ordersFile path to the orders CSV file
+     * @param orderLinesFile path to the order lines CSV file
+     * @throws IOException if an I/O error occurs while reading the files
      */
     public void loadOrders(String ordersFile, String orderLinesFile) throws IOException {
         loadOrdersData(ordersFile);
@@ -44,7 +54,10 @@ public class OrderImporter {
     }
 
     /**
-     * Carrega dados das encomendas do ficheiro orders.csv
+     * Loads order data from orders.csv file
+     *
+     * @param filePath path to the orders CSV file
+     * @throws IOException if an I/O error occurs while reading the file
      */
     private void loadOrdersData(String filePath) throws IOException {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
@@ -101,7 +114,10 @@ public class OrderImporter {
     }
 
     /**
-     * Carrega dados das linhas de encomenda do ficheiro order_lines.csv
+     * Loads order line data from order_lines.csv file
+     *
+     * @param filePath path to the order lines CSV file
+     * @throws IOException if an I/O error occurs while reading the file
      */
     private void loadOrderLinesData(String filePath) throws IOException {
         Map<String, Order> orderMap = new HashMap<>();
@@ -177,14 +193,16 @@ public class OrderImporter {
     }
 
     /**
-     * Retorna a lista de encomendas carregadas
+     * Returns the list of loaded orders
+     *
+     * @return list of orders
      */
     public List<Order> getOrders() {
         return orders;
     }
 
     /**
-     * Retorna estatísticas de carregamento
+     * Prints loading statistics
      */
     public void printStats() {
         System.out.println("\n=== ORDER IMPORT STATISTICS ===");

@@ -3,14 +3,28 @@ package ESINF.service;
 import ESINF.model.*;
 import java.util.*;
 
+/**
+ * Manages warehouse operations including unloading wagons, inventory management,
+ * and dispatching boxes according to FEFO/FIFO ordering.
+ */
 public class WarehouseManager {
 
     private Warehouse warehouse;
 
+    /**
+     * Constructs a new warehouse manager
+     *
+     * @param warehouse the warehouse to manage
+     */
     public WarehouseManager(Warehouse warehouse) {
         this.warehouse = warehouse;
     }
 
+    /**
+     * Unloads wagons into the warehouse, placing boxes in available bays
+     *
+     * @param wagons the list of wagons to unload
+     */
     public void unloadWagons(List<Wagon> wagons) {
         for (Wagon wagon : wagons) {
             for (Box box : wagon.getBoxes()) {
@@ -36,6 +50,9 @@ public class WarehouseManager {
     }
 
 
+    /**
+     * Prints the current warehouse inventory
+     */
     public void printInventory() {
         System.out.println("\n===== WAREHOUSE INVENTORY =====");
         System.out.println("Warehouse: " + warehouse.getId());
@@ -136,7 +153,9 @@ public class WarehouseManager {
     }
 
     /**
-     * Retorna todas as boxes existentes no warehouse.
+     * Returns all boxes in the warehouse
+     *
+     * @return list of all boxes in all bays
      */
     public List<Box> getAllBoxes() {
         List<Box> allBoxes = new ArrayList<>();
@@ -148,7 +167,12 @@ public class WarehouseManager {
         return allBoxes;
     }
 
-
+    /**
+     * Gets all boxes for a specific SKU, sorted by FEFO/FIFO ordering
+     *
+     * @param sku the product SKU
+     * @return list of boxes for the SKU, sorted by FEFO/FIFO
+     */
     public List<Box> getBoxesForSku(String sku) {
         List<Box> boxes = new ArrayList<>();
 
