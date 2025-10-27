@@ -3,26 +3,44 @@ package ESINF.model;
 import java.util.*;
 
 /**
- * USEI04 - Pick Path Sequencing
- * Optimizes the picking route in a warehouse by sequencing bay visits
- * to minimize walking distance.
+ * USEI04 - Pick Path Sequencing.
+ * This class optimizes the picking route in a warehouse by sequencing
+ * bay visits to minimize walking distance. It supports multiple strategies
+ * such as deterministic sweep and nearest-neighbour (greedy) approach.
+ *
+ * @author ESINF Team
+ * @version 1.0
  */
 public class PickPathSequencing {
 
     /**
-     * Represents a 2D coordinate in the warehouse
+     * Represents a 2D coordinate in the warehouse.
+     * Coordinates are used to compute distances between bays.
      */
     public static class Coordinate {
-        public int x; // aisle * 3
-        public int y; // bay position
+        /** The X position in the warehouse (aisle * 3). */
+        public int x;
 
+        /** The Y position in the warehouse (bay position). */
+        public int y;
+
+        /**
+         * Creates a coordinate at a specific (x, y) position.
+         *
+         * @param x X coordinate (aisle * 3)
+         * @param y Y coordinate (bay position)
+         */
         public Coordinate(int x, int y) {
             this.x = x;
             this.y = y;
         }
 
         /**
-         * Calculates distance between two coordinates using the warehouse distance model
+         * Calculates the distance between two coordinates using
+         * the warehouse's internal distance model.
+         *
+         * @param other The other coordinate
+         * @return The computed distance in distance units
          */
         public double distanceTo(Coordinate other) {
             if (this.x == other.x) {
@@ -35,6 +53,11 @@ public class PickPathSequencing {
             }
         }
 
+        /**
+         * Returns a string representation of the coordinate.
+         *
+         * @return A string in the format "(x,y)"
+         */
         @Override
         public String toString() {
             return String.format("(%d,%d)", x, y);
@@ -42,15 +65,31 @@ public class PickPathSequencing {
     }
 
     /**
-     * Represents a unique bay location with consolidated picking info
+     * Represents a unique bay location with consolidated picking information.
+     * Multiple allocations within the same bay are merged into one.
      */
     public static class ConsolidatedBay {
+        /** The aisle number. */
         public int aisle;
-        public int bay;
-        public List<Allocation> allocations; // All allocations for this bay
-        public int totalQty; // Sum of quantities
-        public double totalWeight; // Sum of weights
 
+        /** The bay number within the aisle. */
+        public int bay;
+
+        /** List of all allocations corresponding to this bay. */
+        public List<Allocation> allocations;
+
+        /** Total quantity of items to pick from this bay. */
+        public int totalQty;
+
+        /** Total weight of all items in this bay. */
+        public double totalWeight;
+
+        /**
+         * Constructs a consolidated bay object.
+         *
+         * @param aisle The aisle number
+         * @param bay   The bay number
+         */
         public ConsolidatedBay(int aisle, int bay) {
             this.aisle = aisle;
             this.bay = bay;
@@ -59,14 +98,29 @@ public class PickPathSequencing {
             this.totalWeight = 0.0;
         }
 
+        /**
+         * Returns the coordinate representation of this bay.
+         *
+         * @return The coordinate of this bay
+         */
         public Coordinate getCoordinate() {
             return new Coordinate(aisle * 3, bay);
         }
 
+        /**
+         * Returns a unique string key for this bay, based on aisle and bay.
+         *
+         * @return Unique bay key in the format "aisle,bay"
+         */
         public String getKey() {
             return aisle + "," + bay;
         }
 
+        /**
+         * Returns a string representation of the consolidated bay.
+         *
+         * @return A string containing aisle, bay, and total quantity information
+         */
         @Override
         public String toString() {
             return String.format("Bay[aisle=%d, bay=%d, qty=%d]", aisle, bay, totalQty);
@@ -74,19 +128,35 @@ public class PickPathSequencing {
     }
 
     /**
-     * Represents a complete pick path route
+     * Represents a complete picking path through the warehouse.
      */
     public static class PickPath {
+        /** Name of the strategy used to generate this path. */
         public String strategyName;
+
+        /** Ordered list of bays in the path. */
         public List<ConsolidatedBay> route;
+
+        /** Total walking distance for the entire route. */
         public double totalDistance;
 
+        /**
+         * Constructs a pick path associated with a given strategy.
+         *
+         * @param strategyName The name of the pathfinding strategy
+         */
         public PickPath(String strategyName) {
             this.strategyName = strategyName;
             this.route = new ArrayList<>();
             this.totalDistance = 0.0;
         }
 
+        /**
+         * Returns a formatted string representation of the pick path,
+         * including strategy name, total distance, and route sequence.
+         *
+         * @return A formatted multi-line string describing the pick path
+         */
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder();
@@ -101,8 +171,15 @@ public class PickPathSequencing {
         }
     }
 
+    /** Map of SKU → Item details (unit weight, etc.). */
     private Map<String, Item> itemCatalog;
 
+    /**
+     * Constructs a PickPathSequencing instance.
+     *
+     * @param itemCatalog The item catalog containing SKU details
+     * @throws IllegalArgumentException If the item catalog is null
+     */
     public PickPathSequencing(Map<String, Item> itemCatalog) {
         if (itemCatalog == null) {
             throw new IllegalArgumentException("Item catalog cannot be null");
@@ -112,6 +189,10 @@ public class PickPathSequencing {
 
     /**
      * Consolidates allocations by bay location, merging duplicates
+     * and computing total quantities and weights.
+     *
+     * @param allocations List of allocations to consolidate
+     * @return A map of bay key → ConsolidatedBay object
      */
     private Map<String, ConsolidatedBay> consolidateBays(List<Allocation> allocations) {
         Map<String, ConsolidatedBay> consolidated = new HashMap<>();
@@ -122,7 +203,6 @@ public class PickPathSequencing {
                 continue;
             }
 
-            // Parse aisle and bay (they're stored as strings)
             int aisle, bay;
             try {
                 aisle = Integer.parseInt(alloc.getAisle());
@@ -140,7 +220,6 @@ public class PickPathSequencing {
             consolidated_bay.allocations.add(alloc);
             consolidated_bay.totalQty += alloc.getQty();
 
-            // Calculate weight
             Item item = itemCatalog.get(alloc.getSku());
             if (item != null) {
                 consolidated_bay.totalWeight += item.getUnitWeight() * alloc.getQty();
@@ -151,7 +230,11 @@ public class PickPathSequencing {
     }
 
     /**
-     * Strategy A: Deterministic Sweep (ascending by aisle)
+     * Strategy A: Deterministic Sweep (ascending by aisle and bay).
+     * Visits all bays in ascending order of aisle, then bay number.
+     *
+     * @param allocations List of allocations to process
+     * @return The generated pick path using Strategy A
      */
     public PickPath strategyA(List<Allocation> allocations) {
         if (allocations == null || allocations.isEmpty()) {
@@ -159,18 +242,15 @@ public class PickPathSequencing {
             return new PickPath("Strategy A - Deterministic Sweep");
         }
 
-        // 1. Consolidate bays
         Map<String, ConsolidatedBay> consolidated = consolidateBays(allocations);
         List<ConsolidatedBay> uniqueBays = new ArrayList<>(consolidated.values());
 
-        // 2. Sort by aisle ascending, then bay ascending
         uniqueBays.sort((b1, b2) -> {
             int aisleCmp = Integer.compare(b1.aisle, b2.aisle);
             if (aisleCmp != 0) return aisleCmp;
             return Integer.compare(b1.bay, b2.bay);
         });
 
-        // 3. Calculate distance
         PickPath path = new PickPath("Strategy A - Deterministic Sweep");
         path.route = uniqueBays;
         path.totalDistance = calculateTotalDistance(uniqueBays);
@@ -179,7 +259,11 @@ public class PickPathSequencing {
     }
 
     /**
-     * Strategy B: Nearest-Neighbour (greedy approach)
+     * Strategy B: Nearest-Neighbour (Greedy approach).
+     * Starts at (0,0) and repeatedly moves to the nearest unvisited bay.
+     *
+     * @param allocations List of allocations to process
+     * @return The generated pick path using Strategy B
      */
     public PickPath strategyB(List<Allocation> allocations) {
         if (allocations == null || allocations.isEmpty()) {
@@ -187,11 +271,9 @@ public class PickPathSequencing {
             return new PickPath("Strategy B - Nearest-Neighbour");
         }
 
-        // 1. Consolidate bays
         Map<String, ConsolidatedBay> consolidated = consolidateBays(allocations);
         List<ConsolidatedBay> uniqueBays = new ArrayList<>(consolidated.values());
 
-        // 2. Greedy: start at (0,0) and always go to nearest unvisited bay
         List<ConsolidatedBay> route = new ArrayList<>();
         Set<ConsolidatedBay> visited = new HashSet<>();
         Coordinate current = new Coordinate(0, 0);
@@ -210,14 +292,13 @@ public class PickPathSequencing {
                 }
             }
 
-            if (nearest == null) break; // Should not happen
+            if (nearest == null) break;
 
             route.add(nearest);
             visited.add(nearest);
             current = nearest.getCoordinate();
         }
 
-        // 3. Calculate total distance
         PickPath path = new PickPath("Strategy B - Nearest-Neighbour");
         path.route = route;
         path.totalDistance = calculateTotalDistance(route);
@@ -226,7 +307,11 @@ public class PickPathSequencing {
     }
 
     /**
-     * Calculates total distance for a given route
+     * Calculates the total walking distance for a given route.
+     * Distance is computed from the starting point (0,0) through all bays in sequence.
+     *
+     * @param route Ordered list of consolidated bays
+     * @return Total distance in warehouse units
      */
     private double calculateTotalDistance(List<ConsolidatedBay> route) {
         double total = 0;
@@ -242,7 +327,10 @@ public class PickPathSequencing {
     }
 
     /**
-     * Generates and displays detailed picking routes for both strategies
+     * Generates and displays detailed picking routes for both strategies.
+     * Outputs comprehensive information about each strategy's path to the console.
+     *
+     * @param allocations List of allocations to process
      */
     public void generateAndDisplayPickingRoutes(List<Allocation> allocations) {
         System.out.println("\n========== PICK PATH SEQUENCING (USEI04) ==========\n");
@@ -257,7 +345,11 @@ public class PickPathSequencing {
     }
 
     /**
-     * Displays detailed information about a pick path
+     * Displays detailed information about a generated pick path.
+     * Includes route information and a detailed picking list for each bay.
+     *
+     * @param path        The path to display
+     * @param allocations The original allocation list (for reference)
      */
     private void displayPickPath(PickPath path, List<Allocation> allocations) {
         System.out.println(path);
@@ -278,11 +370,12 @@ public class PickPathSequencing {
     }
 
     /**
-     * Returns both paths for programmatic use
+     * Returns both pick paths (Strategy A and Strategy B) for programmatic use.
+     *
+     * @param allocations List of allocations to process
+     * @return An array with both paths: [0] = Strategy A, [1] = Strategy B
      */
     public PickPath[] generateBothPaths(List<Allocation> allocations) {
         return new PickPath[]{strategyA(allocations), strategyB(allocations)};
     }
 }
-
-
