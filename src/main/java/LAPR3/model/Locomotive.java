@@ -78,86 +78,191 @@ public class Locomotive {
         this.fuelCapacityLiters = fuelCapacityLiters;
     }
 
+    /**
+     * Gets the locomotive number
+     *
+     * @return the locomotive number
+     */
     public int getNumber() {
         return number;
     }
 
+    /**
+     * Gets the locomotive name
+     *
+     * @return the name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Gets the manufacturer
+     *
+     * @return the manufacturer name
+     */
     public String getMake() {
         return make;
     }
 
+    /**
+     * Gets the model
+     *
+     * @return the model name
+     */
     public String getModel() {
         return model;
     }
 
+    /**
+     * Gets the service year
+     *
+     * @return the year it entered service
+     */
     public int getServiceYear() {
         return serviceYear;
     }
 
+    /**
+     * Gets the number of bogies
+     *
+     * @return the number of bogies
+     */
     public int getNumberBogies() {
         return numberBogies;
     }
 
+    /**
+     * Gets the bogies type
+     *
+     * @return the bogies type
+     */
     public String getBogiesType() {
         return bogiesType;
     }
 
+    /**
+     * Gets the power in kilowatts
+     *
+     * @return the power in kW
+     */
     public double getPowerKw() {
         return powerKw;
     }
 
+    /**
+     * Gets the length in meters
+     *
+     * @return the length in meters
+     */
     public double getLengthMeters() {
         return lengthMeters;
     }
 
+    /**
+     * Gets the width in meters
+     *
+     * @return the width in meters
+     */
     public double getWidthMeters() {
         return widthMeters;
     }
 
+    /**
+     * Gets the height in meters
+     *
+     * @return the height in meters
+     */
     public double getHeightMeters() {
         return heightMeters;
     }
 
+    /**
+     * Gets the weight in tons
+     *
+     * @return the weight in tons
+     */
     public double getWeightTons() {
         return weightTons;
     }
 
+    /**
+     * Gets the maximum speed in km/h
+     *
+     * @return maximum speed in km/h
+     */
     public double getMaxSpeedKmh() {
         return maxSpeedKmh;
     }
 
+    /**
+     * Gets the operational speed in km/h
+     *
+     * @return operational speed in km/h
+     */
     public double getOperationalSpeedKmh() {
         return operationalSpeedKmh;
     }
 
+    /**
+     * Gets the traction force in kilonewtons
+     *
+     * @return traction in kN
+     */
     public double getTractionKn() {
         return tractionKn;
     }
 
+    /**
+     * Gets the locomotive type
+     *
+     * @return ELECTRIC or DIESEL
+     */
     public LocomotiveType getType() {
         return type;
     }
 
+    /**
+     * Gets the voltage (for electric locomotives)
+     *
+     * @return the voltage specification
+     */
     public String getVoltage() {
         return voltage;
     }
 
+    /**
+     * Gets the frequency (for electric locomotives)
+     *
+     * @return the frequency specification
+     */
     public String getFrequency() {
         return frequency;
     }
 
+    /**
+     * Gets the operator
+     *
+     * @return the operator name
+     */
     public String getOperator() {
         return operator;
     }
 
+    /**
+     * Gets the gauge in millimeters
+     *
+     * @return the gauge in mm
+     */
     public int getGauge() {
         return gauge;
     }
 
+    /**
+     * Gets the fuel capacity in liters (null for electric locomotives)
+     *
+     * @return fuel capacity in liters, or null
+     */
     public Double getFuelCapacityLiters() {
         return fuelCapacityLiters;
     }

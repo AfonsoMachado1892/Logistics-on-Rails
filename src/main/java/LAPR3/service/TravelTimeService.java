@@ -15,6 +15,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Service for calculating travel times between facilities using locomotives.
+ * Implements USEI03 - Travel Time Calculation functionality.
+ */
 public class TravelTimeService {
     private final FacilityRepository facilityRepository;
     private final LineRepository lineRepository;
@@ -24,6 +28,14 @@ public class TravelTimeService {
     // Physical constant: conversion from km/h to m/s
     private static final double KMH_TO_MS = 1000.0 / 3600.0; // = 0.277778
 
+    /**
+     * Constructs a new travel time service
+     *
+     * @param facilityRepository repository for facilities
+     * @param lineRepository repository for lines
+     * @param segmentRepository repository for segments
+     * @param locomotiveRepository repository for locomotives
+     */
     public TravelTimeService(FacilityRepository facilityRepository,
                              LineRepository lineRepository,
                              SegmentRepository segmentRepository,

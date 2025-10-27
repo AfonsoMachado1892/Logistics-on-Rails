@@ -16,6 +16,12 @@ public class PickingController {
     private List<Trolley> lastPickingPlan;
     private PickingPlan.Heuristic lastHeuristic;
 
+    /**
+     * Constructs a new picking controller
+     *
+     * @param dataController the data controller for accessing items
+     * @param orderController the order controller for accessing allocations
+     */
     public PickingController(DataController dataController, OrderController orderController) {
         this.dataController = dataController;
         this.orderController = orderController;
@@ -126,10 +132,20 @@ public class PickingController {
         System.out.println("💡 Best heuristic (highest utilization): " + bestUtil);
     }
 
+    /**
+     * Gets the last generated picking plan
+     *
+     * @return the last picking plan, or null if none exists
+     */
     public List<Trolley> getLastPickingPlan() {
         return lastPickingPlan;
     }
 
+    /**
+     * Checks if a picking plan has been generated
+     *
+     * @return true if a picking plan exists
+     */
     public boolean hasPickingPlan() {
         return lastPickingPlan != null && !lastPickingPlan.isEmpty();
     }

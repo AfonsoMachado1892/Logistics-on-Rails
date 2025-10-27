@@ -6,6 +6,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Utility class for reading and parsing CSV files.
+ * Handles quoted fields, tab separators, and various data types.
+ */
 public class CSVReader {
     /**
      * Read CSV file and return list of rows (excluding header)

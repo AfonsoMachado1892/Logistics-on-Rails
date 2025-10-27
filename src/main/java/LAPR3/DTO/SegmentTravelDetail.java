@@ -1,5 +1,9 @@
 package LAPR3.DTO;
 
+/**
+ * Represents detailed information about a segment during travel time calculation.
+ * Contains segment properties, distance, speed, and time calculations.
+ */
 public class SegmentTravelDetail {
     private final int segmentId;
     private final int segmentOrder;
@@ -11,6 +15,17 @@ public class SegmentTravelDetail {
     private final boolean electrified;
     private final int numberTracks;
 
+    /**
+     * Constructs a new segment travel detail
+     *
+     * @param segmentId the segment identifier
+     * @param segmentOrder the order of the segment in the line
+     * @param lengthMeters the length of the segment in meters
+     * @param speedKmh the speed in kilometers per hour
+     * @param timeSeconds the travel time in seconds
+     * @param electrified whether the segment is electrified
+     * @param numberTracks the number of tracks
+     */
     public SegmentTravelDetail(int segmentId, int segmentOrder, double lengthMeters,
                                double speedKmh, double timeSeconds,
                                boolean electrified, int numberTracks) {
@@ -25,38 +40,83 @@ public class SegmentTravelDetail {
         this.numberTracks = numberTracks;
     }
 
+    /**
+     * Gets the segment identifier
+     *
+     * @return the segment ID
+     */
     public int getSegmentId() {
         return segmentId;
     }
 
+    /**
+     * Gets the segment order in the line
+     *
+     * @return the segment order
+     */
     public int getSegmentOrder() {
         return segmentOrder;
     }
 
+    /**
+     * Gets the segment length in meters
+     *
+     * @return the length in meters
+     */
     public double getLengthMeters() {
         return lengthMeters;
     }
 
+    /**
+     * Gets the segment length in kilometers
+     *
+     * @return the length in kilometers
+     */
     public double getLengthKilometers() {
         return lengthKilometers;
     }
 
+    /**
+     * Gets the speed in kilometers per hour
+     *
+     * @return the speed in km/h
+     */
     public double getSpeedKmh() {
         return speedKmh;
     }
 
+    /**
+     * Gets the travel time in seconds
+     *
+     * @return the time in seconds
+     */
     public double getTimeSeconds() {
         return timeSeconds;
     }
 
+    /**
+     * Gets the travel time in minutes
+     *
+     * @return the time in minutes
+     */
     public double getTimeMinutes() {
         return timeMinutes;
     }
 
+    /**
+     * Checks if the segment is electrified
+     *
+     * @return true if electrified
+     */
     public boolean isElectrified() {
         return electrified;
     }
 
+    /**
+     * Gets the number of tracks
+     *
+     * @return the number of tracks
+     */
     public int getNumberTracks() {
         return numberTracks;
     }

@@ -49,34 +49,74 @@ public class Line {
         this.gauge = gauge;
     }
 
+    /**
+     * Gets the line identifier
+     *
+     * @return the line ID
+     */
     public int getId() {
         return id;
     }
 
+    /**
+     * Gets the line name
+     *
+     * @return the line name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Gets the line owner
+     *
+     * @return the owner
+     */
     public String getOwner() {
         return owner;
     }
 
+    /**
+     * Gets the starting facility identifier
+     *
+     * @return the start facility ID
+     */
     public int getStartFacilityId() {
         return startFacilityId;
     }
 
+    /**
+     * Gets the starting facility name
+     *
+     * @return the start facility name
+     */
     public String getStartFacilityName() {
         return startFacilityName;
     }
 
+    /**
+     * Gets the ending facility identifier
+     *
+     * @return the end facility ID
+     */
     public int getEndFacilityId() {
         return endFacilityId;
     }
 
+    /**
+     * Gets the ending facility name
+     *
+     * @return the end facility name
+     */
     public String getEndFacilityName() {
         return endFacilityName;
     }
 
+    /**
+     * Gets the track gauge in millimeters
+     *
+     * @return the gauge in mm
+     */
     public int getGauge() {
         return gauge;
     }

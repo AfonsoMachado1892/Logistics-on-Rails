@@ -7,9 +7,16 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Repository for managing segment entities.
+ * Provides access to segments and their properties for lines.
+ */
 public class SegmentRepository {
     private final Map<Integer, Segment> segments;
 
+    /**
+     * Constructs a new segment repository
+     */
     public SegmentRepository() {
         this.segments = new HashMap<>();
     }

@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Represents the complete result of a travel time calculation between two facilities.
+ * Contains aggregated information about the journey including all segments.
+ */
 public class TravelTimeResult {
     private final String originFacilityName;
     private final String destinationFacilityName;
@@ -18,6 +22,16 @@ public class TravelTimeResult {
     private final double totalTimeHours;
     private final double averageSpeedKmh;
 
+    /**
+     * Constructs a new travel time result
+     *
+     * @param originFacilityName the origin facility name
+     * @param destinationFacilityName the destination facility name
+     * @param lineName the line name
+     * @param locomotiveNumber the locomotive number
+     * @param locomotiveName the locomotive name
+     * @param segments list of segment travel details
+     */
     public TravelTimeResult(String originFacilityName, String destinationFacilityName,
                             String lineName, int locomotiveNumber, String locomotiveName,
                             List<SegmentTravelDetail> segments) {
@@ -41,50 +55,110 @@ public class TravelTimeResult {
         this.averageSpeedKmh = totalTimeHours > 0 ? totalDistanceKilometers / totalTimeHours : 0;
     }
 
+    /**
+     * Gets the origin facility name
+     *
+     * @return the origin facility name
+     */
     public String getOriginFacilityName() {
         return originFacilityName;
     }
 
+    /**
+     * Gets the destination facility name
+     *
+     * @return the destination facility name
+     */
     public String getDestinationFacilityName() {
         return destinationFacilityName;
     }
 
+    /**
+     * Gets the line name
+     *
+     * @return the line name
+     */
     public String getLineName() {
         return lineName;
     }
 
+    /**
+     * Gets the locomotive number
+     *
+     * @return the locomotive number
+     */
     public int getLocomotiveNumber() {
         return locomotiveNumber;
     }
 
+    /**
+     * Gets the locomotive name
+     *
+     * @return the locomotive name
+     */
     public String getLocomotiveName() {
         return locomotiveName;
     }
 
+    /**
+     * Gets the list of segment travel details
+     *
+     * @return unmodifiable list of segments
+     */
     public List<SegmentTravelDetail> getSegments() {
         return Collections.unmodifiableList(segments);
     }
 
+    /**
+     * Gets the total distance in meters
+     *
+     * @return total distance in meters
+     */
     public double getTotalDistanceMeters() {
         return totalDistanceMeters;
     }
 
+    /**
+     * Gets the total distance in kilometers
+     *
+     * @return total distance in kilometers
+     */
     public double getTotalDistanceKilometers() {
         return totalDistanceKilometers;
     }
 
+    /**
+     * Gets the total travel time in seconds
+     *
+     * @return total time in seconds
+     */
     public double getTotalTimeSeconds() {
         return totalTimeSeconds;
     }
 
+    /**
+     * Gets the total travel time in minutes
+     *
+     * @return total time in minutes
+     */
     public double getTotalTimeMinutes() {
         return totalTimeMinutes;
     }
 
+    /**
+     * Gets the total travel time in hours
+     *
+     * @return total time in hours
+     */
     public double getTotalTimeHours() {
         return totalTimeHours;
     }
 
+    /**
+     * Gets the average speed for the journey
+     *
+     * @return average speed in km/h
+     */
     public double getAverageSpeedKmh() {
         return averageSpeedKmh;
     }

@@ -6,9 +6,16 @@ import LAPR3.model.Locomotive;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * Repository for managing locomotive entities.
+ * Provides access to locomotives and filtering by various criteria.
+ */
 public class LocomotiveRepository {
     private final Map<Integer, Locomotive> locomotives;
 
+    /**
+     * Constructs a new locomotive repository
+     */
     public LocomotiveRepository() {
         this.locomotives = new HashMap<>();
     }

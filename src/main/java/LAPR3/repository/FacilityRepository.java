@@ -6,9 +6,16 @@ import LAPR3.model.Facility;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * Repository for managing facility entities.
+ * Provides access to facilities loaded from CSV data.
+ */
 public class FacilityRepository {
     private final Map<Integer, Facility> facilities;
 
+    /**
+     * Constructs a new facility repository
+     */
     public FacilityRepository() {
         this.facilities = new HashMap<>();
     }

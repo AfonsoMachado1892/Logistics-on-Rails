@@ -6,9 +6,16 @@ import LAPR3.model.Line;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * Repository for managing line entities.
+ * Provides access to lines and their connections between facilities.
+ */
 public class LineRepository {
     private final Map<Integer, Line> lines;
 
+    /**
+     * Constructs a new line repository
+     */
     public LineRepository() {
         this.lines = new HashMap<>();
     }

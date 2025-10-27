@@ -51,38 +51,84 @@ public class Segment implements Comparable<Segment> {
         this.numberTracks = numberTracks;
     }
 
+    /**
+     * Gets the segment identifier
+     *
+     * @return the segment ID
+     */
     public int getId() {
         return id;
     }
 
+    /**
+     * Gets the parent line identifier
+     *
+     * @return the line ID
+     */
     public int getLineId() {
         return lineId;
     }
 
+    /**
+     * Gets the segment order in the line
+     *
+     * @return the segment order
+     */
     public int getOrder() {
         return order;
     }
 
+    /**
+     * Checks if the segment is electrified
+     *
+     * @return true if electrified
+     */
     public boolean isElectrified() {
         return electrified;
     }
 
+    /**
+     * Gets the maximum weight per meter in kg/m
+     *
+     * @return max weight in kg/m
+     */
     public double getMaxWeightKgPerMeter() {
         return maxWeightKgPerMeter;
     }
 
+    /**
+     * Gets the segment length in meters
+     *
+     * @return length in meters
+     */
     public double getLengthMeters() {
         return lengthMeters;
     }
 
+    /**
+     * Gets the number of tracks
+     *
+     * @return the number of tracks
+     */
     public int getNumberTracks() {
         return numberTracks;
     }
 
+    /**
+     * Gets the segment length in kilometers
+     *
+     * @return length in kilometers
+     */
     public double getLengthKilometers() {
         return lengthMeters / 1000.0;
     }
 
+    /**
+     * Compares this segment with another by order
+     *
+     * @param other the segment to compare to
+     * @return a negative integer, zero, or a positive integer if this segment is less than, equal to, or greater than the other segment
+     */
     @Override
     public int compareTo(Segment other) {
         // Compare by order for sorting segments of the same line

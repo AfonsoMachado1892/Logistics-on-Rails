@@ -23,10 +23,20 @@ public class Facility {
         this.name = name.trim();
     }
 
+    /**
+     * Gets the facility identifier
+     *
+     * @return the facility ID
+     */
     public int getId() {
         return id;
     }
 
+    /**
+     * Gets the facility name
+     *
+     * @return the facility name
+     */
     public String getName() {
         return name;
     }
