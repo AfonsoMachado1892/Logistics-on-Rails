@@ -11,20 +11,44 @@ import ESINF.model.PickPathSequencing;
 import java.util.*;
 
 /**
- * Menu for Pick Path Sequencing (USEI04)
- * Optimizes picking routes using two strategies: Deterministic Sweep and Nearest-Neighbour
+ * Menu for Pick Path Sequencing (USEI04).
+ * Optimizes picking routes using two strategies: Deterministic Sweep and Nearest-Neighbour.
+ * Provides options to load allocations, generate picking plans, execute strategies,
+ * compare results, and export paths to CSV.
+ *
+ * @author LAPR3 Team
+ * @version 1.0
  */
 public class PickPathSequencingMenu {
 
+    /** Scanner for reading user input. */
     private final Scanner scanner;
+
+    /** Controller for managing warehouse data. */
     private final DataController dataController;
+
+    /** Controller for managing picking operations. */
     private final PickingController pickingController;
+
+    /** Validator for input validation operations. */
     private final InputValidator validator;
+
+    /** Controller for managing order operations. */
     private final OrderController orderController;
 
+    /** Current allocation loaded from CSV or generated. */
     private AllocationOutput currentAllocation;
+
+    /** Current picking plan with trolleys and their allocations. */
     private List<Trolley> currentPickingPlan;
 
+    /**
+     * Constructs a PickPathSequencingMenu instance.
+     *
+     * @param scanner The scanner for reading user input
+     * @param dataController The data controller for warehouse operations
+     * @param validator The input validator for validating user input
+     */
     public PickPathSequencingMenu(Scanner scanner, DataController dataController, InputValidator validator) {
         this.scanner = scanner;
         this.dataController = dataController;
@@ -33,6 +57,10 @@ public class PickPathSequencingMenu {
         this.pickingController = new PickingController(dataController, orderController);
     }
 
+    /**
+     * Displays the menu and handles user interactions in a loop.
+     * Returns to the main menu when the user selects option 0.
+     */
     public void show() {
         while (true) {
             displayMenu();
@@ -53,6 +81,9 @@ public class PickPathSequencingMenu {
         }
     }
 
+    /**
+     * Displays the main menu with all available options and current status.
+     */
     private void displayMenu() {
         System.out.println("\n╔══════════════════════════════════════════════════╗");
         System.out.println("║         PICK PATH SEQUENCING (USEI04)            ║");
@@ -75,6 +106,10 @@ public class PickPathSequencingMenu {
         System.out.println();
     }
 
+    /**
+     * Displays the current status of loaded allocations and picking plans.
+     * Shows the number of allocations, trolleys, and total items loaded.
+     */
     private void displayCurrentStatus() {
         if (currentAllocation != null) {
             System.out.println("Allocation: " + currentAllocation.allocations().size() + " allocations loaded");
@@ -91,6 +126,11 @@ public class PickPathSequencingMenu {
         }
     }
 
+    /**
+     * Handles the user's menu choice and executes the corresponding action.
+     *
+     * @param choice The menu option selected by the user (1-6)
+     */
     private void handleChoice(int choice) {
         switch (choice) {
             case 1 -> loadAllocationFromCSV();
@@ -102,6 +142,12 @@ public class PickPathSequencingMenu {
         }
     }
 
+    /**
+     * Loads allocation data from a CSV file.
+     * Supports both strict and partial allocation modes.
+     * Parses the CSV and creates Allocation objects for each valid entry.
+     * Expected CSV format: index,orderId,lineNo,sku,qty,boxId,aisle,bay
+     */
     private void loadAllocationFromCSV() {
         System.out.println("\n═══ LOAD ALLOCATION FROM CSV ═══");
 
@@ -152,6 +198,12 @@ public class PickPathSequencingMenu {
         }
     }
 
+    /**
+     * Loads a picking plan from a CSV file.
+     * Parses the CSV and organizes allocations into trolleys.
+     * Each trolley contains a set of allocations to be picked together.
+     * Expected CSV format: trolleyId,orderId,lineNo,sku,qty,boxId,aisle,bay
+     */
     private void loadPickingPlanFromCSV() {
         System.out.println("\n═══ LOAD PICKING PLAN FROM CSV ═══");
 
@@ -204,7 +256,12 @@ public class PickPathSequencingMenu {
         }
     }
 
-
+    /**
+     * Executes Strategy A (Deterministic Sweep).
+     * Orders bays by aisle ascending, then bay ascending.
+     * This strategy provides a systematic, predictable route through the warehouse.
+     * Displays the generated pick path with detailed information.
+     */
     private void executeStrategyA() {
         System.out.println("\n═══ STRATEGY A - DETERMINISTIC SWEEP ═══");
 
@@ -215,12 +272,18 @@ public class PickPathSequencingMenu {
 
         List<Allocation> allAllocations = getAllAllocations();
         PickPathSequencing sequencer = new PickPathSequencing(dataController.getItems());
-        
+
         PickPathSequencing.PickPath pathA = sequencer.strategyA(allAllocations);
-        
+
         displayPickPath(pathA, "Strategy A - Deterministic Sweep");
     }
 
+    /**
+     * Executes Strategy B (Nearest-Neighbour).
+     * Uses a greedy algorithm to always go to the nearest unvisited bay.
+     * This strategy attempts to minimize travel distance by choosing the closest next location.
+     * Displays the generated pick path with detailed information.
+     */
     private void executeStrategyB() {
         System.out.println("\n═══ STRATEGY B - NEAREST-NEIGHBOUR ═══");
 
@@ -231,12 +294,18 @@ public class PickPathSequencingMenu {
 
         List<Allocation> allAllocations = getAllAllocations();
         PickPathSequencing sequencer = new PickPathSequencing(dataController.getItems());
-        
+
         PickPathSequencing.PickPath pathB = sequencer.strategyB(allAllocations);
-        
+
         displayPickPath(pathB, "Strategy B - Nearest-Neighbour");
     }
 
+    /**
+     * Compares both strategies (A and B) side by side.
+     * Displays total distances, bays visited, and identifies the best strategy.
+     * Calculates the improvement percentage of the better strategy over the other.
+     * If distances are equal, indicates that both strategies are equally efficient.
+     */
     private void compareStrategies() {
         System.out.println("\n═══ COMPARE BOTH STRATEGIES ═══");
 
@@ -284,9 +353,14 @@ public class PickPathSequencingMenu {
             System.out.println("\nBest strategy: " + bestStrategy);
             System.out.printf("Improvement: %.1f%% distance reduction%n", improvement);
         }
-
     }
 
+    /**
+     * Exports pick paths to a CSV file.
+     * Allows selection of which strategy to export (A, B, or both).
+     * CSV format: strategy,step,bayId,aisle,bay,orderId,lineNo,sku,qty,boxId
+     * Each row represents one allocation in the picking sequence.
+     */
     private void exportPickPaths() {
         System.out.println("\n═══ EXPORT PICK PATHS ═══");
 
@@ -301,7 +375,7 @@ public class PickPathSequencingMenu {
 
         List<Allocation> allAllocations = getAllAllocations();
         PickPathSequencing sequencer = new PickPathSequencing(dataController.getItems());
-        
+
         String defaultPath = "Logs/pick_paths.csv";
         String path = validator.readFilePath("Enter output CSV path", defaultPath);
 
@@ -328,6 +402,15 @@ public class PickPathSequencingMenu {
         }
     }
 
+    /**
+     * Writes a pick path to a CSV file writer.
+     * Each allocation in each bay is written as a separate row with step information.
+     *
+     * @param writer The FileWriter to write CSV data to
+     * @param path The pick path to export
+     * @param strategyName The name of the strategy being exported (e.g., "Strategy_A")
+     * @throws java.io.IOException If an I/O error occurs during writing
+     */
     private void exportPickPathToCSV(java.io.FileWriter writer, PickPathSequencing.PickPath path, String strategyName) throws java.io.IOException {
         int step = 1;
         for (PickPathSequencing.ConsolidatedBay bay : path.route) {
@@ -348,12 +431,20 @@ public class PickPathSequencingMenu {
         }
     }
 
+    /**
+     * Displays detailed information about a pick path.
+     * Shows total distance, number of bays visited, route sequence,
+     * and a detailed picking list with all allocations per bay.
+     *
+     * @param path The pick path to display
+     * @param title The title to display for this path
+     */
     private void displayPickPath(PickPathSequencing.PickPath path, String title) {
         System.out.println("\n" + title);
         System.out.println("─".repeat(50));
         System.out.printf("Total Distance: %.2f units%n", path.totalDistance);
         System.out.printf("Bays Visited: %d%n", path.route.size());
-        
+
         System.out.println("\nRoute sequence:");
         for (int i = 0; i < path.route.size(); i++) {
             PickPathSequencing.ConsolidatedBay bay = path.route.get(i);
@@ -373,6 +464,12 @@ public class PickPathSequencingMenu {
         System.out.println();
     }
 
+    /**
+     * Retrieves all allocations from the current picking plan.
+     * Flattens the trolley structure to get a single list of all allocations.
+     *
+     * @return A list containing all allocations from all trolleys in the picking plan
+     */
     private List<Allocation> getAllAllocations() {
         List<Allocation> allAllocations = new ArrayList<>();
         for (Trolley trolley : currentPickingPlan) {
@@ -381,6 +478,12 @@ public class PickPathSequencingMenu {
         return allAllocations;
     }
 
+    /**
+     * Validates that all prerequisites are met before executing operations.
+     * Checks if a warehouse is selected and orders are loaded in the data controller.
+     *
+     * @return true if all prerequisites are met, false otherwise
+     */
     private boolean validatePrerequisites() {
         if (!dataController.isWarehouseSelected()) {
             System.out.println("No warehouse selected!");
@@ -397,6 +500,12 @@ public class PickPathSequencingMenu {
         return true;
     }
 
+    /**
+     * Validates that a picking plan is loaded and ready for processing.
+     * Ensures that the current picking plan is not null or empty before executing strategies.
+     *
+     * @return true if a valid picking plan exists, false otherwise
+     */
     private boolean validatePickingPlan() {
         if (currentPickingPlan == null || currentPickingPlan.isEmpty()) {
             System.out.println("No picking plan available!");
@@ -407,6 +516,16 @@ public class PickPathSequencingMenu {
         return true;
     }
 
+    /**
+     * Reads a double value from user input with validation.
+     * Ensures the value is within the specified range and handles invalid input gracefully.
+     * Continues prompting until a valid value is provided.
+     *
+     * @param prompt The prompt message to display to the user
+     * @param min The minimum acceptable value (inclusive)
+     * @param max The maximum acceptable value (inclusive)
+     * @return The validated double value entered by the user
+     */
     private double readDouble(String prompt, double min, double max) {
         while (true) {
             try {
@@ -433,6 +552,10 @@ public class PickPathSequencingMenu {
         }
     }
 
+    /**
+     * Pauses execution and waits for the user to press ENTER.
+     * Used to prevent the menu from refreshing before the user can read output messages.
+     */
     private void pause() {
         System.out.println("\nPress ENTER to continue...");
         scanner.nextLine();
