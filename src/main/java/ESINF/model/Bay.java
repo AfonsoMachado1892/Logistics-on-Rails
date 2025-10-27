@@ -92,11 +92,22 @@ public class Bay {
     public int getCapacityBoxes() { return capacityBoxes; }
 
     /**
+     * Sets the maximum box capacity of the bay
+     *
+     * @param capacityBoxes the new capacity in number of boxes
+     */
+    public void setCapacity(int capacityBoxes) {
+        this.capacityBoxes = capacityBoxes;
+    }
+
+    /**
      * Gets all boxes in this bay
      *
      * @return the priority queue of boxes
      */
     public PriorityQueue<Box> getBoxes() { return boxes;}
+
+
 
 
     @Override
