@@ -238,7 +238,7 @@ public class PickPathSequencing {
      */
     public PickPath strategyA(List<Allocation> allocations) {
         if (allocations == null || allocations.isEmpty()) {
-            System.out.println("No allocations for strategy A");
+            //System.out.println("No allocations for strategy A");
             return new PickPath("Strategy A - Deterministic Sweep");
         }
 
@@ -267,7 +267,7 @@ public class PickPathSequencing {
      */
     public PickPath strategyB(List<Allocation> allocations) {
         if (allocations == null || allocations.isEmpty()) {
-            System.out.println("No allocations for strategy B");
+            //System.out.println("No allocations for strategy B");
             return new PickPath("Strategy B - Nearest-Neighbour");
         }
 

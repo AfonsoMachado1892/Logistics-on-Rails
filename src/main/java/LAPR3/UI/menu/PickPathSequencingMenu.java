@@ -169,19 +169,20 @@ public class PickPathSequencingMenu {
                 if (line.isEmpty()) continue;
 
                 String[] fields = line.split(",");
-                if (fields.length < 8) continue; // invalid line
+                if (fields.length < 7) continue;
 
                 try {
-                    String orderId = fields[1];
-                    int lineNo = Integer.parseInt(fields[2]);
-                    String sku = fields[3];
-                    int qty = Integer.parseInt(fields[4]);
-                    String boxId = fields[5];
-                    String aisle = fields[6];
-                    String bay = fields[7];
+                    String orderId = fields[0].trim();
+                    int lineNo = Integer.parseInt(fields[1].trim());
+                    String sku = fields[2].trim();
+                    int qty = Integer.parseInt(fields[3].trim());
+                    String boxId = fields[4].trim();
+                    String aisle = fields[5].trim();
+                    String bay = fields[6].trim();
 
                     Allocation alloc = new Allocation(orderId, lineNo, sku, qty, boxId, aisle, bay);
                     allocations.add(alloc);
+
                 } catch (Exception e) {
                     System.err.println("Error parsing line: " + line);
                 }
