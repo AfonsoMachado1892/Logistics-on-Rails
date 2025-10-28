@@ -1,0 +1,36 @@
+Title	URL	Assignees	Status	Priority	Estimate	Size	Sprint
+Daily Meeting October 2, 2025		1241182-AfonsoMachado, 1241187-MiguelPereira, 1241243-marilialopes, 1241277-JoseOliveira, 1241883-diogooliveira	Backlog	P1	0.1	XS	Iteration 1
+Daily Meeting October 6, 2025		1241182-AfonsoMachado, 1241187-MiguelPereira, 1241243-marilialopes, 1241277-JoseOliveira, 1241883-diogooliveira	Backlog	P1	0.1	XS	Iteration 1
+Daily Meeting October 8, 2025		1241182-AfonsoMachado, 1241187-MiguelPereira, 1241243-marilialopes, 1241277-JoseOliveira, 1241883-diogooliveira	Backlog	P1	0.1	XS	Iteration 1
+Daily Meeting October 11, 2025		1241182-AfonsoMachado, 1241187-MiguelPereira, 1241243-marilialopes, 1241277-JoseOliveira, 1241883-diogooliveira	Backlog	P1	0.1	XS	Iteration 1
+Daily Meeting October 12, 2025		1241182-AfonsoMachado, 1241187-MiguelPereira, 1241243-marilialopes, 1241277-JoseOliveira, 1241883-diogooliveira	Backlog	P1	0.1	XS	Iteration 1
+Daily Meeting October 18, 2025		1241182-AfonsoMachado, 1241187-MiguelPereira, 1241243-marilialopes, 1241277-JoseOliveira, 1241883-diogooliveira	Backlog	P1	0.1	XS	Iteration 1
+Daily Meeting October 19, 2025		1241182-AfonsoMachado, 1241187-MiguelPereira, 1241243-marilialopes, 1241277-JoseOliveira, 1241883-diogooliveira	Backlog	P1	0.1	XS	Iteration 1
+Daily Meeting October 21, 2025		1241182-AfonsoMachado, 1241187-MiguelPereira, 1241243-marilialopes, 1241277-JoseOliveira, 1241883-diogooliveira	Backlog	P1	0.1	XS	Iteration 1
+Daily Meeting October 24, 2025		1241182-AfonsoMachado, 1241187-MiguelPereira, 1241243-marilialopes, 1241277-JoseOliveira, 1241883-diogooliveira	Backlog	P1	0.1	XS	Iteration 1
+Planning		1241182-AfonsoMachado, 1241187-MiguelPereira, 1241243-marilialopes, 1241277-JoseOliveira, 1241883-diogooliveira	Backlog	P1	0.1	XS	Iteration 1
+Retrospective Sprint 1			Backlog				
+Error on the commit messages		1241187-MiguelPereira	Backlog				
+Bug [US-LP02]		1241187-MiguelPereira	Backlog				
+USBD15	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/15	1241187-MiguelPereira	In Progress	P1		S	Iteration 1
+Design of the user-system layers	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/25	1241187-MiguelPereira	In Progress	P1	1	L	Iteration 1
+USLP02	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/3	1241187-MiguelPereira	In Progress	P1	2	M	Iteration 1
+LAPR3 Report	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/28	1241243-marilialopes	In Progress	P2	0.5	S	Iteration 1
+USEI05 - Returns & Quarantine	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/2	1241182-AfonsoMachado	Testing	P0	2	XL	Iteration 1
+Implementation of the Menus and Uis	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/26	1241187-MiguelPereira	Testing	P0	2	XL	Iteration 1
+USEI03 - Picking Plans	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/18	1241883-diogooliveira	Testing	P1	2	XL	Iteration 1
+IO Creation	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/21	1241187-MiguelPereira	Testing	P0	3	XL	Iteration 1
+USEI01 - Wagons Unloading (Inventory replenishment)	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/16	1241187-MiguelPereira, 1241277-JoseOliveira	Testing	P0	2	XL	Iteration 1
+USEI02 - Order Eligibility & Allocation	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/17	1241187-MiguelPereira, 1241277-JoseOliveira	Testing	P0	1.5	XL	Iteration 1
+USBD01	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/4	1241182-AfonsoMachado	Testing	P0	1	L	Iteration 1
+USBD17	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/1	1241182-AfonsoMachado	Testing	P1	2	L	Iteration 1
+USLP03	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/20	1241277-JoseOliveira	Testing	P1		M	Iteration 1
+Global Artifacts Documentation	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/24	1241243-marilialopes	Done	P1	1	M	Iteration 1
+USLP01	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/12	1241243-marilialopes	Done	P0	1.5	L	Iteration 1
+IO Creation	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/23	1241187-MiguelPereira	Done	P0	4	L	Iteration 1
+USBD02	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/5	1241883-diogooliveira	Done	P0	1.5	M	Iteration 1
+USBD03	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/6	1241883-diogooliveira	Done	P0	2	M	Iteration 1
+USBD04	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/7	1241243-marilialopes	Done	P0	1	S	Iteration 1
+USEI04 - Pick Path Sequencing	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/19	1241243-marilialopes	Done	P0	2	XL	Iteration 1
+USBD11	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/14	1241277-JoseOliveira	Done	P1		S	Iteration 1
+USBD06	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/13	1241277-JoseOliveira	Done	P0		S	Iteration 1
