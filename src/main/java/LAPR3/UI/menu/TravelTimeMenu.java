@@ -102,8 +102,8 @@ public class TravelTimeMenu {
         System.out.println();
 
         System.out.println("┌─────────────────────────────────────────────────┐");
-        System.out.println("│  1. Load Railway Network Data                  │");
-        System.out.println("│  2. Calculate Travel Time                      │");
+        System.out.println("│  1. Load Railway Network Data                   │");
+        System.out.println("│  2. Calculate Travel Time                       │");
         System.out.println("│  3. List Facilities                             │");
         System.out.println("│  4. List Railway Lines                          │");
         System.out.println("│  5. List Locomotives                            │");

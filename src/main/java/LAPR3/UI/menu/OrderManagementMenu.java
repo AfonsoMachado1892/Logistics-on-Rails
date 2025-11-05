@@ -55,8 +55,8 @@ public class OrderManagementMenu {
         System.out.println("╚══════════════════════════════════════════════════╝");
         System.out.println();
         System.out.println("┌─────────────────────────────────────────────────┐");
-        System.out.println("│  1. Check Order Eligibility (Strict Mode)      │");
-        System.out.println("│  2. Check Order Eligibility (Partial Mode)     │");
+        System.out.println("│  1. Check Order Eligibility (Strict Mode)       │");
+        System.out.println("│  2. Check Order Eligibility (Partial Mode)      │");
         System.out.println("│  3. Compare Both Modes                          │");
         System.out.println("│  4. View Order Statistics                       │");
         System.out.println("│  0. Back to Main Menu                           │");

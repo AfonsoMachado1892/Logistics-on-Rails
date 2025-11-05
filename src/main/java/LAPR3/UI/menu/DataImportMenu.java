@@ -60,7 +60,7 @@ public class DataImportMenu {
         System.out.println("│  2. Load Bays (Warehouses)                      │");
         System.out.println("│  3. Load Wagons                                 │");
         System.out.println("│  4. Load Orders                                 │");
-        System.out.println("│  5. Load All Base Data (Items + Bays + Wagons) │");
+        System.out.println("│  5. Load All Base Data (Items + Bays + Wagons)  │");
         System.out.println("│  6. Select Working Warehouse                    │");
         System.out.println("│  7. View Data Summary                           │");
         System.out.println("│  0. Back to Main Menu                           │");
