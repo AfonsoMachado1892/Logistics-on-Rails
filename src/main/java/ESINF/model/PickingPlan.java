@@ -31,7 +31,7 @@ public class PickingPlan {
     public List<Trolley> generatePickingPlan(List<Allocation> allocations, Heuristic heuristic) {
 
         if (allocations == null || allocations.isEmpty()) {
-            System.out.println("⚠️ No allocations to pack. Returning empty picking plan.");
+            System.out.println("No allocations to pack. Returning empty picking plan.");
             return new ArrayList<>();
         }
 
@@ -47,7 +47,7 @@ public class PickingPlan {
         List<Allocation> invalidAllocations = new ArrayList<>();
 
         for (Allocation a : workingList) {
-            // Validation 3: Check allocation fields
+
             if (a == null) {
                 System.err.println("Null allocation found - skipping");
                 continue;
@@ -63,7 +63,6 @@ public class PickingPlan {
                 continue;
             }
 
-            // Validation 4: Check if SKU exists in catalog
             Item item = itemCatalog.get(a.getSku());
             if (item == null) {
                 System.err.println("Warning: SKU " + a.getSku() + " not found in catalog - assuming weight 0");
@@ -71,7 +70,7 @@ public class PickingPlan {
 
             double weight = (item != null ? item.getUnitWeight() : 0) * a.getQty();
 
-            // Validation 5: Check if allocation exceeds trolley capacity
+         
             if (weight > trolleyCapacity) {
                 System.err.println("Warning: Allocation " + a.getOrderId() +
                         " line " + a.getLineNo() + " (SKU=" + a.getSku() +
