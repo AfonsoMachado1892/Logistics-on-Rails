@@ -3,6 +3,7 @@
 #include "SORT_ARRAY.H"
 #include "REMOVE_OLDEST.H"
 #include "ENCRYPT_DATA.H"
+#include "EXTRACT_DATA.H"
 
 int main(void) {
 	
@@ -76,6 +77,18 @@ int main(void) {
     printf("\n");
 	} else {
 		printf("Erro \n");
+	}
+	//USAC03
+	char str[] = "TEMP&unit:celsius&value:20#HUM&unit:percentage&value:80";
+	char token[] = "TEMP";
+	char unit[20];
+	int value;
+
+	int res3 = extract_data(str, token, unit, &value);
+	if (res3 == 1) {
+    printf("Unit: %s, Value: %d\n", unit, value);
+	} else {
+    printf("Extract failed.\n");
 	}
 
     return 0;
