@@ -2,8 +2,23 @@
 #include "DECRYPT_DATA.H" 
 #include "SORT_ARRAY.H"
 #include "REMOVE_OLDEST.H"
+#include "ENCRYPT_DATA.H"
 
 int main(void) {
+	
+	 // USAC01
+    char plaintext[] = "HELLO";
+    char encrypted[100];
+    int key1 = 3;
+    int result1;
+    result1 = encrypt_data(plaintext, key1, encrypted);
+    if (result1 == 1) {
+        printf("Original: %s\n", plaintext);
+        printf("Encrypted: %s\n", encrypted);
+    } else {
+        printf("Encryption failed.\n");
+    }
+    printf("\n");
 
     // USAC02
     char input[] = "KHOOR";   // "HELLO" encrypted with key = 3
@@ -30,9 +45,9 @@ int main(void) {
 
     int array[10];
 
-    int result = move_n_to_array(buffer, length, &nelem, &tail, head, n, array);
+    int result2 = move_n_to_array(buffer, length, &nelem, &tail, head, n, array);
 
-    if (result == 1) {
+    if (result2 == 1) {
         printf("Remoção bem sucedida.\n");
         printf("Elementos removidos: ");
         for (int i = 0; i < n; i++)
@@ -48,14 +63,14 @@ int main(void) {
 
     // USAC08
     int vec[] = {9, 7, 5, 3, 1, 2, 4, 6, 8};  
-	int length = sizeof(vec) / sizeof(vec[0]);  
+	int length2 = sizeof(vec) / sizeof(vec[0]);  
 	char order = 1; 
 
-	int result2	 = sort_array(vec, length, order);
+	int result3	 = sort_array(vec, length2, order);
 
-	if (result2 == 1) {
+	if (result3 == 1) {
     printf("Sucesso\n");
-		for (int i = 0; i < length; i++) {
+		for (int i = 0; i < length2; i++) {
         printf("%d ", vec[i]);  
 		}
     printf("\n");
