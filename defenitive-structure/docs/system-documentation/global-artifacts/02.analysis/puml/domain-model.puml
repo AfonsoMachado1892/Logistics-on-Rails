@@ -1,8 +1,6 @@
 @startuml
 skinparam monochrome true
 skinparam packageStyle rectangle
-skinparam shadowing false
-skinparam classAttributeIconSize 0
 hide circle
 hide methods
 
@@ -21,16 +19,12 @@ package "Operators and Rolling Stock" {
         country
     }
 
-    class Locomotive {
-        number
-        name
+    class LocomotiveModel {
         make
         model
-        serviceYear
         type
         powerKw
         maxSpeedKmH
-        operationalSpeedKmH
         tractionKN
         totalWeightTons
         lengthM
@@ -41,7 +35,12 @@ package "Operators and Rolling Stock" {
         voltage
         frequency
         fuelCapacityL
-        gaugeMM
+    }
+
+    class Locomotive {
+        number
+        name
+        serviceYear
     }
 
     class WagonModel {
@@ -58,15 +57,11 @@ package "Operators and Rolling Stock" {
         maxSpeedKmH
         volumeM3
         type
-        gaugeMM
     }
 
     class Wagon {
         number
-        model
-        operator
         serviceYear
-        gaugeMM
     }
 
     class Train {
@@ -74,11 +69,13 @@ package "Operators and Rolling Stock" {
         status
     }
 
-    ' === Relationships ===
     Operator "1" -- "*" Locomotive : operates >
     Operator "1" -- "*" Wagon : operates >
     Operator "1" -- "*" Train : manages >
+
+    LocomotiveModel "1" -- "*" Locomotive : defines >
     WagonModel "1" -- "*" Wagon : defines >
+
     Train "*" -- "*" Locomotive : uses >
     Train "*" -- "*" Wagon : pulls >
 }
@@ -89,49 +86,59 @@ package "Operators and Rolling Stock" {
 
 package "Infrastructure" {
 
-    class Facility {
-        id
-        name
-    }
-
-    class RailwayLine {
-        id
-        name
-        owner
-        startStation
-        endStation
-        gaugeMM
-        totalLengthKm
-    }
-
-    class LineSegment {
-        id
-        line
-        order
-        electrified
-        maxWeightKgPerMeter
-        lengthM
-        numberTracks
-    }
-
-    class Station {
-        name
-        city
-        hasWarehouse
-    }
-
     class Gauge {
         name
         measureMM
     }
 
-    ' === Relationships ===
+    class Station {
+        id
+        name
+        city
+        isCity
+        isMainStation
+        isAirport
+        hasWarehouse
+    }
+
+    class Facility {
+        id
+        name
+        type
+        isIntermodal
+        hasGrainSilos
+        hasRefrigeratedAreas
+    }
+
+    class RailwayLine {
+        id
+        name
+        + totalLengthKm()
+    }
+
+    class LineSegment {
+        id
+        order
+        electrified
+        maxWeightKgPerMeter
+        lengthM
+        numberTracks
+        speedLimitKmH
+    }
+
+    Station "1" -- "*" Facility : hosts >
+
     RailwayLine "1" -- "*" LineSegment : composed of >
     LineSegment "1" -- "1" Station : start >
     LineSegment "1" -- "1" Station : end >
+
+    RailwayLine "1" -- "1" Station : begins at >
+    RailwayLine "1" -- "1" Station : ends at >
+
     Gauge "1" -- "*" LineSegment : defines >
-    Gauge "1" -- "*" Locomotive : supports >
+    Gauge "*" -- "*" Locomotive : supports >
     Gauge "1" -- "*" Wagon : supports >
+    Gauge "1" -- "*" RailwayLine : allowed on >
 }
 
 ' ============================================================
@@ -139,6 +146,14 @@ package "Infrastructure" {
 ' ============================================================
 
 package "Freight and Routes" {
+
+    class Route {
+        description
+    }
+
+    class RouteSegment {
+        sequenceOrder
+    }
 
     class Freight {
         departureTime
@@ -151,24 +166,111 @@ package "Freight and Routes" {
         grossWeightKg
     }
 
-    class Route {
-        description
-    }
-
-    class RouteSegment {
-        sequenceOrder
-    }
-
- ' === Relationships ===
-    Freight "1" -- "*" Wagon : includes >
-    Freight "1" -- "*" FreightWagon : includes >
-    Freight "1" -- "1" Route : follows >
-    Freight "1" -- "1" Station : origin >
-    Freight "1" -- "1" Station : destination >
-    Wagon "1" -- "*" FreightWagon : assigned to >
     Route "1" -- "*" RouteSegment : consists of >
     RouteSegment "*" -- "1" LineSegment : references >
+    Freight "1" -- "1" Route : follows >
+    Freight "1" -- "*" Wagon : includes >
+    Freight "1" -- "*" FreightWagon : includes >
     Station "1" -- "*" Freight : dispatches/receives >
+    Freight "1" -- "1" Station : origin >
+    Freight "1" -- "1" Station : destination >
+}
+
+' ============================================================
+' WAREHOUSE MANAGEMENT (ESINF)
+' ============================================================
+
+package "Warehouse Management" {
+
+    class Item {
+        SKU
+        name
+        category
+        unit
+        unitWeight
+        volume
+    }
+
+    class Warehouse {
+        id
+        name
+    }
+
+    class Aisle {
+        number
+    }
+
+    class Bay {
+        number
+        capacityBoxes
+    }
+
+    class Box {
+        boxId
+        qty
+        expiryDate
+        receivedAt
+    }
+
+    class Order {
+        orderId
+        dueDate
+        priority
+    }
+
+    class OrderLine {
+        lineNo
+        requestedQty
+    }
+
+    class Allocation {
+        qty
+        status
+    }
+
+    class Return {
+        returnId
+        SKU
+        qty
+        reason
+        timestamp
+        expiryDate
+    }
+
+    class PickBatch {
+        id
+        heuristic
+        capacityKg
+        usedWeightKg
+    }
+
+    class PickTask {
+        id
+        aisleCoord
+        bayCoord
+        qty
+    }
+
+    class PickPath {
+        strategy
+        totalDistance
+    }
+
+    Station "1" -- "*" Warehouse : contains >
+    Warehouse "1" -- "*" Aisle : has >
+    Aisle "1" -- "*" Bay : has >
+    Bay "1" -- "*" Box : stores >
+    Item "1" -- "*" Box : stocked as >
+
+    Order "1" -- "*" OrderLine : contains >
+    OrderLine "1" -- "*" Allocation : allocates >
+    Allocation "*" -- "1" Box : taken from >
+    Allocation "*" -- "1" Bay : located at >
+
+    Return "*" -- "1" Item : refers to >
+
+    PickBatch "1" -- "*" PickTask : groups >
+    PickPath "1" -- "*" PickTask : sequences >
 }
 
 @enduml
