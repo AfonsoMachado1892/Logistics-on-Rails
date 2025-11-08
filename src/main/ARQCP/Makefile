@@ -3,10 +3,10 @@ CFLAGS = -Wall -Wextra -fanalyzer -g
 ARCHFLAGS = -march=rv32imd -mabi=ilp32d
 LIBRV32 = ${HOME}/bin/bootlin/riscv32-buildroot-linux-gnu/sysroot
 
-program.elf: main.o decrypt_data.o sort_array.o
-	$(CC) $(CFLAGS) $(ARCHFLAGS) main.o decrypt_data.o sort_array.o -o program.elf
+program.elf: main.o decrypt_data.o sort_array.o remove_oldest.o
+	$(CC) $(CFLAGS) $(ARCHFLAGS) main.o decrypt_data.o sort_array.o remove_oldest.o -o program.elf
 
-main.o: main.c decrypt_data.h
+main.o: main.c decrypt_data.h remove_oldest.h
 	$(CC) $(CFLAGS) $(ARCHFLAGS) -c main.c -o main.o
 
 decrypt_data.o: decrypt_data.s decrypt_data.h
@@ -14,6 +14,9 @@ decrypt_data.o: decrypt_data.s decrypt_data.h
 
 sort_array.o: sort_array.s sort_array.h
 	$(CC) $(CFLAGS) $(ARCHFLAGS) -c sort_array.s -o sort_array.o
+
+remove_oldest.o: remove_oldest.s remove_oldest.h
+    $(CC) $(CFLAGS) $(ARCHFLAGS) -c remove_oldest.s -o remove_oldest.o
 
 clean:
 	rm -f *.o *.elf
