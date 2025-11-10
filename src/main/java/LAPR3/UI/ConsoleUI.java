@@ -36,7 +36,7 @@ public class ConsoleUI {
         while (running) {
             try {
                 mainMenu.display();
-                int choice = validator.readInt("Enter your choice: ", 0, 9);  // ← ATUALIZADO: 0-9
+                int choice = validator.readInt("Enter your choice: ", 0, 10);  // ← ATUALIZADO: 0-10
 
                 if (choice == 0) {
                     if (confirmExit()) {
@@ -66,7 +66,10 @@ public class ConsoleUI {
         System.out.println("  • Import and manage warehouse data");
         System.out.println("  • Process wagon unloading operations");
         System.out.println("  • Manage order eligibility and allocation");
-        System.out.println("  • Calculate travel times between stations");  // ← NOVO
+        System.out.println("  • Generate picking plans and path sequences");
+        System.out.println("  • Handle product returns and quarantine");
+        System.out.println("  • Query railway stations by time zones and coordinates");  // ← NOVO
+        System.out.println("  • Calculate travel times between stations");
         System.out.println();
     }
 

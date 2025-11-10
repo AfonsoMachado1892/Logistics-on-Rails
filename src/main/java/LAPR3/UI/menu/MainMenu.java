@@ -20,8 +20,9 @@ public class MainMenu {
     private final OrderManagementMenu orderMenu;
     private final ReturnsManagementMenu returnsMenu;
     private final PickingManagementMenu pickingMenu;
-    private final PickPathSequencingMenu pickPathMenu;  // ← NOVO: USEI04
-    private final TravelTimeMenu travelTimeMenu;  // ← NOVO: USLP03
+    private final PickPathSequencingMenu pickPathMenu;
+    private final TravelTimeMenu travelTimeMenu;
+    private final StationQueryMenu stationQueryMenu;  // ← NOVO: USEI06
 
     public MainMenu(Scanner scanner, DataController dataController, InputValidator validator) {
         this.scanner = scanner;
@@ -33,8 +34,9 @@ public class MainMenu {
         this.orderMenu = new OrderManagementMenu(scanner, dataController, validator);
         this.returnsMenu = new ReturnsManagementMenu(scanner, dataController, validator);
         this.pickingMenu = new PickingManagementMenu(scanner, dataController, validator);
-        this.pickPathMenu = new PickPathSequencingMenu(scanner, dataController, validator);  // ← NOVO: USEI04
-        this.travelTimeMenu = new TravelTimeMenu(scanner, validator);  // ← NOVO: USLP03
+        this.pickPathMenu = new PickPathSequencingMenu(scanner, dataController, validator);
+        this.travelTimeMenu = new TravelTimeMenu(scanner, validator);
+        this.stationQueryMenu = new StationQueryMenu(scanner, validator);  // ← NOVO: USEI06
     }
 
     public void display() {
@@ -47,7 +49,7 @@ public class MainMenu {
         System.out.println(dataController.getDataSummary());
 
         System.out.println("┌─────────────────────────────────────────────────┐");
-        System.out.println("│  WAREHOUSE OPERATIONS                           │");
+        System.out.println("│  WAREHOUSE OPERATIONS (Sprint 1)                │");
         System.out.println("├─────────────────────────────────────────────────┤");
         System.out.println("│  1. Data Import & Management                    │");
         System.out.println("│  2. Wagon Operations (USEI01)                   │");
@@ -57,6 +59,10 @@ public class MainMenu {
         System.out.println("│  6. Returns & Quarantine (USEI05)               │");
         System.out.println("│  7. View Current Inventory                      │");
         System.out.println("│  8. View Logs                                   │");
+        System.out.println("├─────────────────────────────────────────────────┤");
+        System.out.println("│  SPATIAL QUERIES (Sprint 2)                     │");
+        System.out.println("├─────────────────────────────────────────────────┤");
+        System.out.println("│  10. Station Queries - Time Zone Index (USEI06) │");
         System.out.println("├─────────────────────────────────────────────────┤");
         System.out.println("│  RAILWAY OPERATIONS                             │");
         System.out.println("├─────────────────────────────────────────────────┤");
@@ -78,6 +84,7 @@ public class MainMenu {
             case 7 -> viewInventory();
             case 8 -> viewLogs();
             case 9 -> travelTimeMenu.show();
+            case 10 -> stationQueryMenu.show();  // ← NOVO: USEI06
             default -> System.out.println("Invalid option!");
         }
     }
