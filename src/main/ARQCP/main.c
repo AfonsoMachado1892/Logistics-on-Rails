@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include "DECRYPT_DATA.H" 
+#include <string.h>
 #include "SORT_ARRAY.H"
 #include "REMOVE_OLDEST.H"
 #include "ENCRYPT_DATA.H"
 #include "EXTRACT_DATA.H"
 #include "DEQUEUE_VALUE.H"
+#include "format_command.h"
 
 int main(void) {
 	
@@ -35,6 +37,7 @@ int main(void) {
     } else {
         printf("Decryption failed.\n");
     }
+    printf("\n");
 
     // USAC07
 
@@ -62,23 +65,26 @@ int main(void) {
     } else {
         printf("Erro: não existem %d elementos no buffer.\n", n);
     }
+    printf("\n");
 
     // USAC08
     int vec[] = {9, 7, 5, 3, 1, 2, 4, 6, 8};  
 	int length2 = sizeof(vec) / sizeof(vec[0]);  
 	char order = 1; 
 
-	int result3	 = sort_array(vec, length2, order);
+	int result3 = sort_array(vec, length2, order);
 
 	if (result3 == 1) {
-    printf("Sucesso\n");
+        printf("Sucesso\n");
 		for (int i = 0; i < length2; i++) {
-        printf("%d ", vec[i]);  
+            printf("%d ", vec[i]);
 		}
-    printf("\n");
+        printf("\n");
 	} else {
 		printf("Erro \n");
 	}
+    printf("\n");
+
 	//USAC03
 	char str[] = "TEMP&unit:celsius&value:20#HUM&unit:percentage&value:80";
 	char token[] = "TEMP";
@@ -87,9 +93,9 @@ int main(void) {
 
 	int res3 = extract_data(str, token, unit, &value);
 	if (res3 == 1) {
-    printf("Unit: %s, Value: %d\n", unit, value);
+        printf("Unit: %s, Value: %d\n", unit, value);
 	} else {
-    printf("Extract failed.\n");
+        printf("Extract failed.\n");
 	}
 	
 	// USAC06 - Teste dequeue_value
@@ -104,6 +110,45 @@ int main(void) {
     for (int i = 0; i < nelem2; i++) {
         printf("%d ", buffer2[(tail2 + i) % length3]);
     }
+    printf("\n"); // <-- ADDED for better spacing
+
+
+    // USAC04
+    printf("--- USAC04 Tests ---\n");
+    char cmd_out[20];
+    char op_str[20];
+    int op_val;
+    int op_res;
+
+    // Test 1: " rB ", 5 -> "RB, 05" (Success)
+    strcpy(op_str, " rB ");
+    op_val = 5;
+    op_res = format_command(op_str, op_val, cmd_out);
+    printf("Test 1: Result=%d, Output='%s'\n", op_res, cmd_out); // Expected: 1, 'RB, 05'
+
+    // Test 2: " Ye ", 25 -> "YE, 25" (Success)
+    strcpy(op_str, " Ye ");
+    op_val = 25;
+    op_res = format_command(op_str, op_val, cmd_out);
+    printf("Test 2: Result=%d, Output='%s'\n", op_res, cmd_out); // Expected: 1, 'YE, 25'
+
+    // Test 3: " Ye ", 125 -> "" (Failure)
+    strcpy(op_str, " Ye ");
+    op_val = 125;
+    op_res = format_command(op_str, op_val, cmd_out);
+    printf("Test 3: Result=%d, Output='%s'\n", op_res, cmd_out); // Expected: 0, ''
+
+    // Test 4: " aaa ", 25 -> "" (Failure)
+    strcpy(op_str, " aaa ");
+    op_val = 25;
+    op_res = format_command(op_str, op_val, cmd_out);
+    printf("Test 4: Result=%d, Output='%s'\n", op_res, cmd_out); // Expected: 0, ''
+
+    // Test 5: " gTh ", 25 -> "GTH" (Success)
+    strcpy(op_str, " gTh ");
+    op_val = 25; // Value should be ignored
+    op_res = format_command(op_str, op_val, cmd_out);
+    printf("Test 5: Result=%d, Output='%s'\n", op_res, cmd_out); // Expected: 1, 'GTH'
     printf("\n");
     
     // Remover primeiro elemento

@@ -27,6 +27,7 @@ extract_data.o: extract_data.s extract_data.h
 dequeue_value.o: dequeue_value.s dequeue_value.h
 	$(CC) $(CFLAGS) $(ARCHFLAGS) -c dequeue_value.s -o dequeue_value.o
 
+format_command.o: format_command.s format_command.h
 	$(CC) $(CFLAGS) $(ARCHFLAGS) -c format_command.s -o format_command.o
 
 clean:
