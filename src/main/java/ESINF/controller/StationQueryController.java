@@ -251,4 +251,13 @@ public class StationQueryController {
                 ══════════════════════════════════════════════════════════════════
                 """;
     }
+
+    /**
+     * Gets the station index (for USEI07 integration)
+     * @return the station index
+     */
+    public StationIndex getIndex() {
+        ensureDataLoaded();
+        return repository.getIndex();
+    }
 }
