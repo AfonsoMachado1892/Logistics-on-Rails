@@ -22,7 +22,8 @@ public class MainMenu {
     private final PickingManagementMenu pickingMenu;
     private final PickPathSequencingMenu pickPathMenu;
     private final TravelTimeMenu travelTimeMenu;
-    private final StationQueryMenu stationQueryMenu;  // ← NOVO: USEI06
+    private final StationQueryMenu stationQueryMenu;
+    private final KDTreeMenu kdTreeMenu;
 
     public MainMenu(Scanner scanner, DataController dataController, InputValidator validator) {
         this.scanner = scanner;
@@ -36,7 +37,8 @@ public class MainMenu {
         this.pickingMenu = new PickingManagementMenu(scanner, dataController, validator);
         this.pickPathMenu = new PickPathSequencingMenu(scanner, dataController, validator);
         this.travelTimeMenu = new TravelTimeMenu(scanner, validator);
-        this.stationQueryMenu = new StationQueryMenu(scanner, validator);  // ← NOVO: USEI06
+        this.stationQueryMenu = new StationQueryMenu(scanner, validator);
+        this.kdTreeMenu = new KDTreeMenu(scanner, validator);
     }
 
     public void display() {
@@ -63,6 +65,7 @@ public class MainMenu {
         System.out.println("│  SPATIAL QUERIES (Sprint 2)                     │");
         System.out.println("├─────────────────────────────────────────────────┤");
         System.out.println("│  10. Station Queries - Time Zone Index (USEI06) │");
+        System.out.println("│  11. 2D-Tree Spatial Index (USEI07)             │");
         System.out.println("├─────────────────────────────────────────────────┤");
         System.out.println("│  RAILWAY OPERATIONS                             │");
         System.out.println("├─────────────────────────────────────────────────┤");
@@ -84,7 +87,8 @@ public class MainMenu {
             case 7 -> viewInventory();
             case 8 -> viewLogs();
             case 9 -> travelTimeMenu.show();
-            case 10 -> stationQueryMenu.show();  // ← NOVO: USEI06
+            case 10 -> stationQueryMenu.show();
+            case 11 -> kdTreeMenu.show();
             default -> System.out.println("Invalid option!");
         }
     }
