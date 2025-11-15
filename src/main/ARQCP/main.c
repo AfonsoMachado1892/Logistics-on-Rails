@@ -4,6 +4,7 @@
 #include "REMOVE_OLDEST.H"
 #include "ENCRYPT_DATA.H"
 #include "EXTRACT_DATA.H"
+#include "DEQUEUE_VALUE.H"
 
 int main(void) {
 	
@@ -90,6 +91,44 @@ int main(void) {
 	} else {
     printf("Extract failed.\n");
 	}
+	
+	// USAC06 - Teste dequeue_value
+    int buffer2[5] = {100, 200, 300, 400, 500};
+    int length3 = 5;
+    int nelem2 = 3;     // 3 elementos válidos
+    int tail2 = 0;      // primeiro elemento está em buffer2[0]
+    int head2 = 3;      // próximo elemento seria inserido em buffer2[3]
+    int dequeued_value;
+    
+    printf("Buffer inicial (nelem=%d, tail=%d, head=%d): ", nelem2, tail2, head2);
+    for (int i = 0; i < nelem2; i++) {
+        printf("%d ", buffer2[(tail2 + i) % length3]);
+    }
+    printf("\n");
+    
+    // Remover primeiro elemento
+    int result4 = dequeue_value(buffer2, length3, &nelem2, &tail2, &head2, &dequeued_value);
+    if (result4 == 1) {
+        printf("Elemento removido: %d\n", dequeued_value);
+        printf("Novo tail: %d, Novo nelem: %d\n", tail2, nelem2);
+    } else {
+        printf("Erro: buffer vazio.\n");
+    }
+    
+    // Remover segundo elemento
+    result4 = dequeue_value(buffer2, length3, &nelem2, &tail2, &head2, &dequeued_value);
+    if (result4 == 1) {
+        printf("Elemento removido: %d\n", dequeued_value);
+        printf("Novo tail: %d, Novo nelem: %d\n", tail2, nelem2);
+    }
+    
+    // Tentar remover de buffer vazio (após remover todos)
+    dequeue_value(buffer2, length3, &nelem2, &tail2, &head2, &dequeued_value);
+    dequeue_value(buffer2, length3, &nelem2, &tail2, &head2, &dequeued_value);
+    result4 = dequeue_value(buffer2, length3, &nelem2, &tail2, &head2, &dequeued_value);
+    if (result4 == 0) {
+        printf("Buffer vazio - não foi possível remover elemento.\n");
+    }
 
     return 0;
 }
