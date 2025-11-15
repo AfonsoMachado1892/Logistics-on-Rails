@@ -327,49 +327,6 @@ public class PickPathSequencing {
     }
 
     /**
-     * Generates and displays detailed picking routes for both strategies.
-     * Outputs comprehensive information about each strategy's path to the console.
-     *
-     * @param allocations List of allocations to process
-     */
-    public void generateAndDisplayPickingRoutes(List<Allocation> allocations) {
-        System.out.println("\n========== PICK PATH SEQUENCING (USEI04) ==========\n");
-
-        PickPath pathA = strategyA(allocations);
-        PickPath pathB = strategyB(allocations);
-
-        displayPickPath(pathA, allocations);
-        displayPickPath(pathB, allocations);
-
-        System.out.println("===================================================\n");
-    }
-
-    /**
-     * Displays detailed information about a generated pick path.
-     * Includes route information and a detailed picking list for each bay.
-     *
-     * @param path        The path to display
-     * @param allocations The original allocation list (for reference)
-     */
-    private void displayPickPath(PickPath path, List<Allocation> allocations) {
-        System.out.println(path);
-
-        if (!path.route.isEmpty()) {
-            System.out.println("Detailed picking list:");
-            for (ConsolidatedBay bay : path.route) {
-                System.out.printf("  Aisle %d, Bay %d (Coordinate: %s):\n",
-                        bay.aisle, bay.bay, bay.getCoordinate());
-                for (Allocation alloc : bay.allocations) {
-                    System.out.printf("    - Order %s, Line %d | SKU %s | Qty %d | Box %s\n",
-                            alloc.getOrderId(), alloc.getLineNo(), alloc.getSku(),
-                            alloc.getQty(), alloc.getBoxId());
-                }
-            }
-        }
-        System.out.println();
-    }
-
-    /**
      * Returns both pick paths (Strategy A and Strategy B) for programmatic use.
      *
      * @param allocations List of allocations to process
