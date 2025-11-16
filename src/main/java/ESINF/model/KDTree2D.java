@@ -419,4 +419,130 @@ public class KDTree2D {
     public Node getRoot() {
         return root;
     }
+    /**
+     * USEI08 - Range query with optional filtering.
+     * Finds all stations within a rectangular region that match the filter criteria.
+     *
+     * @param region The geographic region to search
+     * @param filter Optional filter (use null for no filtering)
+     * @return List of stations matching region and filter
+     */
+    public List<Station> rangeSearchWithFilter(GeographicRegion region, StationFilter filter) {
+        if (region == null) {
+            throw new IllegalArgumentException("Region cannot be null");
+        }
+
+        List<Station> result = new ArrayList<>();
+        long startTime = System.nanoTime();
+
+        rangeSearchWithFilterRecursive(
+                root,
+                region.getLatMin(),
+                region.getLatMax(),
+                region.getLonMin(),
+                region.getLonMax(),
+                filter,
+                0,
+                result
+        );
+
+        long endTime = System.nanoTime();
+        long elapsedNanos = endTime - startTime;
+
+        // Store last query time for statistics
+        this.lastQueryTimeNanos = elapsedNanos;
+
+        return result;
+    }
+
+    /**
+     * Recursive helper for range search with filtering and pruning.
+     *
+     * Pruning logic:
+     * - If splitting by latitude and region.latMax < node.latitude -> only explore left
+     * - If splitting by latitude and region.latMin > node.latitude -> only explore right
+     * - Similar logic for longitude splits
+     *
+     * @param node Current node
+     * @param minLat Minimum latitude of search region
+     * @param maxLat Maximum latitude of search region
+     * @param minLon Minimum longitude of search region
+     * @param maxLon Maximum longitude of search region
+     * @param filter Optional filter (null = no filtering)
+     * @param depth Current depth (0 = root)
+     * @param result List to accumulate results
+     */
+    private void rangeSearchWithFilterRecursive(Node node,
+                                                double minLat, double maxLat,
+                                                double minLon, double maxLon,
+                                                StationFilter filter,
+                                                int depth,
+                                                List<Station> result) {
+        if (node == null) {
+            return;
+        }
+
+        // Check if node's coordinates are in range
+        if (node.latitude >= minLat && node.latitude <= maxLat &&
+                node.longitude >= minLon && node.longitude <= maxLon) {
+
+            // Add all stations at this node that pass the filter
+            for (Station station : node.stations) {
+                if (filter == null || filter.matches(station)) {
+                    result.add(station);
+                }
+            }
+        }
+
+        // Determine split axis (even depth = latitude, odd = longitude)
+        boolean splitByLatitude = (depth % 2 == 0);
+
+        // PRUNING: Decide which subtrees to explore
+        if (splitByLatitude) {
+            // Split by latitude
+            // Explore left subtree if region extends below node's latitude
+            if (minLat <= node.latitude) {
+                rangeSearchWithFilterRecursive(node.left, minLat, maxLat, minLon, maxLon,
+                        filter, depth + 1, result);
+            }
+            // Explore right subtree if region extends above node's latitude
+            if (maxLat >= node.latitude) {
+                rangeSearchWithFilterRecursive(node.right, minLat, maxLat, minLon, maxLon,
+                        filter, depth + 1, result);
+            }
+        } else {
+            // Split by longitude
+            // Explore left subtree if region extends west of node's longitude
+            if (minLon <= node.longitude) {
+                rangeSearchWithFilterRecursive(node.left, minLat, maxLat, minLon, maxLon,
+                        filter, depth + 1, result);
+            }
+            // Explore right subtree if region extends east of node's longitude
+            if (maxLon >= node.longitude) {
+                rangeSearchWithFilterRecursive(node.right, minLat, maxLat, minLon, maxLon,
+                        filter, depth + 1, result);
+            }
+        }
+    }
+
+    // Add field to track last query time
+    private long lastQueryTimeNanos = 0;
+
+    /**
+     * Gets the execution time of the last range search query.
+     *
+     * @return Time in nanoseconds
+     */
+    public long getLastQueryTimeNanos() {
+        return lastQueryTimeNanos;
+    }
+
+    /**
+     * Gets the execution time of the last range search query in milliseconds.
+     *
+     * @return Time in milliseconds
+     */
+    public double getLastQueryTimeMs() {
+        return lastQueryTimeNanos / 1_000_000.0;
+    }
 }
