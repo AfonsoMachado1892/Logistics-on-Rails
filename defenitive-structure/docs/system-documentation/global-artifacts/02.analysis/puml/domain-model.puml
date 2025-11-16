@@ -69,7 +69,13 @@ package "Operators and Rolling Stock" {
         status
     }
 
+    class TrainEvent {
+        timestamp
+        eventType
+    }
+
     Operator "1" -- "*" Locomotive : operates >
+    Operator "1" -- "*" RailwayLine : owns >
     Operator "1" -- "*" Wagon : operates >
     Operator "1" -- "*" Train : manages >
 
@@ -78,6 +84,7 @@ package "Operators and Rolling Stock" {
 
     Train "*" -- "*" Locomotive : uses >
     Train "*" -- "*" Wagon : pulls >
+    TrainEvent "1" -- "1" Station
 }
 
 ' ============================================================
@@ -174,6 +181,7 @@ package "Freight and Routes" {
     Station "1" -- "*" Freight : dispatches/receives >
     Freight "1" -- "1" Station : origin >
     Freight "1" -- "1" Station : destination >
+    FreightWagon "1" -- "1" Wagon : carried by >
 }
 
 ' ============================================================
@@ -198,10 +206,12 @@ package "Warehouse Management" {
 
     class Aisle {
         number
+        xCoord
     }
 
     class Bay {
         number
+        yCoord
         capacityBoxes
     }
 
@@ -268,6 +278,7 @@ package "Warehouse Management" {
     Allocation "*" -- "1" Bay : located at >
 
     Return "*" -- "1" Item : refers to >
+    Return "1" -- "*" Box : generates >
 
     PickBatch "1" -- "*" PickTask : groups >
     PickPath "1" -- "*" PickTask : sequences >
