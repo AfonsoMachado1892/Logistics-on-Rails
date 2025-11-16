@@ -170,7 +170,7 @@ public class KDTreeMenu {
 
         kdTree = new KDTree2D();
         lastStatistics = kdTree.buildBalanced(latitudeBST, longitudeBST);
-
+        stationController.setKDTree(kdTree); // Share the built tree with USEI06 controller
         System.out.println("\n✓ 2D-Tree built successfully!");
         System.out.println(lastStatistics);
 
