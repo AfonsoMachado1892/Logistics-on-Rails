@@ -17,4 +17,26 @@ CREATE TABLE train (id_train number(10) GENERATED AS IDENTITY, operator number(1
 CREATE TABLE train_composition (id_train_composition number(10) NOT NULL, trainid_train number(10) NOT NULL, wagonnumber number(10) NOT NULL, position_in_train number(10) NOT NULL, loaded raw(1000) NOT NULL, load_weight number(10) NOT NULL, PRIMARY KEY (id_train_composition, trainid_train, wagonnumber));
 CREATE TABLE wagon_model (id_model number(10) GENERATED AS IDENTITY, model_wagon varchar2(255) NOT NULL, maker varchar2(255) NOT NULL, number_bogies number(10) NOT NULL, bogies varchar2(255) NOT NULL, lenght number(10) NOT NULL, width number(10) NOT NULL, height number(10) NOT NULL, weight number(10) NOT NULL, max_speed number(10) NOT NULL, payload number(10) NOT NULL, volume number(10) NOT NULL, type varchar2(255) NOT NULL, bitola number(10) NOT NULL, PRIMARY KEY (id_model));
 CREATE TABLE freights (id_freights number(10) GENERATED AS IDENTITY, "date" date NOT NULL, origin number(10) NOT NULL, facility number(10) NOT NULL, destination number(10) NOT NULL, facility_final number(10) NOT NULL, wagon date NOT NULL, PRIMARY KEY (id_freights));
-
+ALTER TABLE locomotive_operator ADD CONSTRAINT FKlocomotive506643 FOREIGN KEY (locomotive_id) REFERENCES locomotive (id_locomotive);
+ALTER TABLE locomotive_operator ADD CONSTRAINT FKlocomotive16944 FOREIGN KEY (operator_id) REFERENCES operator (Id_operator);
+ALTER TABLE segment ADD CONSTRAINT FKsegment444131 FOREIGN KEY (line_id) REFERENCES line (id_line);
+ALTER TABLE Building ADD CONSTRAINT FKBuilding683407 FOREIGN KEY (facility_id) REFERENCES facility (id_facility);
+ALTER TABLE Building ADD CONSTRAINT FKBuilding808218 FOREIGN KEY (building_type_id) REFERENCES building_type (id_building_type);
+ALTER TABLE locomotive_Gauge ADD CONSTRAINT FKlocomotive211237 FOREIGN KEY (locomotive_id) REFERENCES locomotive (id_locomotive);
+ALTER TABLE locomotive_Gauge ADD CONSTRAINT FKlocomotive815639 FOREIGN KEY (Gauge_id) REFERENCES Gauge (id_gauge);
+ALTER TABLE Gauge_line ADD CONSTRAINT FKGauge_line197336 FOREIGN KEY (gauge_id) REFERENCES Gauge (id_gauge);
+ALTER TABLE Gauge_line ADD CONSTRAINT FKGauge_line602619 FOREIGN KEY (line_id) REFERENCES line (id_line);
+ALTER TABLE wagon ADD CONSTRAINT FKwagon548018 FOREIGN KEY (Operator_id) REFERENCES operator (Id_operator);
+ALTER TABLE wagon_Gauge ADD CONSTRAINT FKwagon_Gaug381999 FOREIGN KEY (wagonnumber) REFERENCES wagon (number);
+ALTER TABLE wagon_Gauge ADD CONSTRAINT FKwagon_Gaug517054 FOREIGN KEY (Gaugeid_gauge) REFERENCES Gauge (id_gauge);
+ALTER TABLE line ADD CONSTRAINT FKline868044 FOREIGN KEY (ownerid_owner) REFERENCES owner (id_owner);
+ALTER TABLE line ADD CONSTRAINT FKline57062 FOREIGN KEY (start_id) REFERENCES facility (id_facility);
+ALTER TABLE line ADD CONSTRAINT FKline467100 FOREIGN KEY (end_id) REFERENCES facility (id_facility);
+ALTER TABLE train_composition ADD CONSTRAINT FKtrain_comp345896 FOREIGN KEY (trainid_train) REFERENCES train (id_train);
+ALTER TABLE train_composition ADD CONSTRAINT FKtrain_comp488792 FOREIGN KEY (wagonnumber) REFERENCES wagon (number);
+ALTER TABLE train ADD CONSTRAINT FKtrain592359 FOREIGN KEY (operator_id) REFERENCES operator (Id_operator);
+ALTER TABLE wagon ADD CONSTRAINT FKwagon351226 FOREIGN KEY (model_id) REFERENCES wagon_model (id_model);
+ALTER TABLE freights ADD CONSTRAINT FKfreights204608 FOREIGN KEY (origin) REFERENCES facility (id_facility);
+ALTER TABLE freights ADD CONSTRAINT FKfreights976898 FOREIGN KEY (destination) REFERENCES facility (id_facility);
+ALTER TABLE train ADD CONSTRAINT FKtrain356517 FOREIGN KEY (start_id) REFERENCES facility (id_facility);
+ALTER TABLE train ADD CONSTRAINT FKtrain766555 FOREIGN KEY (end_id) REFERENCES facility (id_facility);
