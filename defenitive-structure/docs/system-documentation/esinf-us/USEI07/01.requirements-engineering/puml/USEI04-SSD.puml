@@ -1,0 +1,37 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Picker" as Picker
+participant ":System" as System
+
+activate Picker
+
+    Picker -> System : requests a Pick Path Sequencing
+    activate System
+
+        System --> Picker : shows sequencing strategies (A or B) and requests confirmation
+    deactivate System
+
+    Picker -> System : confirms strategy selection
+    activate System
+
+        System --> Picker : processes data and calculates paths/distances
+    deactivate System
+
+    Picker -> System : acknowledges processing
+    activate System
+
+        System --> Picker : displays sequenced paths and distances
+    deactivate System
+
+    Picker -> System : confirms operation success
+    activate System
+
+        System --> Picker : displays operation success or failure
+    deactivate System
+
+@enduml
