@@ -6,6 +6,7 @@
 #include "ENCRYPT_DATA.H"
 #include "EXTRACT_DATA.H"
 #include "DEQUEUE_VALUE.H"
+#INCLUDE "ENQUEUE_VALUE.H"
 #include "format_command.h"
 #include "median.h"
 
@@ -39,6 +40,57 @@ int main(void) {
         printf("Decryption failed.\n");
     }
     printf("\n");
+    // USAC05
+    extern int enqueue_value(int* buffer, int length, int nelem, int tail, int* head, int value);
+
+    void print_buffer(int* buffer, int length, int head, int tail, int nelem) {
+        printf("Buffer: [");
+        for (int i = 0; i < length; i++) {
+            if (i > 0) printf(", ");
+            printf("%d", buffer[i]);
+        }
+        printf("]\n");
+        printf("Head: %d, Tail: %d, Nelem: %d\n\n", head, tail, nelem);
+    }
+
+
+        int length = 5;
+        int* buffer = (int*)calloc(length, sizeof(int));
+        int head = 0;
+        int tail = 0;
+        int nelem = 0;
+
+        printf("=== Teste da função enqueue_value ===\n\n");
+
+        printf("Estado inicial:\n");
+        print_buffer(buffer, length, head, tail, nelem);
+
+        printf("Inserindo valores 10, 20, 30, 40, 50:\n");
+        for (int i = 1; i <= 5; i++) {
+            int value = i * 10;
+            int is_full = enqueue_value(buffer, length, nelem, tail, &head, value);
+
+            tail = (tail + 1) % length;
+            if (nelem < length) nelem++;
+
+            printf("Inserido %d - Buffer %s\n", value, is_full ? "CHEIO" : "não cheio");
+            print_buffer(buffer, length, head, tail, nelem);
+        }
+
+        printf("Inserindo mais valores (60, 70) - deve sobrescrever os mais antigos:\n");
+        for (int i = 6; i <= 7; i++) {
+            int value = i * 10;
+            int is_full = enqueue_value(buffer, length, nelem, tail, &head, value);
+
+            tail = (tail + 1) % length;
+
+            printf("Inserido %d - Buffer %s\n", value, is_full ? "CHEIO" : "não cheio");
+            print_buffer(buffer, length, head, tail, nelem);
+        }
+
+        free(buffer);
+       
+
 
     // USAC07
 
