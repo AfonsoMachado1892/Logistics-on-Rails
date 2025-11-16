@@ -7,6 +7,7 @@
 #include "EXTRACT_DATA.H"
 #include "DEQUEUE_VALUE.H"
 #include "format_command.h"
+#include "median.h"
 
 int main(void) {
 	
@@ -174,6 +175,26 @@ int main(void) {
     if (result4 == 0) {
         printf("Buffer vazio - não foi possível remover elemento.\n");
     }
+
+
+    // --- USAC09 ---
+        printf("--- USAC09 Tests ---\n");
+        int median_val;
+        int median_res;
+
+        // Test 1: Success case (unsorted, 5 elements)
+        // {50, 10, 30, 20, 40} -> {10, 20, 30, 40, 50} -> median é 30
+        int vec_median[] = {50, 10, 30, 20, 40};
+        int len_median = 5;
+        median_res = median(vec_median, len_median, &median_val);
+        printf("Test 1 (Success): Result=%d, Median is %d\n", median_res, median_val); // 1, 30
+
+        // Test 2: Length é 0
+        int vec_fail[] = {};
+        int len_fail = 0;
+        median_res = median(vec_fail, len_fail, &median_val);
+        printf("Test 2 (Fail): Result=%d\n", median_res); // 0
+        printf("\n");
 
     return 0;
 }
