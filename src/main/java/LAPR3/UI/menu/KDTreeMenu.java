@@ -34,11 +34,14 @@ public class KDTreeMenu {
 
     /**
      * Constructs a KDTreeMenu instance.
+     * @param scanner Scanner for user input
+     * @param validator Input validator
+     * @param stationController Shared controller instance (from USEI06)
      */
-    public KDTreeMenu(Scanner scanner, InputValidator validator) {
+    public KDTreeMenu(Scanner scanner, InputValidator validator, StationQueryController stationController) {
         this.scanner = scanner;
         this.validator = validator;
-        this.stationController = new StationQueryController();
+        this.stationController = stationController;
         this.kdTree = new KDTree2D();
     }
 

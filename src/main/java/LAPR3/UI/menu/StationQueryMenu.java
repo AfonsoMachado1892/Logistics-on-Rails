@@ -27,6 +27,12 @@ public class StationQueryMenu {
         this.controller = new StationQueryController();
     }
 
+    public StationQueryMenu(Scanner scanner, InputValidator validator, StationQueryController controller) {
+        this.scanner = scanner;
+        this.validator = validator;
+        this.controller = controller;
+    }
+
     public void show() {
         while (true) {
             displayMenu();

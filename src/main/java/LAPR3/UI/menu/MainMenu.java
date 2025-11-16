@@ -1,5 +1,6 @@
 package LAPR3.UI.menu;
 
+import ESINF.controller.StationQueryController;
 import LAPR3.controller.DataController;
 import LAPR3.UI.utils.InputValidator;
 
@@ -14,6 +15,7 @@ public class MainMenu {
     private final Scanner scanner;
     private final DataController dataController;
     private final InputValidator validator;
+    private final StationQueryController stationController;
 
     private final DataImportMenu dataImportMenu;
     private final WagonOperationsMenu wagonMenu;
@@ -30,6 +32,8 @@ public class MainMenu {
         this.dataController = dataController;
         this.validator = validator;
 
+        this.stationController = new StationQueryController();
+
         this.dataImportMenu = new DataImportMenu(scanner, dataController, validator);
         this.wagonMenu = new WagonOperationsMenu(scanner, dataController, validator);
         this.orderMenu = new OrderManagementMenu(scanner, dataController, validator);
@@ -37,8 +41,8 @@ public class MainMenu {
         this.pickingMenu = new PickingManagementMenu(scanner, dataController, validator);
         this.pickPathMenu = new PickPathSequencingMenu(scanner, dataController, validator);
         this.travelTimeMenu = new TravelTimeMenu(scanner, validator);
-        this.stationQueryMenu = new StationQueryMenu(scanner, validator);
-        this.kdTreeMenu = new KDTreeMenu(scanner, validator);
+        this.stationQueryMenu = new StationQueryMenu(scanner, validator, stationController);
+        this.kdTreeMenu = new KDTreeMenu(scanner, validator, stationController);
     }
 
     public void display() {
