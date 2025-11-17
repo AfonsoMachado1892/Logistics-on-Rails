@@ -44,15 +44,13 @@ System.out.println("Execution time: " + result.getExecutionTimeMs() + " ms");
 
 ### **Expected Output**
 ```
-Stations in Portugal: 147
-Execution time: 15.3 ms
-
-Sample stations:
-Station{name='Lisboa Santa Apolónia', lat=38.71387, lon=-9.12227, country='PT'}
-Station{name='Porto-Campanhã', lat=41.14961, lon=-8.58447, country='PT'}
-Station{name='Coimbra-B', lat=40.20564, lon=-8.42955, country='PT'}
-Station{name='Faro', lat=37.01940, lon=-7.93991, country='PT'}
-Station{name='Braga', lat=41.54547, lon=-8.42611, country='PT'}
+Region: GeographicRegion{lat=[36,96000, 42,15000], lon=[-9,50000, -6,19000], area=17,17890°²}
+Filter: StationFilter{country='PT'}
+✅ Found: 168 stations in 0,290 ms
+Sample results:
+  • Mogadouro (PT)
+  • Vila Real de San Antonio Guad (PT)
+  • Lagos (PT)
 ```
 
 ### **Why This Query Matters**
@@ -84,16 +82,11 @@ for (Station station : result.getStations()) {
 
 ### **Expected Output**
 ```
-Main stations in Madrid: 7
-Execution time: 3.8 ms
-
-  - Madrid-Atocha
-  - Madrid-Chamartín
-  - Madrid-Príncipe Pío
-  - Alcalá de Henares
-  - Guadalajara
-  - Aranjuez
-  - El Escorial
+Region: GeographicRegion{lat=[40,20000, 40,70000], lon=[-4,00000, -3,40000], area=0,30000°²}
+Filter: StationFilter{isMainStation=true, country='ES'}
+✅ Found: 1 stations in 0,064 ms
+Sample results:
+  • Madrid Atocha (ES)
 ```
 
 ### **Why This Query Matters**
@@ -130,16 +123,13 @@ System.out.println("Distribution: " + byRegion);
 
 ### **Expected Output**
 ```
-Coastal cities in Spain: 42
-Execution time: 11.7 ms
-Distribution: {CET=42}
-Sample cities:
-
-- Barcelona-Sants
-- Valencia-Joaquín Sorolla
-- Alicante
-- Málaga-María Zambrano
-- Tarragona
+Region: GeographicRegion{lat=[36,50000, 43,00000], lon=[-1,00000, 4,50000], area=35,75000°²}
+Filter: StationFilter{isCity=true, country='ES'}
+✅ Found: 740 stations in 0,136 ms
+Sample results:
+  • Llardecans (ES)
+  • Almatret (ES)
+  • La Manga del Mar Menor (ES)
 ```
 ### **Why This Query Matters**
 - Tests isCity filter
@@ -179,21 +169,13 @@ station.getLongitude() + ")")
 
 ### **Expected Output**
 ```
-Airport stations in Germany: 12
-Execution time: 8.4 ms
-
-- Frankfurt am Main Flughafen (50.05098, 8.57062)
-- München Flughafen (48.35378, 11.78609)
-- Düsseldorf Flughafen (51.28951, 6.76678)
-- Stuttgart Flughafen (48.68893, 9.22196)
-- Hamburg Flughafen (53.63280, 9.98823)
-- Berlin Brandenburg Flughafen (52.36249, 13.50323)
-- Köln/Bonn Flughafen (50.87873, 7.12265)
-- Hannover Flughafen (52.46101, 9.68508)
-- Nürnberg Flughafen (49.49878, 11.06627)
-- Leipzig/Halle Flughafen (51.42387, 12.23618)
-- Dresden Flughafen (51.13298, 13.76772)
-- Bremen Flughafen (53.04752, 8.78667)
+Region: GeographicRegion{lat=[45,80000, 47,80000], lon=[5,90000, 10,50000], area=9,20000°²}
+Filter: StationFilter{country='CH'}
+✅ Found: 22225 stations in 3,623 ms
+Sample results:
+  • Langnau am Albis Unterrengg (CH)
+  • Munsingen Neuhaus (CH)
+  • Chemin-Dessous (CH)
 ```
 ### **Why This Query Matters**
 - Tests isAirport flag (custom filter extension)
@@ -231,25 +213,13 @@ sortedByLat.forEach(s ->
 
 ### **Expected Output**
 ```
-Stations in Switzerland: 189
-Execution time: 6.9 ms
-
-Northernmost stations (likely higher altitude):
-  - Basel SBB (lat: 47.54710)
-  - Basel Bad Bf (lat: 47.56764)
-  - Schaffhausen (lat: 47.69768)
-  - Zürich HB (lat: 47.37805)
-  - St. Gallen (lat: 47.42307)
-
-Main stations in Switzerland:
-  - Zürich HB
-  - Bern
-  - Basel SBB
-  - Genève
-  - Lausanne
-  - Luzern
-  - St. Gallen
-  - Lugano
+Region: GeographicRegion{lat=[49,50000, 53,50000], lon=[2,50000, 7,20000], area=18,80000°²}
+Filter: StationFilter{isCity=true}
+✅ Found: 72 stations in 0,252 ms
+Sample results:
+  • Peronne (FR)
+  • Chambry (FR)
+  • Hirson (FR)
 
 ```
 ### **Why This Query Matters**
