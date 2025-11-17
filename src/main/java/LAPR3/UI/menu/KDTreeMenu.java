@@ -51,7 +51,7 @@ public class KDTreeMenu {
     public void show() {
         while (true) {
             displayMenu();
-            int choice = validator.readInt("Enter your choice: ", 0, 7);
+            int choice = validator.readInt("Enter your choice: ", 0, 8);
 
             if (choice == 0) {
                 return; // Back to main menu
@@ -72,24 +72,25 @@ public class KDTreeMenu {
      * Displays the main menu.
      */
     private void displayMenu() {
-        System.out.println("\n╔══════════════════════════════════════════════════╗");
+        System.out.println("\n╔═══════════════════════════════════════════════════╗");
         System.out.println("║       2D-TREE SPATIAL INDEX (USEI07)             ║");
-        System.out.println("╚══════════════════════════════════════════════════╝");
+        System.out.println("╚═══════════════════════════════════════════════════╝");
         System.out.println();
 
         displayCurrentStatus();
         System.out.println();
 
-        System.out.println("┌─────────────────────────────────────────────────┐");
-        System.out.println("│  1. Check Station Data Status                   │");
-        System.out.println("│  2. Build Balanced 2D-Tree                       │");
-        System.out.println("│  3. Display Tree Statistics                      │");
-        System.out.println("│  4. Display Tree Structure (In-Order)            │");
-        System.out.println("│  5. Range Query (Rectangular Region)             │");
-        System.out.println("│  6. Nearest Neighbor Search                      │");
-        System.out.println("│  7. Analyze Bucket Sizes                         │");
-        System.out.println("│  0. Back to Main Menu                            │");
-        System.out.println("└─────────────────────────────────────────────────┘");
+        System.out.println("┌───────────────────────────────────────────────────┐");
+        System.out.println("│  1. Check Station Data Status                    │");
+        System.out.println("│  2. Build Balanced 2D-Tree                        │");
+        System.out.println("│  3. Display Tree Statistics                       │");
+        System.out.println("│  4. Display Tree Structure (Visual)               │");
+        System.out.println("│  5. Range Query (Rectangular Region)              │");
+        System.out.println("│  6. Nearest Neighbor Search                       │");
+        System.out.println("│  7. Analyze Bucket Sizes                          │");
+        System.out.println("│  8. Temporal Complexity Analysis                  │");
+        System.out.println("│  0. Back to Main Menu                             │");
+        System.out.println("└───────────────────────────────────────────────────┘");
         System.out.println();
     }
 
@@ -123,6 +124,7 @@ public class KDTreeMenu {
             case 5 -> performRangeQuery();
             case 6 -> performNearestNeighbor();
             case 7 -> analyzeBucketSizes();
+            case 8 -> analyzeComplexity();
         }
     }
 
@@ -171,11 +173,11 @@ public class KDTreeMenu {
         kdTree = new KDTree2D();
         lastStatistics = kdTree.buildBalanced(latitudeBST, longitudeBST);
         stationController.setKDTree(kdTree); // Share the built tree with USEI06 controller
-        System.out.println("\n✓ 2D-Tree built successfully!");
-        System.out.println(lastStatistics);
 
-        // Temporal complexity analysis
-        analyzeComplexity();
+        System.out.println("\n✓ 2D-Tree built successfully!");
+        System.out.println("  • Size: " + lastStatistics.size + " nodes");
+        System.out.println("  • Height: " + lastStatistics.height);
+        System.out.println("  • Build time: " + String.format("%.3f ms", lastStatistics.buildTimeNanos / 1_000_000.0));
     }
 
     /**
@@ -229,35 +231,58 @@ public class KDTreeMenu {
     }
 
     /**
-     * Displays tree structure using in-order traversal.
+     * Displays tree structure as a visual graph.
      */
     private void displayTreeStructure() {
-        System.out.println("\n═══ TREE STRUCTURE (IN-ORDER TRAVERSAL) ═══");
+        System.out.println("\n═══ TREE STRUCTURE (VISUAL) ═══");
 
         if (lastStatistics == null) {
             System.out.println("No tree built yet! Please run option 2 first.");
             return;
         }
 
-        List<KDTree2D.Node> nodes = kdTree.inOrderTraversal();
+        System.out.println("\nTree visualization (showing first 5 levels):");
+        printSeparator(80);
 
-        System.out.println("Total nodes: " + nodes.size());
-        System.out.println("\nFirst 20 nodes:");
-        System.out.println("─".repeat(80));
+        printTreeVisual(kdTree.getRoot(), "", true, 0, 5);
 
-        for (int i = 0; i < Math.min(20, nodes.size()); i++) {
-            KDTree2D.Node node = nodes.get(i);
-            System.out.printf("%3d. (%.5f, %.5f) - %d station(s): %s\n",
-                    i + 1, node.latitude, node.longitude, node.stations.size(),
-                    node.stations.stream()
-                            .map(Station::getName)
-                            .limit(3)
-                            .reduce((a, b) -> a + ", " + b)
-                            .orElse(""));
+        System.out.println();
+        printSeparator(80);
+        System.out.println("Legend:");
+        System.out.println("  [LAT] = Split by Latitude (even depth)");
+        System.out.println("  [LON] = Split by Longitude (odd depth)");
+        System.out.println("  (n) = Number of stations at this coordinate");
+    }
+
+    /**
+     * Recursively prints tree structure with visual branches.
+     */
+    private void printTreeVisual(KDTree2D.Node node, String prefix, boolean isTail, int depth, int maxDepth) {
+        if (node == null || depth > maxDepth) {
+            return;
         }
 
-        if (nodes.size() > 20) {
-            System.out.println("... (" + (nodes.size() - 20) + " more nodes)");
+        String splitAxis = (depth % 2 == 0) ? "LAT" : "LON";
+        String connector = isTail ? "└── " : "├── ";
+
+        System.out.printf("%s%s[%s] (%.4f, %.4f) (%d)%s\n",
+                prefix,
+                connector,
+                splitAxis,
+                node.latitude,
+                node.longitude,
+                node.stations.size(),
+                node.stations.size() > 1 ? " *" : "");
+
+        String newPrefix = prefix + (isTail ? "    " : "│   ");
+
+        if (node.left != null || node.right != null) {
+            if (node.right != null) {
+                printTreeVisual(node.right, newPrefix, node.left == null, depth + 1, maxDepth);
+            }
+            if (node.left != null) {
+                printTreeVisual(node.left, newPrefix, true, depth + 1, maxDepth);
+            }
         }
     }
 
@@ -352,9 +377,9 @@ public class KDTreeMenu {
 
         System.out.println("Distinct bucket sizes: " + distinctSizes);
         System.out.println("\nDetailed frequency distribution:");
-        System.out.println("─".repeat(60));
+        printSeparator(60);
         System.out.printf("%-20s | %-15s | %-15s\n", "Bucket Size", "Frequency", "Percentage");
-        System.out.println("─".repeat(60));
+        printSeparator(60);
 
         int totalNodes = lastStatistics.size;
         frequency.entrySet().stream()
@@ -366,7 +391,7 @@ public class KDTreeMenu {
                     System.out.printf("%-20d | %-15d | %.2f%%\n", size, count, percentage);
                 });
 
-        System.out.println("─".repeat(60));
+        printSeparator(60);
 
         // Find coordinates with multiple stations
         System.out.println("\nCoordinates with multiple stations:");
@@ -384,6 +409,16 @@ public class KDTreeMenu {
                 System.out.printf("  %s: %d station(s)\n", entry.getKey(), entry.getValue());
             }
         }
+    }
+
+    /**
+     * Prints a separator line.
+     */
+    private void printSeparator(int length) {
+        for (int i = 0; i < length; i++) {
+            System.out.print("─");
+        }
+        System.out.println();
     }
 
     /**
