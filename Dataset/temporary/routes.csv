@@ -1,0 +1,11 @@
+routeId,name,facilities,type
+R001,Lisboa-Porto Direto,"1,18",SIMPLE
+R002,Lisboa-Porto Via Coimbra,"1,5,18",SIMPLE
+R003,Porto-Faro,"18,12,5,1,25",COMPLEX
+R004,Lisboa-Faro Via Evora,"1,8,25",SIMPLE
+R005,Porto-Guarda,"18,12,22",SIMPLE
+R006,Lisboa-Entroncamento,"1,5",SIMPLE
+R007,Entroncamento-Porto,"5,12,18",SIMPLE
+R008,Lisboa-Aveiro Via Coimbra,"1,5,12",SIMPLE
+R009,Porto-Braga,"18,30",SIMPLE
+R010,Faro-Entroncamento,"25,8,5",COMPLEX
