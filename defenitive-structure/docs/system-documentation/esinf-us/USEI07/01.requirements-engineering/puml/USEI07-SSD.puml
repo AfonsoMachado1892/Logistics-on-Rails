@@ -1,0 +1,31 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Data Engineer" as Eng
+participant ":System" as System
+
+activate Eng
+
+    Eng -> System : requests 2D-Tree build
+    activate System
+
+        System --> Eng : shows build requirements\n(uses AVL/BST from USEI06)\nand asks for confirmation
+    deactivate System
+
+    Eng -> System : confirms build
+    activate System
+
+        System --> Eng : builds balanced 2D-Tree\n(processes coordinates, handles duplicates)
+    deactivate System
+
+    Eng -> System : acknowledges process
+    activate System
+
+        System --> Eng : displays results\n(size, height, bucket sizes,\ncomplexity analysis)
+    deactivate System
+
+@enduml

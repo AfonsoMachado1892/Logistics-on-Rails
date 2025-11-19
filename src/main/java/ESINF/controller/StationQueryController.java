@@ -1,5 +1,6 @@
 package ESINF.controller;
 
+import ESINF.model.KDTree2D;
 import ESINF.model.Station;
 import ESINF.model.StationIndex;
 import ESINF.repository.StationRepository;
@@ -15,7 +16,7 @@ import java.util.Set;
 public class StationQueryController {
 
     private final StationRepository repository;
-
+    private KDTree2D kdTree;
     public StationQueryController() {
         this.repository = new StationRepository();
     }
@@ -259,5 +260,21 @@ public class StationQueryController {
     public StationIndex getIndex() {
         ensureDataLoaded();
         return repository.getIndex();
+    }
+    /**
+     * Gets the built 2D-Tree (for USEI08 integration).
+     *
+     * @return KDTree2D or null if not built
+     */
+    public KDTree2D getKDTree() {
+        return kdTree;
+    }
+    /**
+     * Sets the built 2D-Tree (called from KDTreeMenu after building).
+     *
+     * @param kdTree The built tree
+     */
+    public void setKDTree(KDTree2D kdTree) {
+        this.kdTree = kdTree;
     }
 }

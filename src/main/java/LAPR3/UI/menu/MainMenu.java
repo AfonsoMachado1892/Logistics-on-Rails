@@ -4,6 +4,7 @@ import ESINF.controller.StationQueryController;
 import LAPR3.controller.DataController;
 import LAPR3.UI.utils.InputValidator;
 
+import java.sql.SQLOutput;
 import java.util.Scanner;
 
 /**
@@ -26,6 +27,8 @@ public class MainMenu {
     private final TravelTimeMenu travelTimeMenu;
     private final StationQueryMenu stationQueryMenu;
     private final KDTreeMenu kdTreeMenu;
+    private final GeographicSearchMenu geoSearchMenu;
+    private final ProximitySearchMenu proximitySearchMenu;
 
     public MainMenu(Scanner scanner, DataController dataController, InputValidator validator) {
         this.scanner = scanner;
@@ -43,6 +46,8 @@ public class MainMenu {
         this.travelTimeMenu = new TravelTimeMenu(scanner, validator);
         this.stationQueryMenu = new StationQueryMenu(scanner, validator, stationController);
         this.kdTreeMenu = new KDTreeMenu(scanner, validator, stationController);
+        this.geoSearchMenu = new GeographicSearchMenu(scanner, validator, stationController);
+        this.proximitySearchMenu = new ProximitySearchMenu(scanner, validator, stationController);
     }
 
     public void display() {
@@ -70,6 +75,8 @@ public class MainMenu {
         System.out.println("├─────────────────────────────────────────────────┤");
         System.out.println("│  10. Station Queries - Time Zone Index (USEI06) │");
         System.out.println("│  11. 2D-Tree Spatial Index (USEI07)             │");
+        System.out.println("│  12. Geographic Area Search (USEI08)            │");
+        System.out.println("│  13. Proximity Search (Nearest-N) (USEI09)      │");
         System.out.println("├─────────────────────────────────────────────────┤");
         System.out.println("│  RAILWAY OPERATIONS                             │");
         System.out.println("├─────────────────────────────────────────────────┤");
@@ -93,6 +100,8 @@ public class MainMenu {
             case 9 -> travelTimeMenu.show();
             case 10 -> stationQueryMenu.show();
             case 11 -> kdTreeMenu.show();
+            case 12 -> geoSearchMenu.show();
+            case 13 -> proximitySearchMenu.show();
             default -> System.out.println("Invalid option!");
         }
     }

@@ -1,0 +1,31 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Analyst" as Analyst
+participant ":System" as System
+
+activate Analyst
+
+    Analyst -> System : requests N-Nearest Station search
+    activate System
+
+        System --> Analyst : shows search requirements\n(Target Lat/Lon, N, Time Zone Filter)\nand asks for input
+    deactivate System
+
+    Analyst -> System : provides search parameters
+    activate System
+
+        System --> Analyst : executes k-NN search on 2D-Tree\n(uses Haversine, PriorityQueue, Pruning, and Filter)
+    deactivate System
+
+    Analyst -> System : acknowledges search
+    activate System
+
+        System --> Analyst : displays results\n(List of N-nearest stations sorted by distance, query time)
+    deactivate System
+
+@enduml
