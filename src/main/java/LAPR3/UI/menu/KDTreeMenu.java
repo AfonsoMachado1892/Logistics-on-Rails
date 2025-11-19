@@ -73,7 +73,7 @@ public class KDTreeMenu {
      */
     private void displayMenu() {
         System.out.println("\n╔═══════════════════════════════════════════════════╗");
-        System.out.println("║       2D-TREE SPATIAL INDEX (USEI07)             ║");
+        System.out.println("║       2D-TREE SPATIAL INDEX (USEI07)              ║");
         System.out.println("╚═══════════════════════════════════════════════════╝");
         System.out.println();
 
@@ -81,7 +81,7 @@ public class KDTreeMenu {
         System.out.println();
 
         System.out.println("┌───────────────────────────────────────────────────┐");
-        System.out.println("│  1. Check Station Data Status                    │");
+        System.out.println("│  1. Check Station Data Status                     │");
         System.out.println("│  2. Build Balanced 2D-Tree                        │");
         System.out.println("│  3. Display Tree Statistics                       │");
         System.out.println("│  4. Display Tree Structure (Visual)               │");
