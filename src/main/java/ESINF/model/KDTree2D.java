@@ -248,101 +248,6 @@ public class KDTree2D {
     }
 
     /**
-     * Range query: finds all stations within a rectangular region.
-     *
-     * @param minLat Minimum latitude
-     * @param maxLat Maximum latitude
-     * @param minLon Minimum longitude
-     * @param maxLon Maximum longitude
-     * @return List of stations in the range
-     */
-    public List<Station> rangeQuery(double minLat, double maxLat, double minLon, double maxLon) {
-        List<Station> result = new ArrayList<>();
-        rangeQueryRecursive(root, minLat, maxLat, minLon, maxLon, 0, result);
-        return result;
-    }
-
-    private void rangeQueryRecursive(Node node, double minLat, double maxLat,
-                                     double minLon, double maxLon, int depth,
-                                     List<Station> result) {
-        if (node == null) return;
-
-        // Check if node is in range
-        if (node.latitude >= minLat && node.latitude <= maxLat &&
-                node.longitude >= minLon && node.longitude <= maxLon) {
-            result.addAll(node.stations);
-        }
-
-        boolean splitByLatitude = (depth % 2 == 0);
-
-        // Decide which subtrees to explore
-        if (splitByLatitude) {
-            if (minLat <= node.latitude) {
-                rangeQueryRecursive(node.left, minLat, maxLat, minLon, maxLon, depth + 1, result);
-            }
-            if (maxLat >= node.latitude) {
-                rangeQueryRecursive(node.right, minLat, maxLat, minLon, maxLon, depth + 1, result);
-            }
-        } else {
-            if (minLon <= node.longitude) {
-                rangeQueryRecursive(node.left, minLat, maxLat, minLon, maxLon, depth + 1, result);
-            }
-            if (maxLon >= node.longitude) {
-                rangeQueryRecursive(node.right, minLat, maxLat, minLon, maxLon, depth + 1, result);
-            }
-        }
-    }
-
-    /**
-     * Finds the nearest station to a given point.
-     *
-     * @param targetLat Target latitude
-     * @param targetLon Target longitude
-     * @return Nearest station (null if tree is empty)
-     */
-    public Station nearestNeighbor(double targetLat, double targetLon) {
-        if (root == null) return null;
-
-        NearestResult result = new NearestResult();
-        nearestNeighborRecursive(root, targetLat, targetLon, 0, result);
-
-        return result.nearest;
-    }
-
-    private static class NearestResult {
-        Station nearest = null;
-        double bestDistance = Double.MAX_VALUE;
-    }
-
-    private void nearestNeighborRecursive(Node node, double targetLat, double targetLon,
-                                          int depth, NearestResult result) {
-        if (node == null) return;
-
-        // Calculate distance to this node
-        double dist = haversineDistance(targetLat, targetLon, node.latitude, node.longitude);
-
-        if (dist < result.bestDistance) {
-            result.bestDistance = dist;
-            result.nearest = node.stations.get(0); // First station in sorted bucket
-        }
-
-        boolean splitByLatitude = (depth % 2 == 0);
-        double diff = splitByLatitude ?
-                (targetLat - node.latitude) : (targetLon - node.longitude);
-
-        // Visit closer subtree first
-        Node first = diff < 0 ? node.left : node.right;
-        Node second = diff < 0 ? node.right : node.left;
-
-        nearestNeighborRecursive(first, targetLat, targetLon, depth + 1, result);
-
-        // Check if we need to explore the other subtree
-        if (Math.abs(diff) < result.bestDistance) {
-            nearestNeighborRecursive(second, targetLat, targetLon, depth + 1, result);
-        }
-    }
-
-    /**
      * Calculates Haversine distance between two coordinates (in km).
      */
     private double haversineDistance(double lat1, double lon1, double lat2, double lon2) {
@@ -544,5 +449,127 @@ public class KDTree2D {
      */
     public double getLastQueryTimeMs() {
         return lastQueryTimeNanos / 1_000_000.0;
+    }
+
+
+
+    // ---  METHODS FOR USEI09 (Proximity Search) ---
+
+    /**
+     * Finds the N nearest *locations* (nodes) to a target coordinate.
+     * Complies with USEI09: Handles N < X cases and optional time zone filtering.
+     *
+     * @param targetLat Target latitude
+     * @param targetLon Target longitude
+     * @param N         The number of nearest locations to find (must be > 0)
+     * @param filter    Optional TimeZoneFilter (null for no filter)
+     * @return A list of all stations from the N nearest locations, sorted by distance.
+     */
+    public List<Station> findNearestNStations(double targetLat, double targetLon, int N, TimeZoneFilter filter) {
+        if (N <= 0) {
+            throw new IllegalArgumentException("N must be greater than 0");
+        }
+        if (root == null) {
+            return Collections.emptyList();
+        }
+
+        // Use a PriorityQueue as a Max-Heap to store the N-best results
+        // We give it Collections.reverseOrder() so the *farthest* distance is at the top (peek)
+        PriorityQueue<ProximityResult> maxHeap = new PriorityQueue<>(N, Collections.reverseOrder());
+
+        // Start recursive search
+        findNearestNRecursive(root, targetLat, targetLon, N, filter, 0, maxHeap);
+
+        // --- Process Results ---
+        // The heap now contains the N-best results, but in Max-Heap order.
+        // We drain it into a LinkedList to reverse it (now Min-Heap order / sorted by distance)
+        LinkedList<ProximityResult> sortedResults = new LinkedList<>();
+        while (!maxHeap.isEmpty()) {
+            sortedResults.addFirst(maxHeap.poll());
+        }
+
+        // Flatten the list of ProximityResult into a list of Station
+        List<Station> finalStationList = new ArrayList<>();
+        for (ProximityResult pr : sortedResults) {
+            // Add all stations from this location
+            // They are already pre-sorted by name (from USEI07 build)
+            finalStationList.addAll(pr.stations());
+        }
+
+        return finalStationList;
+    }
+
+    /**
+     * Recursive helper for the k-NN search.
+     *
+     * @param node      Current node to check
+     * @param targetLat Target latitude
+     * @param targetLon Target longitude
+     * @param N         Number of neighbors to find
+     * @param filter    Optional time zone filter
+     * @param depth     Current depth in the tree
+     * @param maxHeap   The Max-Heap (size N) holding the N-best results found so far
+     */
+    private void findNearestNRecursive(Node node, double targetLat, double targetLon,
+                                       int N, TimeZoneFilter filter, int depth,
+                                       PriorityQueue<ProximityResult> maxHeap) {
+        if (node == null) {
+            return;
+        }
+
+        // --- 1. Check current node ---
+        boolean passesFilter = (filter == null || filter.matches(node.stations.get(0)));
+
+        if (passesFilter) {
+            double dist = haversineDistance(targetLat, targetLon, node.latitude, node.longitude);
+
+            if (maxHeap.size() < N) {
+                // Heap is not full, just add the new result
+                maxHeap.add(new ProximityResult(dist, node.stations));
+            } else if (dist < maxHeap.peek().distance()) {
+                // Heap is full, but this node is CLOSER than the FARTHEST one in the heap
+                // Remove the farthest, add this new one
+                maxHeap.poll(); // Remove farthest
+                maxHeap.add(new ProximityResult(dist, node.stations)); // Add new
+            }
+        }
+
+        // --- 2. Determine "good" (closer) and "bad" (farther) subtrees ---
+        boolean splitByLatitude = (depth % 2 == 0);
+        Node goodSubtree, badSubtree;
+        double diff; // Distance from target to the node's coordinate on the splitting axis
+
+        if (splitByLatitude) {
+            diff = targetLat - node.latitude;
+        } else {
+            diff = targetLon - node.longitude;
+        }
+
+        if (diff < 0) {
+            goodSubtree = node.left;
+            badSubtree = node.right;
+        } else {
+            goodSubtree = node.right;
+            badSubtree = node.left;
+        }
+
+        // --- 3. Visit "good" subtree ---
+        findNearestNRecursive(goodSubtree, targetLat, targetLon, N, filter, depth + 1, maxHeap);
+
+        // --- 4. Pruning: Check if "bad" subtree is worth visiting ---
+        double distToSplittingPlane;
+        if (splitByLatitude) {
+            // Distance from target to the latitude splitting line
+            distToSplittingPlane = haversineDistance(targetLat, targetLon, node.latitude, targetLon);
+        } else {
+            // Distance from target to the longitude splitting line
+            distToSplittingPlane = haversineDistance(targetLat, targetLon, targetLat, node.longitude);
+        }
+
+        if (maxHeap.size() < N || distToSplittingPlane < maxHeap.peek().distance()) {
+            // The bad subtree *could* contain a point closer than our current-farthest.
+            // We must explore it.
+            findNearestNRecursive(badSubtree, targetLat, targetLon, N, filter, depth + 1, maxHeap);
+        }
     }
 }

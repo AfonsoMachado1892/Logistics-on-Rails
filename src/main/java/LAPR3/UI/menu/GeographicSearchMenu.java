@@ -5,6 +5,8 @@ import ESINF.controller.StationQueryController;
 import ESINF.model.*;
 import LAPR3.UI.utils.InputValidator;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -13,6 +15,7 @@ import java.util.stream.Collectors;
 /**
  * USEI08 - Geographic Area Search Menu
  * Provides interface for searching stations by geographic region with optional filters
+
  */
 public class GeographicSearchMenu {
 
@@ -36,7 +39,7 @@ public class GeographicSearchMenu {
             return;
         }
 
-        // Get KDTree from station controller (assumes KDTree is built in KDTreeMenu)
+        // Get KDTree from controller (assumes KDTree is built in KDTreeMenu)
         KDTree2D kdTree = getKDTreeFromController();
         if (kdTree == null || kdTree.getRoot() == null) {
             System.out.println("\n❌ 2D-Tree not built!");
@@ -105,6 +108,9 @@ public class GeographicSearchMenu {
                     geoController.searchByGeographicArea(latMin, latMax, lonMin, lonMax);
 
             displaySearchResult(result);
+            if (result.getStationCount() > 0) {
+                offerToSaveResults(result.getStations(), "region_custom");
+            }
 
         } catch (Exception e) {
             System.out.println("❌ Error: " + e.getMessage());
@@ -144,6 +150,9 @@ public class GeographicSearchMenu {
                 geoController.searchByGeographicArea(region, null);
 
         displaySearchResult(result);
+        if (result.getStationCount() > 0) {
+            offerToSaveResults(result.getStations(), regionName.toLowerCase().replace(" ", "_"));
+        }
     }
 
     private void searchWithFilters() {
@@ -167,10 +176,17 @@ public class GeographicSearchMenu {
 
         System.out.println("\n🔍 Searching with filter: " + filter);
 
-        GeographicSearchController.SearchResult result =
-                geoController.searchByGeographicArea(latMin, latMax, lonMin, lonMax, filter);
+        try {
+            GeographicSearchController.SearchResult result =
+                    geoController.searchByGeographicArea(latMin, latMax, lonMin, lonMax, filter);
 
-        displaySearchResult(result);
+            displaySearchResult(result);
+            if (result.getStationCount() > 0) {
+                offerToSaveResults(result.getStations(), "region_filtered");
+            }
+        } catch (Exception e) {
+            System.out.println("❌ Error: " + e.getMessage());
+        }
     }
 
     private StationFilter buildFilterInteractive() {
@@ -463,4 +479,49 @@ public class GeographicSearchMenu {
         return stationController.getKDTree();
     }
 
+    // ---  HELPER METHODS FOR LOGGING ---
+
+    private void offerToSaveResults(List<Station> results, String suffix) {
+        boolean save = validator.readConfirmation("\nSave ALL " + results.size() + " stations to a log file?");
+        if (save) {
+            saveResultsToFile(results, suffix);
+        }
+    }
+
+    /**
+     * Saves all station results to a timestamped CSV file in the Logs directory.
+     */
+    private void saveResultsToFile(List<Station> results, String suffix) {
+        try {
+            // Create a timestamped filename
+            String filename = "Logs/geographic_" + suffix + "_" + System.currentTimeMillis() + ".csv";
+
+            try (FileWriter writer = new FileWriter(filename)) {
+                // Header
+                writer.write("station,latitude,longitude,country,timeZone,timeZoneGroup,isCity,isMainStation,isAirport\n");
+
+                // Data
+                for (Station s : results) {
+                    // Escape commas and quotes for CSV integrity
+                    String name = s.getName().contains(",") ? "\"" + s.getName().replace("\"", "\"\"") + "\"" : s.getName();
+
+                    writer.write(String.format("%s,%.5f,%.5f,%s,%s,%s,%b,%b,%b\n",
+                            name,
+                            s.getLatitude(),
+                            s.getLongitude(),
+                            s.getCountry(),
+                            s.getTimeZone(),
+                            s.getTimeZoneGroup(),
+                            s.isCity(),
+                            s.isMainStation(),
+                            s.isAirport()));
+                }
+            }
+
+            System.out.println("\nALL results saved to: " + filename);
+
+        } catch (IOException e) {
+            System.err.println(" Error saving file: " + e.getMessage());
+        }
+    }
 }
