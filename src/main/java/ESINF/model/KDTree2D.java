@@ -1,6 +1,9 @@
 package ESINF.model;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
+import java.nio.file.Paths;
 
 /**
  * USEI07 - Build a balanced 2D-Tree on Latitude/Longitude
@@ -324,6 +327,66 @@ public class KDTree2D {
     public Node getRoot() {
         return root;
     }
+
+    /**
+     * Exports the structure of the 2D-Tree to a CSV file.
+     * Each row represents a node with its coordinates, bucket size, and split axis.
+     * Uses a Pre-Order traversal to maintain a hierarchical-like structure in the file.
+     *
+     * @param filename The name of the CSV file to create
+     * @return The number of nodes exported
+     * @throws IOException If an error occurs during file writing
+     */
+    public int exportTreeToCsv(String filename) throws IOException {
+        // CONSTRÓI O CAMINHO DO ARQUIVO DENTRO DA PASTA 'Logs/'
+        String path = Paths.get("Logs", filename).toString();
+
+        try (FileWriter writer = new FileWriter(path)) {
+            // Write header
+            writer.write("Depth,SplitAxis,Latitude,Longitude,BucketSize,StationNames\n");
+
+            // Start recursive export from root
+            return exportTreeToCsvRecursive(root, 0, writer);
+        }
+    }
+
+    /**
+     * Recursive helper for exporting the tree in Pre-Order.
+     */
+    private int exportTreeToCsvRecursive(Node node, int depth, FileWriter writer) throws IOException {
+        if (node == null) return 0;
+
+        String splitAxis = (depth % 2 == 0) ? "Latitude" : "Longitude";
+
+        // Collect station names in the bucket
+        StringBuilder stationNames = new StringBuilder();
+        for (int i = 0; i < node.stations.size(); i++) {
+            // Escape quotes for CSV compliance
+            stationNames.append(node.stations.get(i).getName().replace("\"", "\"\""));
+            if (i < node.stations.size() - 1) {
+                stationNames.append("|"); // Separador para múltiplas estações
+            }
+        }
+
+        // Write node data (coordenadas com 5 casas decimais para consistência)
+        String line = String.format("%d,%s,%.5f,%.5f,%d,\"%s\"\n",
+                depth,
+                splitAxis,
+                node.latitude,
+                node.longitude,
+                node.stations.size(),
+                stationNames.toString());
+
+        writer.write(line);
+
+        int count = 1;
+        count += exportTreeToCsvRecursive(node.left, depth + 1, writer);
+        count += exportTreeToCsvRecursive(node.right, depth + 1, writer);
+
+        return count;
+    }
+
+
     /**
      * USEI08 - Range query with optional filtering.
      * Finds all stations within a rectangular region that match the filter criteria.
