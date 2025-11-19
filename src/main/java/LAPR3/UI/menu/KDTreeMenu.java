@@ -85,10 +85,8 @@ public class KDTreeMenu {
         System.out.println("│  2. Build Balanced 2D-Tree                        │");
         System.out.println("│  3. Display Tree Statistics                       │");
         System.out.println("│  4. Display Tree Structure (Visual)               │");
-        System.out.println("│  5. Range Query (Rectangular Region)              │");
-        System.out.println("│  6. Nearest Neighbor Search                       │");
-        System.out.println("│  7. Analyze Bucket Sizes                          │");
-        System.out.println("│  8. Temporal Complexity Analysis                  │");
+        System.out.println("│  5. Analyze Bucket Sizes                          │");
+        System.out.println("│  6. Temporal Complexity Analysis                  │");
         System.out.println("│  0. Back to Main Menu                             │");
         System.out.println("└───────────────────────────────────────────────────┘");
         System.out.println();
@@ -121,10 +119,8 @@ public class KDTreeMenu {
             case 2 -> buildBalancedTree();
             case 3 -> displayStatistics();
             case 4 -> displayTreeStructure();
-            case 5 -> performRangeQuery();
-            case 6 -> performNearestNeighbor();
-            case 7 -> analyzeBucketSizes();
-            case 8 -> analyzeComplexity();
+            case 5 -> analyzeBucketSizes();
+            case 6 -> analyzeComplexity();
         }
     }
 
@@ -283,81 +279,6 @@ public class KDTreeMenu {
             if (node.left != null) {
                 printTreeVisual(node.left, newPrefix, true, depth + 1, maxDepth);
             }
-        }
-    }
-
-    /**
-     * Performs a range query on the 2D-Tree.
-     */
-    private void performRangeQuery() {
-        System.out.println("\n═══ RANGE QUERY ═══");
-
-        if (lastStatistics == null) {
-            System.out.println("No tree built yet! Please run option 2 first.");
-            return;
-        }
-
-        System.out.println("Enter rectangular region coordinates:");
-
-        double minLat = readDouble("Minimum Latitude: ", -90, 90);
-        double maxLat = readDouble("Maximum Latitude: ", minLat, 90);
-        double minLon = readDouble("Minimum Longitude: ", -180, 180);
-        double maxLon = readDouble("Maximum Longitude: ", minLon, 180);
-
-        long startTime = System.nanoTime();
-        List<Station> results = kdTree.rangeQuery(minLat, maxLat, minLon, maxLon);
-        long endTime = System.nanoTime();
-
-        System.out.println("\n✓ Range query completed in " +
-                (endTime - startTime) / 1_000_000.0 + " ms");
-        System.out.println("Found " + results.size() + " station(s) in the region:");
-
-        if (results.isEmpty()) {
-            System.out.println("  (No stations found in this region)");
-        } else {
-            for (int i = 0; i < Math.min(20, results.size()); i++) {
-                Station s = results.get(i);
-                System.out.printf("  %d. %s (%.5f, %.5f) - %s\n",
-                        i + 1, s.getName(), s.getLatitude(), s.getLongitude(), s.getCountry());
-            }
-            if (results.size() > 20) {
-                System.out.println("  ... (" + (results.size() - 20) + " more stations)");
-            }
-        }
-    }
-
-    /**
-     * Finds the nearest neighbor to a target point.
-     */
-    private void performNearestNeighbor() {
-        System.out.println("\n═══ NEAREST NEIGHBOR SEARCH ═══");
-
-        if (lastStatistics == null) {
-            System.out.println("No tree built yet! Please run option 2 first.");
-            return;
-        }
-
-        System.out.println("Enter target coordinates:");
-
-        double targetLat = readDouble("Latitude: ", -90, 90);
-        double targetLon = readDouble("Longitude: ", -180, 180);
-
-        long startTime = System.nanoTime();
-        Station nearest = kdTree.nearestNeighbor(targetLat, targetLon);
-        long endTime = System.nanoTime();
-
-        System.out.println("\n✓ Nearest neighbor search completed in " +
-                (endTime - startTime) / 1_000_000.0 + " ms");
-
-        if (nearest == null) {
-            System.out.println("No nearest station found (tree is empty).");
-        } else {
-            System.out.println("Nearest station:");
-            System.out.printf("  Name: %s\n", nearest.getName());
-            System.out.printf("  Coordinates: (%.5f, %.5f)\n",
-                    nearest.getLatitude(), nearest.getLongitude());
-            System.out.printf("  Country: %s\n", nearest.getCountry());
-            System.out.printf("  Timezone: %s\n", nearest.getTimeZone());
         }
     }
 
