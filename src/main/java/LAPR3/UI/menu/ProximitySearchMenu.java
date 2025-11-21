@@ -152,33 +152,50 @@ public class ProximitySearchMenu {
         System.out.println("║       TEMPORAL COMPLEXITY ANALYSIS (USEI09)           ║");
         System.out.println("╚═══════════════════════════════════════════════════════╝");
         System.out.println();
-        System.out.println("ALGORITHM: k-Nearest Neighbors (k-NN) on 2D-Tree");
+        System.out.println("ALGORITHM: k-Nearest Neighbors (k-NN) on 2D-Tree with Filtering");
         System.out.println("─".repeat(60));
         System.out.println();
-        System.out.println(" AVERAGE CASE: O(log n)");
-        System.out.println("   When: Tree is balanced and pruning is effective.");
-        System.out.println("   Why: Algorithm quickly eliminates subtrees that cannot");
-        System.out.println("        contain points closer than the N-th best found so far.");
+
+        // Best / Average Case
+        System.out.println("  BEST / AVERAGE CASE: O(log n)");
+        System.out.println("   When:    N is small, and the Filter matches local stations.");
+        System.out.println("   Example: Finding the 5 nearest stations in Paris (no filter).");
+        System.out.println("   Why:     The algorithm finds valid neighbors quickly. The distance");
+        System.out.println("            to the N-th neighbor becomes the pruning threshold,");
+        System.out.println("            allowing huge sections of the tree to be discarded.");
         System.out.println();
-        System.out.println(" WORST CASE: O(n)");
-        System.out.println("   When: Tree is unbalanced OR N is very large OR");
-        System.out.println("         search point is equidistant to many nodes.");
-        System.out.println("   Why: Algorithm may have to visit every node.");
+
+        // Worst Case
+        System.out.println("  WORST CASE: O(n * log N)");
+        System.out.println("   When:    1. Strict Filtering (e.g., searching for 'Asia/Tokyo'");
+        System.out.println("               stations while targeting coordinates in Portugal).");
+        System.out.println("            2. Large N (Requesting N ≈ total stations).");
+        System.out.println("   Why:     The pruning check always returns true (cannot shrink");
+        System.out.println("            threshold), forcing recursion to visit every node.");
         System.out.println();
+
         System.out.println("─".repeat(60));
-        System.out.println("COMPONENTS:");
-        System.out.println("  • Priority Queue Operations: O(log N)");
-        System.out.println("  • Distance Calculation: O(1)");
-        System.out.println("  • Filter Check: O(1) (HashSet lookup)");
+
+        // Component Costs
+        System.out.println(" COMPONENT COSTS:");
+        System.out.println("   • Tree Traversal:     O(log n) [depth] to O(n) [full scan]");
+        System.out.println("   • Priority Queue Ops: O(log N) [insert/poll]");
+        System.out.println("   • Distance Calc:      O(1)");
+        System.out.println("   • Filter Check:       O(1)");
         System.out.println();
-        System.out.println("WHERE:");
-        System.out.println("  n = total nodes in tree (~64,000)");
-        System.out.println("  N = number of neighbors requested");
+        System.out.println("   Where:");
+        System.out.println("     n = Total stations (~64,000)");
+        System.out.println("     N = Desired neighbors (k)");
+        System.out.println();
+
         System.out.println("─".repeat(60));
-        System.out.println();
-        System.out.println(" EFFICIENCY:");
-        System.out.println("   For small N (e.g., 5-10), finding nearest neighbors takes");
-        System.out.println("   milliseconds, vastly outperforming a linear scan of 64k items.");
+
+        // Speedup
+        System.out.println(" SPEEDUP vs LINEAR SCAN:");
+        System.out.println("   • Linear Scan: Always O(n) iterations.");
+        System.out.println("   • 2D-Tree:     Varies from O(log n) to O(n).");
+        System.out.println("     -> Typically 100x-500x faster for small N (e.g., N=10)");
+        System.out.println("        unless filters force a full traversal.");
         System.out.println();
         System.out.println("═".repeat(60));
     }
