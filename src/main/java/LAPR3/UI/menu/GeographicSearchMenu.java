@@ -76,18 +76,18 @@ public class GeographicSearchMenu {
 
     private void displayMenu() {
         System.out.println("\n╔═══════════════════════════════════════════════════╗");
-        System.out.println("║   USEI08 - GEOGRAPHIC AREA SEARCH                ║");
+        System.out.println("║   USEI08 - GEOGRAPHIC AREA SEARCH                 ║");
         System.out.println("╚═══════════════════════════════════════════════════╝");
         System.out.println();
         System.out.println("┌───────────────────────────────────────────────────┐");
-        System.out.println("│  1. Search by Custom Geographic Region           │");
-        System.out.println("│  2. Search by Predefined Region                  │");
-        System.out.println("│  3. Search with Filters                          │");
-        System.out.println("│  4. Run Sample Queries (Demo)                    │");
-        System.out.println("│  5. Analyze Region Density                       │");
-        System.out.println("│  6. View Complexity Analysis                     │");
+        System.out.println("│  1. Search by Custom Geographic Region            │");
+        System.out.println("│  2. Search by Predefined Region                   │");
+        System.out.println("│  3. Search with Filters                           │");
+        System.out.println("│  4. Run Sample Queries (Demo)                     │");
+        System.out.println("│  5. Analyze Region Density                        │");
+        System.out.println("│  6. View Complexity Analysis                      │");
         System.out.println("├───────────────────────────────────────────────────┤");
-        System.out.println("│  0. Back to Main Menu                            │");
+        System.out.println("│  0. Back to Main Menu                             │");
         System.out.println("└───────────────────────────────────────────────────┘");
         System.out.println();
     }
@@ -339,16 +339,16 @@ public class GeographicSearchMenu {
         System.out.println("ALGORITHM: 2D-Tree Range Search with Pruning");
         System.out.println("─".repeat(60));
         System.out.println();
-        System.out.println("🔹 BEST CASE: O(log n + k)");
+        System.out.println("BEST CASE: O(log n + k)");
         System.out.println("   When: Small region, sparse area, effective pruning");
         System.out.println("   Example: 0.1° × 0.1° region → ~5ms for 64k stations");
         System.out.println();
-        System.out.println("🔹 AVERAGE CASE: O(√n + k)");
+        System.out.println("AVERAGE CASE: O(√n + k)");
         System.out.println("   When: Medium region (1-5 degrees)");
         System.out.println("   Example: Portugal → ~15ms for 64k stations");
         System.out.println("   Why: Rectangular query intersects O(√n) splitting planes");
         System.out.println();
-        System.out.println("🔹 WORST CASE: O(n)");
+        System.out.println("WORST CASE: O(n)");
         System.out.println("   When: Region covers entire map (no pruning)");
         System.out.println("   Example: All Europe → ~100ms for 64k stations");
         System.out.println();
@@ -364,10 +364,10 @@ public class GeographicSearchMenu {
         System.out.println("  k = number of results found");
         System.out.println("─".repeat(60));
         System.out.println();
-        System.out.println("💡 SPEEDUP vs Linear Scan:");
+        System.out.println(" SPEEDUP vs Linear Scan:");
         System.out.println("   Linear scan: Always O(n) ≈ 50-100ms");
         System.out.println("   2D-Tree: Typically O(√n) ≈ 5-30ms");
-        System.out.println("   Performance gain: 10-20x faster! 🚀");
+        System.out.println("   Performance gain: 10-20x faster ");
         System.out.println();
         System.out.println("═".repeat(60));
     }
