@@ -141,7 +141,7 @@ public class ProximitySearchControllerTest {
         ProximitySearchController controller = new ProximitySearchController(realTree);
         ProximitySearchController.SearchResult result = controller.searchNearest(10.0, 10.0, 1, null);
         String output = result.toString();
-        assertTrue(output.contains("Target: (10.00000, 10.00000)"));
+        assertTrue(output.contains("Target: (10,00000, 10,00000)"));
     }
 
     @Test
