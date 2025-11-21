@@ -1,6 +1,6 @@
 #include <string.h>  
-#include "../../unity.h"
-#include "asm.h" 
+#include "../unity.h"
+#include "extract_data.h"
 
 
 int callfunc ( int (*f)(char* str,char* tok, char* unit, int* value),char* str,char *tok, char* unit, int* value);  
@@ -70,9 +70,3 @@ int main()
     return UNITY_END();  
 
   } 
-
-
-
-
-
-

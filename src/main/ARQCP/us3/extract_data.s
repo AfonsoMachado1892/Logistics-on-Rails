@@ -1,4 +1,4 @@
- .section .text
+.section .text
  .global extract_data
 
 # int extract_data(char* str, char* token, char* unit, int* value)
@@ -34,18 +34,24 @@ extract_data:
     beqz a0, error          # Se não encontrou, erro
     mv s4, a0               # s4 = posição após token
     
-    # Pula ':' após token
+    # Pula '&' após token
     lbu t0, 0(s4)
-    li t1, ':'
-    bne t0, t1, error       # Se não for ':', erro
-    addi s4, s4, 1          # Avança para depois de ':'
+    li t1, '&'
+    bne t0, t1, error       # Se não for '&', erro
+    addi s4, s4, 1          # Avança para depois de '&'
+
+    # Pula "unit:"
+    mv a0, s4
+    jal skip_unit_label     # Procura e pula "unit:"
+    beqz a0, error
+    mv s4, a0               # s4 = posição após "unit:"
     
-    # Extrai unidade até '&'
-    mv a0, s4               # a0 = posição atual
+    # Extrai unidade até '&' (sua rotina extract_unit)
+    mv a0, s4               # a0 = posição atual (início da unidade)
     mv a1, s2               # a1 = unit (destino)
-    jal extract_unit        # Extrai unidade
+    jal extract_unit        
     beqz a0, error          # Se falhou, erro
-    mv s4, a0               # s4 = posição após '&'
+    mv s4, a0               # s4 = posição após '&' (que segue a unidade)
     
     # Pula "value:"
     mv a0, s4
@@ -81,35 +87,77 @@ cleanup:
     addi sp, sp, 32
     ret
 
-# find_token: Procura token em str
+# =========================================================
+# SUB-ROTINAS (CORRIGIDAS)
+# =========================================================
+
+# find_token: Procura token em str (CORRIGIDA)
 # a0 = str, a1 = token
-# Retorna: a0 = ponteiro após token ou 0
+# Retorna: a0 = ponteiro após token OU 0
 find_token:
-    mv t0, a0               # t0 = str atual
+    # t0: ponteiro de busca em str (str_ptr)
+    # t1: caractere lido de str
+    # t2: ponteiro de str para match (match_ptr)
+    # t3: ponteiro de token (token_ptr)
+    # t4: caractere lido de token
+    mv t0, a0               # t0 = str_ptr (inicia em str)
+    
 find_loop:
     lbu t1, 0(t0)
     beqz t1, find_fail      # Fim da string
     
-    # Compara com token
-    mv t2, a0               # t2 = início de str
-    mv t3, a1               # t3 = token
-    mv t4, t0               # t4 = posição atual
+    # Compara o caractere atual t1 com o primeiro caractere do token
+    lbu t4, 0(a1)           # t4 = token[0]
+    bne t1, t4, find_next   # Se não for o primeiro char, avança
+    
+    # Possível correspondência encontrada. Inicia comparação completa.
+    mv t2, t0               # t2 = match_ptr (posição atual em str)
+    mv t3, a1               # t3 = token_ptr
+    
 compare_loop:
-    lbu t5, 0(t4)
-    lbu t6, 0(t3)
-    beqz t6, find_success   # Token completo encontrado
-    bne t5, t6, find_next   # Não coincide
-    addi t4, t4, 1
+    lbu t1, 0(t2)           # t1 = str[i]
+    lbu t4, 0(t3)           # t4 = token[j]
+
+    beqz t4, check_prefix_delim # Token completo encontrado!
+
+    bne t1, t4, find_next   # Não coincide, continua a busca no próximo caractere de str
+    
+    addi t2, t2, 1
     addi t3, t3, 1
     j compare_loop
+
+# ------------------------------------------------------------------
+# NOVO PASSO: Verificar o caractere anterior e posterior (Delimitação)
+# ------------------------------------------------------------------
+check_prefix_delim:
+    # T2 é o endereço após o token.
+    # Verificar o caractere após o token (deve ser '&')
+    lbu t1, 0(t2)           # t1 = char após o token
+    li t4, '&'
+    bne t1, t4, find_next   # Se não for '&', não é um campo completo -> continua a busca
+    
+    # Verificar o caractere ANTES do token:
+    # Deve ser '#', ou deve ser o início da string (t0 == a0)
+    bne t0, a0, check_hash  # Se não for o início da string, verifica '#'
+    
+    # É o início da string, e o sufixo é '&'. SUCESSO.
+    mv a0, t2               # Retorna a posição após o token
+    ret
+    
+check_hash:
+    # t0 é o início da correspondência. Verificar o caractere em t0 - 1.
+    addi t3, t0, -1         # t3 = char antes do token
+    lbu t1, 0(t3)           # t1 = caractere anterior
+    li t4, '#'              # t4 = '#'
+    bne t1, t4, find_next   # Se não for '#', não é um campo completo -> continua a busca
+    
+    # É depois de '#' e o sufixo é '&'. SUCESSO.
+    mv a0, t2               # Retorna a posição após o token
+    ret
 
 find_next:
     addi t0, t0, 1
     j find_loop
-
-find_success:
-    mv a0, t4               # Retorna posição após token
-    ret
 
 find_fail:
     li a0, 0
@@ -143,6 +191,41 @@ extract_fail:
     li a0, 0
     ret
 
+# skip_unit_label: Pula "unit:"
+# a0 = str
+# Retorna: a0 = posição após "unit:" ou 0
+skip_unit_label:
+    mv t0, a0
+    # Verifica a string "unit:" (5 caracteres)
+    li t1, 'u'
+    li t2, 'n'
+    li t3, 'i'
+    li t4, 't'
+    li t5, ':'
+
+    lbu t6, 0(t0)
+    bne t6, t1, skip_unit_fail
+
+    lbu t6, 1(t0)
+    bne t6, t2, skip_unit_fail
+
+    lbu t6, 2(t0)
+    bne t6, t3, skip_unit_fail
+
+    lbu t6, 3(t0)
+    bne t6, t4, skip_unit_fail
+
+    lbu t6, 4(t0)
+    bne t6, t5, skip_unit_fail
+    
+    addi a0, t0, 5          # Pula "unit:" (5 caracteres)
+    ret
+
+skip_unit_fail:
+    li a0, 0
+    ret
+
+
 # skip_value_label: Pula "value:"
 # a0 = str
 # Retorna: a0 = posição após "value:" ou 0
@@ -173,7 +256,7 @@ skip_value_label:
     li t2, ':'
     bne t1, t2, skip_fail
     
-    addi a0, t0, 6          # Pula "value:"
+    addi a0, t0, 6          # Pula "value:" (6 caracteres)
     ret
 
 skip_fail:
