@@ -76,6 +76,52 @@ public class RouteRepository {
     }
 
     /**
+     * Saves a route to the repository
+     *
+     * @param route route to save
+     * @throws IllegalArgumentException if route ID already exists
+     */
+    public void save(Route route) {
+        if (route == null) {
+            throw new IllegalArgumentException("Route cannot be null");
+        }
+
+        if (routes.containsKey(route.getRouteId())) {
+            throw new IllegalArgumentException("Route with ID " + route.getRouteId() + " already exists");
+        }
+
+        routes.put(route.getRouteId(), route);
+    }
+
+    /**
+     * Updates an existing route
+     *
+     * @param route route to update
+     * @throws IllegalArgumentException if route doesn't exist
+     */
+    public void update(Route route) {
+        if (route == null) {
+            throw new IllegalArgumentException("Route cannot be null");
+        }
+
+        if (!routes.containsKey(route.getRouteId())) {
+            throw new IllegalArgumentException("Route with ID " + route.getRouteId() + " does not exist");
+        }
+
+        routes.put(route.getRouteId(), route);
+    }
+
+    /**
+     * Deletes a route from the repository
+     *
+     * @param routeId route ID to delete
+     * @return true if deleted, false if not found
+     */
+    public boolean delete(String routeId) {
+        return routes.remove(routeId) != null;
+    }
+
+    /**
      * Finds a route by ID
      */
     public Optional<Route> findById(String routeId) {
@@ -180,5 +226,12 @@ public class RouteRepository {
      */
     public boolean exists(String routeId) {
         return routes.containsKey(routeId);
+    }
+
+    /**
+     * Clears all routes from the repository
+     */
+    public void clear() {
+        routes.clear();
     }
 }

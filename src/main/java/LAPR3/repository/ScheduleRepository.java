@@ -208,4 +208,56 @@ public class ScheduleRepository {
             schedule.setStatus(newStatus);
         }
     }
+    /**
+     * Saves a schedule to the repository
+     *
+     * @param schedule schedule to save
+     * @throws IllegalArgumentException if schedule ID already exists
+     */
+    public void save(Schedule schedule) {
+        if (schedule == null) {
+            throw new IllegalArgumentException("Schedule cannot be null");
+        }
+
+        if (schedules.containsKey(schedule.getScheduleId())) {
+            throw new IllegalArgumentException("Schedule with ID " + schedule.getScheduleId() + " already exists");
+        }
+
+        schedules.put(schedule.getScheduleId(), schedule);
+    }
+
+    /**
+     * Updates an existing schedule
+     *
+     * @param schedule schedule to update
+     * @throws IllegalArgumentException if schedule doesn't exist
+     */
+    public void update(Schedule schedule) {
+        if (schedule == null) {
+            throw new IllegalArgumentException("Schedule cannot be null");
+        }
+
+        if (!schedules.containsKey(schedule.getScheduleId())) {
+            throw new IllegalArgumentException("Schedule with ID " + schedule.getScheduleId() + " does not exist");
+        }
+
+        schedules.put(schedule.getScheduleId(), schedule);
+    }
+
+    /**
+     * Deletes a schedule from the repository
+     *
+     * @param scheduleId schedule ID to delete
+     * @return true if deleted, false if not found
+     */
+    public boolean delete(String scheduleId) {
+        return schedules.remove(scheduleId) != null;
+    }
+
+    /**
+     * Clears all schedules from the repository
+     */
+    public void clear() {
+        schedules.clear();
+    }
 }
