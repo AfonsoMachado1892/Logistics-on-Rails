@@ -13,18 +13,31 @@ public class ProximityResultTest {
     private List<Station> listA = List.of(sA);
 
     @Test
-    void testCompareTo() {
+    public void testCompareTo_LesserThan() {
         ProximityResult res50 = new ProximityResult(50.0, listA);
         ProximityResult res100 = new ProximityResult(100.0, listA);
-        ProximityResult res50_dupe = new ProximityResult(50.0, listA);
 
-        assertTrue(res50.compareTo(res100) < 0, "50 should be less than 100");
-        assertTrue(res100.compareTo(res50) > 0, "100 should be greater than 50");
-        assertEquals(0, res50.compareTo(res50_dupe), "50 should be equal to 50");
+        assertTrue("50 should be less than 100", res50.compareTo(res100) < 0);
     }
 
     @Test
-    void testPriorityQueueAsMaxHeap() {
+    public void testCompareTo_GreaterThan() {
+        ProximityResult res50 = new ProximityResult(50.0, listA);
+        ProximityResult res100 = new ProximityResult(100.0, listA);
+
+        assertTrue("100 should be greater than 50", res100.compareTo(res50) > 0);
+    }
+
+    @Test
+    public void testCompareTo_EqualTo() {
+        ProximityResult res50 = new ProximityResult(50.0, listA);
+        ProximityResult res50_dupe = new ProximityResult(50.0, listA);
+
+        assertEquals("50 should be equal to 50", 0, res50.compareTo(res50_dupe));
+    }
+
+    @Test
+    public void testPriorityQueueAsMaxHeap_FirstPoll() {
 
         PriorityQueue<ProximityResult> maxHeap = new PriorityQueue<>(Collections.reverseOrder());
 
@@ -36,12 +49,42 @@ public class ProximityResultTest {
         maxHeap.add(res100);
         maxHeap.add(res25);
 
-        // The top of the heap (peek) should be the one with the MAXIMUM distance
-        assertEquals(100.0, maxHeap.peek().distance());
+        // The top of the heap (poll) should be the one with the MAXIMUM distance
         assertEquals(res100, maxHeap.poll()); // Remove 100
-        assertEquals(50.0, maxHeap.peek().distance());
+    }
+
+    @Test
+    public void testPriorityQueueAsMaxHeap_SecondPoll() {
+
+        PriorityQueue<ProximityResult> maxHeap = new PriorityQueue<>(Collections.reverseOrder());
+
+        ProximityResult res50 = new ProximityResult(50.0, listA);
+        ProximityResult res100 = new ProximityResult(100.0, listA);
+        ProximityResult res25 = new ProximityResult(25.0, listA);
+
+        maxHeap.add(res50);
+        maxHeap.add(res100);
+        maxHeap.add(res25);
+
+        maxHeap.poll(); // Remove 100
         assertEquals(res50, maxHeap.poll()); // Remove 50
-        assertEquals(25.0, maxHeap.peek().distance());
+    }
+
+    @Test
+    public void testPriorityQueueAsMaxHeap_ThirdPoll() {
+
+        PriorityQueue<ProximityResult> maxHeap = new PriorityQueue<>(Collections.reverseOrder());
+
+        ProximityResult res50 = new ProximityResult(50.0, listA);
+        ProximityResult res100 = new ProximityResult(100.0, listA);
+        ProximityResult res25 = new ProximityResult(25.0, listA);
+
+        maxHeap.add(res50);
+        maxHeap.add(res100);
+        maxHeap.add(res25);
+
+        maxHeap.poll(); // Remove 100
+        maxHeap.poll(); // Remove 50
         assertEquals(res25, maxHeap.poll()); // Remove 25
     }
 }

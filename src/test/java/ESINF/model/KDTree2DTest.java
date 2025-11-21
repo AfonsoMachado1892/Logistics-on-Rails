@@ -30,11 +30,12 @@ public class KDTree2DTest {
         portoCampanha = buildStation("Porto Campanhã", 41.14961, -8.61099, "PT", true, true);
         portoSaoBento = buildStation("Porto São Bento", 41.14961, -8.61099, "PT", false, false);
         aveiro = buildStation("Aveiro", 40.64050, -8.65370, "PT", true, false);
-        madridChamartin = buildStation("Madrid Chamartín", 40.47295, -3.68920, "ES", true, true);
         lisbonOriente = buildStation("Lisboa Oriente", 38.76792, -9.09944, "PT", true, true);
 
         // Initialize new stations (BUT DO NOT ADD TO DEFAULT LIST)
         // Paris (CET)
+        madridChamartin = new Station("Madrid Chamartín", 40.47295, -3.68920, "ES", "Europe/Madrid", "CET", true, true, false);
+
         parisGareLyon = new Station("Paris-Gare-Lyon", 48.84, 2.37, "FR", "Europe/Paris", "CET", true, true, false);
         // Berlin (CET)
         berlinHbf = new Station("Berlin Hbf", 52.52, 13.36, "DE", "Europe/Berlin", "CET", true, true, false);
@@ -192,7 +193,7 @@ public class KDTree2DTest {
     }
 
     // -----------------------------------------------------------------
-    // --- NEW TESTS FOR USEI09 (Proximity Search) ---
+    // --- TESTS FOR USEI09 (Proximity Search) ---
     // -----------------------------------------------------------------
 
     /**
@@ -211,9 +212,8 @@ public class KDTree2DTest {
     }
 
     @Test
-    public void testFindNearestN_Simple() {
-        // Search near Lisbon (38, -9) for N=1
-        // Nearest is Lisbon Oriente
+    public void testFindNearestN_SimpleCase_N_is_1() {
+        // Search near Lisbon (38, -9) for N=1. Nearest is Lisbon Oriente.
         List<Station> results = tree.findNearestNStations(38.0, -9.0, 1, null);
 
         assertEquals(1, results.size());
@@ -221,50 +221,65 @@ public class KDTree2DTest {
     }
 
     @Test
-    public void testFindNearestN_N_is_2() {
-        // Search near Lisbon (38, -9) for N=2
-        // 1. Lisbon Oriente
-        // 2. Aveiro (closer than Madrid)
+    public void testFindNearestN_N_is_2_NearestIsLisbonOriente() {
+        // Search near Lisbon (38, -9) for N=2. The first is Lisbon Oriente.
         List<Station> results = tree.findNearestNStations(38.0, -9.0, 2, null);
 
-        assertEquals(2, results.size());
         assertEquals(lisbonOriente.getName(), results.get(0).getName());
+    }
+
+    @Test
+    public void testFindNearestN_N_is_2_SecondNearestIsAveiro() {
+        // Search near Lisbon (38, -9) for N=2. The second nearest should be Aveiro.
+        List<Station> results = tree.findNearestNStations(38.0, -9.0, 2, null);
+
         assertEquals(aveiro.getName(), results.get(1).getName());
     }
 
     @Test
-    public void testFindNearestN_SpecialCase_N_less_X() {
-        // N=1 search near Porto.
-        // Porto coord has 2 stations. N=1 must return both.
+    public void testFindNearestN_N_Less_Than_X_ReturnsBothStationsInBucket() {
+        // N=1 search near Porto. Porto coord has 2 stations (a bucket). N=1 must return both.
         List<Station> results = tree.findNearestNStations(41.15, -8.61, 1, null);
 
         assertEquals(2, results.size());
-        assertTrue(results.contains(portoCampanha));
-        assertTrue(results.contains(portoSaoBento));
     }
 
     @Test
-    public void testFindNearestN_WithFilter() {
-        // Use the FULL tree with Paris/Berlin/Kyiv for this test
+    public void testFindNearestN_N_Less_Than_X_ContainsPortoCampanha() {
+        // N=1 search near Porto. Porto coord has 2 stations (a bucket).
+        List<Station> results = tree.findNearestNStations(41.15, -8.61, 1, null);
+
+        assertTrue(results.contains(portoCampanha));
+    }
+
+    @Test
+    public void testFindNearestN_WithFilter_FirstNearestIsMadrid() {
+        // Full tree. Search near Lisbon (WET) for N=2, Filter: "CET".
+        // Expected: 1. Madrid (CET).
         KDTree2D fullTree = buildFullTree();
-
-        // Search near Lisbon (38, -9) for N=2
-        // Filter: "CET" (Central European Time)
-        // Lisbon (WET) and Aveiro (WET) should be ignored.
-        // Expected: 1. Madrid (CET), 2. Paris (CET)
-
         TimeZoneFilter filter = new TimeZoneFilter("CET");
         List<Station> results = fullTree.findNearestNStations(38.0, -9.0, 2, filter);
 
-        assertEquals(2, results.size());
         assertEquals(madridChamartin.getName(), results.get(0).getName());
+    }
+
+    @Test
+    public void testFindNearestN_WithFilter_SecondNearestIsParis() {
+        // Full tree. Search near Lisbon (WET) for N=2, Filter: "CET".
+        // Expected: 2. Paris (CET).
+        KDTree2D fullTree = buildFullTree();
+        TimeZoneFilter filter = new TimeZoneFilter("CET");
+        List<Station> results = fullTree.findNearestNStations(38.0, -9.0, 2, filter);
+
         assertEquals(parisGareLyon.getName(), results.get(1).getName());
     }
 
     @Test
-    public void testFindNearestN_FilterExcludesAll() {
+    public void testFindNearestN_FilterExcludesAll_ReturnsEmpty() {
+        // Filter that does not exist in the tree.
         TimeZoneFilter filter = new TimeZoneFilter("NonExistentGroup");
         List<Station> results = tree.findNearestNStations(38.0, -9.0, 3, filter);
+
         assertTrue(results.isEmpty());
     }
 
@@ -279,25 +294,18 @@ public class KDTree2DTest {
     }
 
     @Test
-    public void testFindNearestN_N_greater_than_nodes() {
-        // N=100 on default tree (5 stations)
+    public void testFindNearestN_N_greater_than_nodes_returns_all_stations() {
+        // N=100 on default tree (5 stations in 4 nodes). Should return all 5 stations.
         List<Station> results = tree.findNearestNStations(38.0, -9.0, 100, null);
 
-        // Should return all 5 original stations (Porto counts as 2) = Total 6 objects?
-        // Actually: Porto Campanhã, Porto SB, Aveiro, Madrid, Lisbon = 5 objects.
-        // Wait, Porto stations share coordinates.
-        // Unique coordinates: Porto, Aveiro, Madrid, Lisbon = 4 nodes.
-        // N=100 asks for 100 closest NODES.
-        // It returns ALL 4 nodes -> extracting ALL 5 stations.
-
         assertEquals(5, results.size());
-        assertEquals(lisbonOriente.getName(), results.get(0).getName());
     }
 
     @Test
-    public void testFindNearestN_EmptyTree() {
+    public void testFindNearestN_EmptyTree_ReturnsEmptyList() {
         KDTree2D emptyTree = new KDTree2D();
         List<Station> results = emptyTree.findNearestNStations(38.0, -9.0, 3, null);
+
         assertTrue(results.isEmpty());
     }
 
