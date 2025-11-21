@@ -1,7 +1,8 @@
-/* USBD30: As a planner, I want a list of all facilities that have grain silos, 
-   but no warehouses.
-*/
-
+CREATE OR REPLACE FUNCTION get_facilities_silo_no_warehouse
+RETURN SYS_REFCURSOR IS
+    result_cursor SYS_REFCURSOR;
+BEGIN
+OPEN result_cursor FOR
 SELECT
     f.id_facility AS "Facility ID",
     f.name AS "Facility Name"
@@ -23,3 +24,7 @@ FROM
         INNER JOIN building_type bt ON b.building_type_id = bt.id_building_type
 WHERE
     bt.type = 'Warehouse';
+
+RETURN result_cursor;
+END;
+/
