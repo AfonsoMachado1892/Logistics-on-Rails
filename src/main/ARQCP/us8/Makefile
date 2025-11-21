@@ -3,14 +3,20 @@ CFLAGS = -Wall -Wextra -fanalyzer -g
 ARCHFLAGS = -march=rv32imd -mabi=ilp32d
 LIBRV32 = ${HOME}/bin/bootlin/riscv32-buildroot-linux-gnu/sysroot
 
-program.elf: main.o sort_array.o 
-	$(CC) $(CFLAGS) $(ARCHFLAGS) main.o sort_array.o 
+program.elf: main.o sort_array.o unity.o callfunc.o
+	$(CC) $(CFLAGS) $(ARCHFLAGS) main.o sort_array.o unity.o callfunc.o -o program.elf
 
 main.o: main.c main.o
 	$(CC) $(CFLAGS) $(ARCHFLAGS) -c main.c -o main.o
 
 sort_array.o: sort_array.s sort_array.h
 	$(CC) $(CFLAGS) $(ARCHFLAGS) -c sort_array.s -o sort_array.o
+
+unity.o: unity.c
+	$(CC) $(CFLAGS) $(ARCHFLAGS) -c unity.c -o unity.o
+
+callfunc.o: callfunc.s
+	$(CC) $(CFLAGS) $(ARCHFLAGS) -c callfunc.s -o callfunc.o
 
 clean:
 	rm -f *.o *.elf
