@@ -46,7 +46,8 @@ public class RadiusSearchResultMenu {
 
             switch (choice) {
                 case 1 -> runRadiusSearch(kdTree); // Chama KDTree real
-              
+                case 2 -> viewComplexityAnalysis();
+            
                 case 0 -> back = true;
                 default -> System.out.println("Invalid option!");
             }
@@ -127,6 +128,17 @@ public class RadiusSearchResultMenu {
         } catch (IOException e) {
             System.err.println(" Error saving file: " + e.getMessage());
         }
+    }
+
+    private void viewComplexityAnalysis() {
+        System.out.println("\n╔═══════════════════════════════════════════════════════╗");
+        System.out.println("║       TEMPORAL COMPLEXITY ANALYSIS (USEI10)           ║");
+        System.out.println("╚═══════════════════════════════════════════════════════╝");
+
+        System.out.println("ALGORITHM: Radius Search in KD-Tree (Circular Range Query)");
+        System.out.println(" BEST / AVERAGE CASE:  O(log n + k)");
+        System.out.println(" WORST CASE:  O(n)");
+        System.out.println(" n = total stations, k = stations within radius");
     }
 
 
