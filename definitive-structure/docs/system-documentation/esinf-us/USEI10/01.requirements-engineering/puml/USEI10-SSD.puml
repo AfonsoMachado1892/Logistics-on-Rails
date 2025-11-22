@@ -3,6 +3,29 @@ skinparam monochrome true
 skinparam packageStyle rectangle
 skinparam shadowing false
 
+autonumber
 
+actor "Operations Planner" as Planner
+participant ":System" as System
+
+activate Planner
+
+    Planner -> System : requests Radius Search within R km
+    activate System
+
+        System --> Planner : shows search requirements\n(Target Lat/Lon, Radius R)\nand asks for input
+    deactivate System
+
+    Planner -> System : provides search parameters
+    activate System
+
+        System --> Planner : executes radius search on 2D-Tree\n(uses Haversine, BST/AVL insertion, pruning)
+    deactivate System
+
+    Planner -> System : acknowledges search
+    activate System
+
+        System --> Planner : displays results\n(List of stations within R km sorted by distance ASC, name DESC)\nSummary by country and isCity\nTemporal analysis complexity
+    deactivate System
 
 @enduml
