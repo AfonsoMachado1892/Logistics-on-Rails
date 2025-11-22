@@ -146,12 +146,12 @@ public class RadiusSearchResult {
     /**
      * Constructs a new RadiusSearchResult.
      *
-     * @param stationTree    BST/AVL tree of stations sorted by distance and name
-     * @param densitySummary Density summary statistics
-     * @param targetLat      Target latitude
-     * @param targetLon      Target longitude
-     * @param radius         Search radius in kilometers
-     * @param queryTimeNanos Query execution time in nanoseconds
+     * @param stationTree     BST/AVL tree of stations sorted by distance and name
+     * @param densitySummary  Density summary statistics
+     * @param targetLat       Target latitude
+     * @param targetLon       Target longitude
+     * @param radius          Search radius in kilometers
+     * @param queryTimeNanos  Query execution time in nanoseconds
      */
     public RadiusSearchResult(TreeMap<StationKey, Station> stationTree,
                               DensitySummary densitySummary,
@@ -297,4 +297,57 @@ public class RadiusSearchResult {
         return stationTree.lastKey().getDistance();
     }
 
+    /**
+     * Returns a comprehensive string representation of the search result.
+     *
+     * @return Formatted multi-line string with query details and results
+     */
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("=== Radius Search Result ===\n");
+        sb.append(String.format("Target: (%.5f, %.5f)\n", targetLat, targetLon));
+        sb.append(String.format("Radius: %.2f km\n", radius));
+        sb.append(String.format("Stations Found: %d\n", getTotalStations()));
+        sb.append(String.format("Query Time: %.3f ms\n\n", getQueryTimeMs()));
+
+        if (!stationTree.isEmpty()) {
+            sb.append(String.format("Distance Range: %.3f - %.3f km\n\n",
+                    getMinDistance(), getMaxDistance()));
+        }
+
+        sb.append(densitySummary.toString());
+
+        sb.append("\n=== Station List (sorted by distance ASC, name DESC) ===\n");
+        int count = 0;
+        for (Map.Entry<StationKey, Station> entry : stationTree.entrySet()) {
+            count++;
+            StationKey key = entry.getKey();
+            Station station = entry.getValue();
+            sb.append(String.format("%3d. [%.3f km] %s (%s) %s\n",
+                    count,
+                    key.getDistance(),
+                    station.getName(),
+                    station.getCountry(),
+                    station.isCity() ? "[City]" : ""));
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * Returns a compact summary string.
+     *
+     * @return Brief summary of the search result
+     */
+    public String toSummaryString() {
+        return String.format(
+                "Radius Search: %d stations within %.2f km (%.3f ms) - %d cities, %d countries",
+                getTotalStations(),
+                radius,
+                getQueryTimeMs(),
+                densitySummary.getCityCount(),
+                densitySummary.getCountryDistribution().size()
+        );
+    }
 }
