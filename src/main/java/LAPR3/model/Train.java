@@ -266,4 +266,5 @@ public class Train {
                 trainId, operator, locomotives.size(), wagons.size(),
                 getTotalWeightTons(), getTotalPowerKw());
     }
+
 }

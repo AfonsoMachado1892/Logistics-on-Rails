@@ -1,0 +1,31 @@
+routeId,name,facilities,type
+R001,Lisboa-Porto Direto,"24,5",SIMPLE
+R002,Lisboa-Porto Via Coimbra,"24,26,5",SIMPLE
+R003,Porto-Faro,"5,24,25",COMPLEX
+R004,Lisboa-Faro Via Évora,"24,31,25",SIMPLE
+R005,Porto-Guarda,"5,26,30",SIMPLE
+R006,Lisboa-Entroncamento,"24,27",SIMPLE
+R007,Entroncamento-Porto,"27,5",SIMPLE
+R008,Lisboa-Aveiro Via Coimbra,"24,26,29",SIMPLE
+R009,Porto-Braga,"5,28",SIMPLE
+R010,Faro-Entroncamento,"25,31,24,27",COMPLEX
+R011,Porto-Famalicão,"5,18",SIMPLE
+R012,Famalicão-Darque,"18,12",SIMPLE
+R013,Porto-Viana do Castelo,"5,18,12,17",COMPLEX
+R014,Lisboa-Coimbra,"24,26",SIMPLE
+R015,Coimbra-Guarda,"26,30",SIMPLE
+R016,Porto-Aveiro,"5,29",SIMPLE
+R017,Aveiro-Coimbra,"29,26",SIMPLE
+R018,Lisboa-Setúbal,"24,32",SIMPLE
+R019,Porto-Braga Via Famalicão,"5,18,28",COMPLEX
+R020,Entroncamento-Tomar,"27,34",SIMPLE
+R021,Tomar-Santarém,"34,35",SIMPLE
+R022,Santarém-Lisboa,"35,24",SIMPLE
+R023,Porto-Leiria,"5,26,33",COMPLEX
+R024,Leiria-Coimbra,"33,26",SIMPLE
+R025,Lisboa-Évora,"24,31",SIMPLE
+R026,Évora-Faro,"31,25",SIMPLE
+R027,Porto-Darque,"5,18,12",COMPLEX
+R028,Famalicão-Carvalha,"18,22",SIMPLE
+R029,Porto-Valença,"5,18,12,17,21,16,11",COMPLEX
+R030,Lisboa-Guarda Via Entroncamento,"24,27,30",COMPLEX

@@ -88,9 +88,16 @@ public class MainMenu {
         ScheduleVisualizationService visualService =
                 new ScheduleVisualizationService(facilityRepo);
 
+        // --- CORREÇÃO: Inicializar o TrainDataImportMenu ---
+        TrainDataImportMenu trainImportMenu = new TrainDataImportMenu(
+                scanner, validator, facilityRepo, lineRepo, segmentRepo,
+                locoRepo, wagonRepo, trainRepo, routeRepo, scheduleRepo
+        );
+
+        // Agora passar o trainImportMenu como o último argumento
         return new FreightManagerMenu(
                 scanner, validator, dispatcherService, routeRepo, facilityRepo,
-                trainRepo, scheduleRepo, routePathService, visualService
+                trainRepo, scheduleRepo, routePathService, visualService, trainImportMenu
         );
     }
 

@@ -1,8 +1,36 @@
 ID	Name	Owner	Start ID	Start	End ID	End	Gauge
 1	Ramal São Bento - Campanhã	IP	7	Porto São Bento	5	Porto Campanhã	1668
-2	Ramal Camapanhã - Nine	IP	5	Porto Campanhã	20	Nine	1668
-3	Ramal Nine - Barcelos	IP	20	Nine	8	Barcelos	1668
-4	Ramal Barcelos - Viana	IP	8	Barcelos	17	Viana do Castelo	1668
-5	Ramal viana - Caminha	IP	17	Viana do Castelo	21	Caminha	1668
-6	Ramal Caminha - Torre	IP	21	Caminha	16	São Pedro da Torre	1668
-7	Ramal Torre - Valença	IP	16	São Pedro da Torre	11	Valença	1668
+2	Linha do Norte - Porto a Lisboa	IP	5	Porto Campanhã	24	Lisboa Santa Apolónia	1668
+3	Ramal Campanhã - Nine	IP	5	Porto Campanhã	20	Nine	1668
+4	Ramal Nine - Barcelos	IP	20	Nine	8	Barcelos	1668
+5	Ramal Barcelos - Viana	IP	8	Barcelos	17	Viana do Castelo	1668
+6	Ramal Viana - Caminha	IP	17	Viana do Castelo	21	Caminha	1668
+7	Ramal Caminha - Torre	IP	21	Caminha	16	São Pedro da Torre	1668
+8	Ramal Torre - Valença	IP	16	São Pedro da Torre	11	Valença	1668
+9	Linha do Norte - Porto a Coimbra	IP	5	Porto Campanhã	26	Coimbra	1668
+10	Linha do Norte - Coimbra a Lisboa	IP	26	Coimbra	24	Lisboa Santa Apolónia	1668
+11	Linha do Norte - Entroncamento a Lisboa	IP	27	Entroncamento	24	Lisboa Santa Apolónia	1668
+12	Linha do Norte - Porto a Entroncamento	IP	5	Porto Campanhã	27	Entroncamento	1668
+13	Linha do Oeste - Lisboa a Leiria	IP	24	Lisboa Santa Apolónia	33	Leiria	1668
+14	Linha do Oeste - Leiria a Coimbra	IP	33	Leiria	26	Coimbra	1668
+15	Linha da Beira Alta - Coimbra a Guarda	IP	26	Coimbra	30	Guarda	1668
+16	Linha do Minho - Porto a Braga	IP	5	Porto Campanhã	28	Braga	1668
+17	Linha do Minho - Braga a Famalicão	IP	28	Braga	18	Famalicão	1668
+18	Linha do Minho - Famalicão a Darque	IP	18	Famalicão	12	Darque	1668
+19	Linha do Minho - Darque a Viana	IP	12	Darque	17	Viana do Castelo	1668
+20	Linha do Douro - Porto a Aveiro	IP	5	Porto Campanhã	29	Aveiro	1668
+21	Linha do Douro - Aveiro a Coimbra	IP	29	Aveiro	26	Coimbra	1668
+22	Linha do Algarve - Lisboa a Faro	IP	24	Lisboa Santa Apolónia	25	Faro	1668
+23	Linha do Alentejo - Lisboa a Évora	IP	24	Lisboa Santa Apolónia	31	Évora	1668
+24	Linha do Alentejo - Évora a Faro	IP	31	Évora	25	Faro	1668
+25	Linha do Leste - Entroncamento a Guarda	IP	27	Entroncamento	30	Guarda	1668
+26	Ramal Entroncamento - Tomar	IP	27	Entroncamento	34	Tomar	1668
+27	Ramal Tomar - Santarém	IP	34	Tomar	35	Santarém	1668
+28	Ramal Santarém - Lisboa	IP	35	Santarém	24	Lisboa Santa Apolónia	1668
+29	Linha de Setúbal - Lisboa a Setúbal	IP	24	Lisboa Santa Apolónia	32	Setúbal	1668
+30	Ramal Famalicão - Carvalha	IP	18	Famalicão	22	Carvalha	1668
+31	Linha do Minho - Porto a Famalicão	IP	5	Porto Campanhã	18	Famalicão	1668
+32	Linha do Norte - Lisboa a Entroncamento	IP	24	Lisboa Santa Apolónia	27	Entroncamento	1668
+33	Linha do Norte - Entroncamento a Porto	IP	27	Entroncamento	5	Porto Campanhã	1668
+34	Linha do Oeste - Coimbra a Leiria	IP	26	Coimbra	33	Leiria	1668
+35	Linha do Douro - Coimbra a Aveiro	IP	26	Coimbra	29	Aveiro	1668
