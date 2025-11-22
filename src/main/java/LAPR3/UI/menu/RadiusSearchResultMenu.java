@@ -47,7 +47,7 @@ public class RadiusSearchResultMenu {
             switch (choice) {
                 case 1 -> runRadiusSearch(kdTree); // Chama KDTree real
                 case 2 -> viewComplexityAnalysis();
-            
+                case 3 -> viewAbout();
                 case 0 -> back = true;
                 default -> System.out.println("Invalid option!");
             }
@@ -141,5 +141,10 @@ public class RadiusSearchResultMenu {
         System.out.println(" n = total stations, k = stations within radius");
     }
 
-
+    private void viewAbout() {
+        System.out.println("\nUSEI10 - Radius Search");
+        System.out.println("Searches all stations inside a circular radius using KD-Tree pruning.");
+        System.out.println("Results are sorted by distance (ASC) and name (DESC).");
+        System.out.println("Density summaries are included by country and city type.");
+    }
 }
