@@ -36,8 +36,10 @@ public class TrainRepository {
 
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line = br.readLine(); // Skip header
+            int lineNumber = 1;
 
             while ((line = br.readLine()) != null) {
+                lineNumber++;
                 line = line.trim();
                 if (line.isEmpty()) continue;
 
@@ -45,8 +47,9 @@ public class TrainRepository {
                     Train train = parseTrainFromCSV(line);
                     trains.put(train.getTrainId(), train);
                 } catch (Exception e) {
-                    System.err.println("Error parsing train line: " + line);
+                    System.err.println("Error parsing train at line " + lineNumber + ": " + line);
                     System.err.println("Error: " + e.getMessage());
+                    // Continue loading other trains
                 }
             }
         }
@@ -61,30 +64,50 @@ public class TrainRepository {
      * wagons: "W001,W002,W003"
      */
     private Train parseTrainFromCSV(String line) {
-        // Use regex to handle quoted fields properly
-        String[] parts = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
+        // Manual parsing to handle quoted fields correctly
+        List<String> fields = parseCSVLine(line);
 
-        if (parts.length != 5) {
-            throw new IllegalArgumentException("Invalid CSV format: expected 5 fields");
+        if (fields.size() != 5) {
+            throw new IllegalArgumentException("Invalid CSV format: expected 5 fields, got " + fields.size());
         }
 
-        String trainId = parts[0].trim();
-        String operator = parts[1].trim();
-        String locomotivesStr = parts[2].trim().replace("\"", "");
-        String wagonsStr = parts[3].trim().replace("\"", "");
-        double totalPayloadTons = Double.parseDouble(parts[4].trim());
+        String trainId = fields.get(0).trim();
+        String operator = fields.get(1).trim();
+        String locomotivesStr = fields.get(2).trim();
+        String wagonsStr = fields.get(3).trim();
+        double totalPayloadTons;
+
+        try {
+            totalPayloadTons = Double.parseDouble(fields.get(4).trim());
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid payload value: " + fields.get(4));
+        }
 
         // Parse locomotive numbers
         List<Locomotive> locomotives = new ArrayList<>();
         if (!locomotivesStr.isEmpty()) {
             String[] locoNumbers = locomotivesStr.split(",");
             for (String locoNumStr : locoNumbers) {
-                int locoNum = Integer.parseInt(locoNumStr.trim());
-                Locomotive loco = locomotiveRepository.findByNumber(locoNum)
-                        .orElseThrow(() -> new IllegalArgumentException(
-                                "Locomotive not found: " + locoNum));
-                locomotives.add(loco);
+                locoNumStr = locoNumStr.trim();
+                if (locoNumStr.isEmpty()) continue;
+
+                try {
+                    int locoNum = Integer.parseInt(locoNumStr);
+                    Optional<Locomotive> locoOpt = locomotiveRepository.findByNumber(locoNum);
+
+                    if (locoOpt.isPresent()) {
+                        locomotives.add(locoOpt.get());
+                    } else {
+                        System.err.println("Warning: Locomotive not found: " + locoNum + " (skipping)");
+                    }
+                } catch (NumberFormatException e) {
+                    System.err.println("Warning: Invalid locomotive number: " + locoNumStr + " (skipping)");
+                }
             }
+        }
+
+        if (locomotives.isEmpty()) {
+            throw new IllegalArgumentException("Train must have at least one locomotive");
         }
 
         // Parse wagon IDs
@@ -93,15 +116,55 @@ public class TrainRepository {
             String[] wagonIds = wagonsStr.split(",");
             for (String wagonId : wagonIds) {
                 wagonId = wagonId.trim();
-                String finalWagonId = wagonId;
-                Wagon wagon = wagonRepository.findById(wagonId)
-                        .orElseThrow(() -> new IllegalArgumentException(
-                                "Wagon not found: " + finalWagonId));
-                wagons.add(wagon);
+                if (wagonId.isEmpty()) continue;
+
+                Optional<Wagon> wagonOpt = wagonRepository.findById(wagonId);
+
+                if (wagonOpt.isPresent()) {
+                    wagons.add(wagonOpt.get());
+                } else {
+                    System.err.println("Warning: Wagon not found: " + wagonId + " (skipping)");
+                }
             }
         }
 
         return new Train(trainId, operator, locomotives, wagons, totalPayloadTons);
+    }
+
+    /**
+     * Parses a CSV line handling quoted fields
+     * This properly handles commas inside quoted strings
+     */
+    private List<String> parseCSVLine(String line) {
+        List<String> result = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        boolean inQuotes = false;
+
+        for (int i = 0; i < line.length(); i++) {
+            char c = line.charAt(i);
+
+            if (c == '"') {
+                inQuotes = !inQuotes;
+            } else if (c == ',' && !inQuotes) {
+                result.add(current.toString());
+                current = new StringBuilder();
+            } else {
+                current.append(c);
+            }
+        }
+
+        result.add(current.toString());
+        return result;
+    }
+
+    /**
+     * Saves a train to the repository
+     */
+    public void save(Train train) {
+        if (train == null) {
+            throw new IllegalArgumentException("Train cannot be null");
+        }
+        trains.put(train.getTrainId(), train);
     }
 
     /**
@@ -184,5 +247,12 @@ public class TrainRepository {
             }
         }
         return errors;
+    }
+
+    /**
+     * Clears all trains from repository
+     */
+    public void clear() {
+        trains.clear();
     }
 }
