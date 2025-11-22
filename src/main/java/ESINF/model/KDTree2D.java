@@ -702,4 +702,99 @@ public class KDTree2D {
             findNearestNRecursive(badSubtree, targetLat, targetLon, N, filter, depth + 1, maxHeap);
         }
     }
+    // --- METHODS FOR USEI10 (Radius Search + Density) ---
+
+    /**
+     * USEI10 - Radius Search with Density Summary
+     */
+    public RadiusSearchResult radiusSearchWithDensity(double targetLat,
+                                                      double targetLon,
+                                                      double radiusKm) {
+
+        long startTime = System.nanoTime();
+
+        TreeMap<RadiusSearchResult.StationKey, Station> tree = new TreeMap<>();
+        Map<String, Integer> countryCount = new HashMap<>();
+        Map<Boolean, Integer> cityCount = new HashMap<>();
+
+        radiusSearchRecursive(root, targetLat, targetLon, radiusKm,
+                0, tree, countryCount, cityCount);
+
+        long endTime = System.nanoTime();
+
+        RadiusSearchResult.DensitySummary density =
+                new RadiusSearchResult.DensitySummary(
+                        countryCount,
+                        cityCount,
+                        tree.size()
+                );
+
+        return new RadiusSearchResult(
+                tree,
+                density,
+                targetLat,
+                targetLon,
+                radiusKm,
+                endTime - startTime
+        );
+    }
+
+    private void radiusSearchRecursive(Node node,
+                                       double targetLat,
+                                       double targetLon,
+                                       double radiusKm,
+                                       int depth,
+                                       TreeMap<RadiusSearchResult.StationKey, Station> tree,
+                                       Map<String, Integer> countryCount,
+                                       Map<Boolean, Integer> cityCount) {
+
+        if (node == null) return;
+
+        double dist = haversineDistance(
+                targetLat, targetLon,
+                node.latitude, node.longitude
+        );
+
+        boolean insideRadius = dist <= radiusKm;
+
+        if (insideRadius) {
+            for (Station s : node.stations) {
+                RadiusSearchResult.StationKey key =
+                        new RadiusSearchResult.StationKey(dist, s);
+
+                tree.put(key, s);
+
+                countryCount.put(
+                        s.getCountry(),
+                        countryCount.getOrDefault(s.getCountry(), 0) + 1
+                );
+
+                cityCount.put(
+                        s.isCity(),
+                        cityCount.getOrDefault(s.isCity(), 0) + 1
+                );
+            }
+        }
+
+        boolean splitByLat = (depth % 2 == 0);
+        double diff = splitByLat
+                ? targetLat - node.latitude
+                : targetLon - node.longitude;
+
+        Node near = diff < 0 ? node.left : node.right;
+        Node far  = diff < 0 ? node.right : node.left;
+
+        radiusSearchRecursive(near, targetLat, targetLon,
+                radiusKm, depth + 1, tree, countryCount, cityCount);
+
+        double distToPlane = splitByLat
+                ? haversineDistance(targetLat, targetLon, node.latitude, targetLon)
+                : haversineDistance(targetLat, targetLon, targetLat, node.longitude);
+
+        if (distToPlane <= radiusKm) {
+            radiusSearchRecursive(far, targetLat, targetLon,
+                    radiusKm, depth + 1, tree, countryCount, cityCount);
+        }
+    }
+
 }
