@@ -41,7 +41,7 @@ public class ReturnsManagementMenu {
     }
 
     /**
-     * Displays the Returns & Quarantine Management menu loop.
+     * Displays the Returns and Quarantine Management menu loop.
      * Handles user interaction and executes selected actions.
      */
     public void show() {

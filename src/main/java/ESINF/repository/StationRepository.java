@@ -8,25 +8,47 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Repository for Station data
- * Manages the station index and provides query operations
+ * Repository for managing Station data and the associated spatial index.
+ * <p>
+ * This class acts as an abstraction layer between the data source (CSV files)
+ * and the application logic. It handles the loading of stations, the construction
+ * of the {@link StationIndex}, and ensures data integrity before access.
+ * </p>
+ *
  */
 public class StationRepository {
 
+    /**
+     * The central index containing the BSTs and 2D-Tree for station queries.
+     */
     private StationIndex index;
+
+    /**
+     * Flag indicating if the repository has successfully loaded and indexed data.
+     */
     private boolean isLoaded;
 
+    /**
+     * Constructs a new, empty StationRepository.
+     * The repository is initially in an unloaded state.
+     */
     public StationRepository() {
         this.index = null;
         this.isLoaded = false;
     }
 
     /**
-     * Loads stations from CSV file and builds the index
+     * Loads stations from a specified CSV file, builds the station index, and finalizes it.
+     * <p>
+     * This method delegates reading to {@link StationCSVReader}, adds all valid stations
+     * to the {@link StationIndex}, and triggers the balancing/building of the
+     * internal tree structures (e.g., 2D-Tree).
+     * </p>
      *
-     * @param filePath path to CSV file
-     * @return import result with statistics
-     * @throws IOException if file cannot be read
+     * @param filePath the relative or absolute path to the CSV file containing station data.
+     * @return an {@link ImportResult} record containing statistics about the load operation
+     * (valid records, skipped records, errors, and a summary string).
+     * @throws IOException if the file cannot be found or a read error occurs.
      */
     public ImportResult loadStations(String filePath) throws IOException {
         StationCSVReader reader = new StationCSVReader();
@@ -37,6 +59,7 @@ public class StationRepository {
         for (Station station : stations) {
             index.addStation(station);
         }
+        // Ensure the trees (BSTs/KD-Tree) are built and balanced
         index.finalizeIndex();
 
         isLoaded = true;
@@ -50,8 +73,11 @@ public class StationRepository {
     }
 
     /**
-     * Gets the station index
-     * @throws IllegalStateException if data not loaded
+     * Retrieves the loaded Station Index.
+     *
+     * @return the {@link StationIndex} containing the loaded data.
+     * @throws IllegalStateException if the station data has not been loaded yet
+     * (i.e., {@link #loadStations(String)} has not been called successfully).
      */
     public StationIndex getIndex() {
         if (!isLoaded) {
@@ -61,14 +87,17 @@ public class StationRepository {
     }
 
     /**
-     * Checks if station data is loaded
+     * Checks if the repository currently holds loaded data.
+     *
+     * @return {@code true} if data has been successfully loaded; {@code false} otherwise.
      */
     public boolean isLoaded() {
         return isLoaded;
     }
 
     /**
-     * Clears the repository
+     * Clears the repository, removing the current index and resetting the loaded state.
+     * This allows for reloading data from a fresh file.
      */
     public void clear() {
         this.index = null;
@@ -76,7 +105,12 @@ public class StationRepository {
     }
 
     /**
-     * Result of import operation
+     * A record representing the outcome of a bulk import operation.
+     *
+     * @param validCount   The number of stations successfully parsed and added.
+     * @param invalidCount The number of lines skipped due to validation errors.
+     * @param errors       A list of specific error messages for the skipped lines.
+     * @param summary      A human-readable summary string of the operation.
      */
     public record ImportResult(
             int validCount,
@@ -84,6 +118,11 @@ public class StationRepository {
             List<String> errors,
             String summary
     ) {
+        /**
+         * Checks if there were any errors during the import process.
+         *
+         * @return {@code true} if any records were invalid; {@code false} otherwise.
+         */
         public boolean hasErrors() {
             return invalidCount > 0;
         }
