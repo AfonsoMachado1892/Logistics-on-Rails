@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Controls the loading and processing of product returns
  * and manages the quarantine inspection workflow.
- * Implements USEI05 - Returns & Quarantine.
+ * Implements USEI05 - Returns and Quarantine.
  */
 public class ReturnsController {
 

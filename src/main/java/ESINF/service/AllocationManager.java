@@ -9,7 +9,7 @@ import java.util.*;
  * Responsável por verificar a elegibilidade das encomendas e alocar quantidades
  * de caixas (boxes) em FEFO/FIFO order, produzindo listas de estados e alocações.
  *
- * USEI02 - Order Eligibility & Allocation
+ * USEI02 - Order Eligibility and Allocation
  */
 public class AllocationManager {
 

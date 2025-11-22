@@ -6,41 +6,54 @@ import java.util.*;
 import java.nio.file.Paths;
 
 /**
- * USEI07 - Build a balanced 2D-Tree on Latitude/Longitude
- *
- * A KD-Tree (k=2) for spatial indexing of train stations using (latitude, longitude).
- * Supports efficient range queries and nearest-neighbor searches.
- *
- * When multiple stations share the same coordinates, they are stored in a bucket
- * sorted by station name in ascending order.
- *
- * @author ESINF Team
- * @version 1.0
+ * USEI07 - Build a balanced 2D-Tree on Latitude/Longitude.
+ * <p>
+ * A KD-Tree (k=2) implementation designed for efficient spatial indexing of train stations.
+ * It partitions the space using alternating axes:
+ * <ul>
+ * <li>Even depths: Split by Latitude</li>
+ * <li>Odd depths: Split by Longitude</li>
+ * </ul>
+ * <p>
+ * This structure supports efficient range queries (USEI08) and Nearest-Neighbor searches (USEI09).
+ * <p>
+ * <strong>Duplicate Handling:</strong> When multiple stations share the exact same coordinates,
+ * they are stored in a single node's bucket, sorted by station name in ascending order.
  */
 public class KDTree2D {
 
     /**
      * Represents a node in the 2D-Tree.
-     * Each node splits space either by latitude (even depth) or longitude (odd depth).
+     * <p>
+     * Each node represents a split in the 2D plane and contains a "bucket" (list)
+     * of stations that share the exact coordinate of this split.
+     * </p>
      */
     public static class Node {
-        /** Latitude coordinate of this node */
+        /** Latitude coordinate of this node (splitting value for even depths). */
         public double latitude;
 
-        /** Longitude coordinate of this node */
+        /** Longitude coordinate of this node (splitting value for odd depths). */
         public double longitude;
 
-        /** List of stations at this coordinate (sorted by name) */
+        /**
+         * List of stations at this exact coordinate.
+         * Maintained in ascending order by station name.
+         */
         public List<Station> stations;
 
-        /** Left subtree (lat < this.lat OR lon < this.lon depending on depth) */
+        /** Left subtree (contains points "smaller" than this node on the current split axis). */
         public Node left;
 
-        /** Right subtree (lat >= this.lat OR lon >= this.lon depending on depth) */
+        /** Right subtree (contains points "greater" or equal to this node on the current split axis). */
         public Node right;
 
         /**
-         * Creates a node with given coordinates and station.
+         * Creates a new node with the given coordinates and initializes the bucket with the first station.
+         *
+         * @param latitude  The latitude of the node.
+         * @param longitude The longitude of the node.
+         * @param station   The initial station to store in this node.
          */
         public Node(double latitude, double longitude, Station station) {
             this.latitude = latitude;
@@ -52,13 +65,23 @@ public class KDTree2D {
         }
 
         /**
-         * Adds a station to this node's bucket (maintains sorted order by name).
+         * Adds a station to this node's bucket.
+         * <p>
+         * After insertion, the bucket is re-sorted by station name to maintain consistency.
+         * </p>
+         *
+         * @param station The station to add.
          */
         public void addStation(Station station) {
             stations.add(station);
             stations.sort(Comparator.comparing(Station::getName));
         }
 
+        /**
+         * Returns a string representation of the node.
+         *
+         * @return A formatted string containing coordinates and bucket size.
+         */
         @Override
         public String toString() {
             return String.format("Node(%.5f, %.5f) - %d station(s)",
@@ -66,20 +89,21 @@ public class KDTree2D {
         }
     }
 
-    /** Root node of the 2D-Tree */
+    /** Root node of the 2D-Tree. */
     private Node root;
 
-    /** Total number of nodes in the tree */
+    /** Total number of nodes in the tree. */
     private int size;
 
-    /** Height of the tree */
+    /** Height of the tree. */
     private int height;
 
-    /** Map tracking bucket sizes (coordinate -> number of stations) */
+    /** Map tracking bucket sizes (Key: "lat,lon", Value: number of stations). */
     private Map<String, Integer> bucketSizes;
 
     /**
      * Constructs an empty 2D-Tree.
+     * Initializes statistics to zero.
      */
     public KDTree2D() {
         this.root = null;
@@ -89,16 +113,18 @@ public class KDTree2D {
     }
 
     /**
-     * Builds a balanced 2D-Tree from BST/AVL trees of latitude and longitude.
+     * Builds a balanced 2D-Tree from pre-sorted BST/AVL lists of latitude and longitude.
+     * <p>
+     * <strong>Build Strategy:</strong>
+     * <ol>
+     * <li>Merges and deduplicates stations from both input lists.</li>
+     * <li>Uses a recursive median partitioning strategy (bulk loading) to ensure the tree is perfectly balanced.</li>
+     * <li>At each level, selects the median element of the current axis to be the root/split-point.</li>
+     * </ol>
      *
-     * Strategy:
-     * 1. Extract all stations from the latitude and longitude BSTs
-     * 2. Remove duplicates (same station in both trees)
-     * 3. Perform bulk build using recursive median partitioning
-     *
-     * @param latitudeBST BST/AVL ordered by latitude
-     * @param longitudeBST BST/AVL ordered by longitude
-     * @return Statistics about the built tree
+     * @param latitudeBST  List of stations sorted by latitude (from the BST/AVL index).
+     * @param longitudeBST List of stations sorted by longitude (from the BST/AVL index).
+     * @return A {@link TreeStatistics} object containing metrics about the built tree (size, height, build time).
      */
     public TreeStatistics buildBalanced(List<Station> latitudeBST, List<Station> longitudeBST) {
         long startTime = System.nanoTime();
@@ -131,9 +157,9 @@ public class KDTree2D {
     /**
      * Recursively builds a balanced 2D-Tree.
      *
-     * @param stations List of stations to insert
-     * @param depth Current depth (0 = root, even = split by lat, odd = split by lon)
-     * @return Root node of the subtree
+     * @param stations List of stations to insert.
+     * @param depth    Current depth (0 = root, even = split by lat, odd = split by lon).
+     * @return Root node of the subtree.
      */
     private Node buildBalancedRecursive(List<Station> stations, int depth) {
         if (stations.isEmpty()) {
@@ -200,6 +226,9 @@ public class KDTree2D {
 
     /**
      * Calculates the height of the tree.
+     *
+     * @param node The current node.
+     * @return The height of the subtree.
      */
     private int calculateHeight(Node node) {
         if (node == null) return 0;
@@ -208,6 +237,9 @@ public class KDTree2D {
 
     /**
      * Counts total nodes in the tree.
+     *
+     * @param node The current node.
+     * @return The count of nodes.
      */
     private int countNodes(Node node) {
         if (node == null) return 0;
@@ -216,6 +248,9 @@ public class KDTree2D {
 
     /**
      * Calculates bucket sizes (number of stations per coordinate).
+     *
+     * @param node The current node.
+     * @return A map of coordinate strings to station counts.
      */
     private Map<String, Integer> calculateBucketSizes(Node node) {
         Map<String, Integer> sizes = new HashMap<>();
@@ -235,6 +270,8 @@ public class KDTree2D {
 
     /**
      * Performs an in-order traversal of the tree.
+     *
+     * @return A list of nodes in in-order sequence.
      */
     public List<Node> inOrderTraversal() {
         List<Node> result = new ArrayList<>();
@@ -251,7 +288,13 @@ public class KDTree2D {
     }
 
     /**
-     * Calculates Haversine distance between two coordinates (in km).
+     * Calculates Haversine distance between two coordinates.
+     *
+     * @param lat1 Latitude of point 1.
+     * @param lon1 Longitude of point 1.
+     * @param lat2 Latitude of point 2.
+     * @param lon2 Longitude of point 2.
+     * @return Distance in kilometers.
      */
     private double haversineDistance(double lat1, double lon1, double lat2, double lon2) {
         final double R = 6371.0; // Earth radius in km
@@ -269,14 +312,16 @@ public class KDTree2D {
     }
 
     /**
-     * Returns statistics about the tree.
+     * Retrieves statistics about the tree structure and build process.
+     *
+     * @return A {@link TreeStatistics} object.
      */
     public TreeStatistics getStatistics() {
         return new TreeStatistics(size, height, bucketSizes, 0);
     }
 
     /**
-     * Statistics about the built tree.
+     * Inner class to hold tree statistics.
      */
     public static class TreeStatistics {
         public int size;
@@ -292,14 +337,16 @@ public class KDTree2D {
         }
 
         /**
-         * Gets all distinct bucket sizes.
+         * Gets all distinct bucket sizes present in the tree.
+         * @return Set of sizes.
          */
         public Set<Integer> getDistinctBucketSizes() {
             return new HashSet<>(bucketSizes.values());
         }
 
         /**
-         * Gets frequency distribution of bucket sizes.
+         * Gets frequency distribution of bucket sizes (how many nodes have X stations).
+         * @return Map where Key=BucketSize, Value=Frequency.
          */
         public Map<Integer, Integer> getBucketSizeFrequency() {
             Map<Integer, Integer> frequency = new HashMap<>();
@@ -322,20 +369,24 @@ public class KDTree2D {
     }
 
     /**
-     * Returns the root node (for testing/visualization).
+     * Returns the root node (primarily for testing and visualization purposes).
+     *
+     * @return The root {@link Node}.
      */
     public Node getRoot() {
         return root;
     }
 
     /**
-     * Exports the structure of the 2D-Tree to a CSV file.
-     * Each row represents a node with its coordinates, bucket size, and split axis.
-     * Uses a Pre-Order traversal to maintain a hierarchical-like structure in the file.
+     * Exports the structure of the 2D-Tree to a CSV file in the 'Logs/' directory.
+     * <p>
+     * Uses a Pre-Order traversal to write nodes. The CSV contains depth, split axis,
+     * coordinates, and the list of stations in the bucket.
+     * </p>
      *
-     * @param filename The name of the CSV file to create
-     * @return The number of nodes exported
-     * @throws IOException If an error occurs during file writing
+     * @param filename The name of the CSV file to create (e.g., "tree_structure.csv").
+     * @return The total number of nodes exported.
+     * @throws IOException If an error occurs during file creation or writing.
      */
     public int exportTreeToCsv(String filename) throws IOException {
         // CONSTRÓI O CAMINHO DO ARQUIVO DENTRO DA PASTA 'Logs/'
@@ -389,11 +440,21 @@ public class KDTree2D {
 
     /**
      * USEI08 - Range query with optional filtering.
-     * Finds all stations within a rectangular region that match the filter criteria.
+     * <p>
+     * Finds all stations located within a specific rectangular geographic region.
+     * Supports filtering logic (e.g., by City, Country) to refine results.
+     * </p>
+     * <p>
+     * <strong>Pruning Logic:</strong>
+     * The algorithm effectively prunes the search space by checking if the search region
+     * overlaps with the splitting planes of the current nodes, avoiding traversal of
+     * irrelevant subtrees.
+     * </p>
      *
-     * @param region The geographic region to search
-     * @param filter Optional filter (use null for no filtering)
-     * @return List of stations matching region and filter
+     * @param region The {@link GeographicRegion} defining the bounds (lat/lon range).
+     * @param filter An optional {@link StationFilter} (pass {@code null} for no filtering).
+     * @return A list of {@link Station} objects matching the region and filter criteria.
+     * @throws IllegalArgumentException if the region is null.
      */
     public List<Station> rangeSearchWithFilter(GeographicRegion region, StationFilter filter) {
         if (region == null) {
@@ -424,21 +485,16 @@ public class KDTree2D {
     }
 
     /**
-     * Recursive helper for range search with filtering and pruning.
+     * Recursive helper for range search with pruning.
      *
-     * Pruning logic:
-     * - If splitting by latitude and region.latMax < node.latitude -> only explore left
-     * - If splitting by latitude and region.latMin > node.latitude -> only explore right
-     * - Similar logic for longitude splits
-     *
-     * @param node Current node
-     * @param minLat Minimum latitude of search region
-     * @param maxLat Maximum latitude of search region
-     * @param minLon Minimum longitude of search region
-     * @param maxLon Maximum longitude of search region
-     * @param filter Optional filter (null = no filtering)
-     * @param depth Current depth (0 = root)
-     * @param result List to accumulate results
+     * @param node    Current node being visited.
+     * @param minLat  Minimum latitude of search region.
+     * @param maxLat  Maximum latitude of search region.
+     * @param minLon  Minimum longitude of search region.
+     * @param maxLon  Maximum longitude of search region.
+     * @param filter  Optional filter criteria.
+     * @param depth   Current depth in the tree.
+     * @param result  Accumulator list for matching stations.
      */
     private void rangeSearchWithFilterRecursive(Node node,
                                                 double minLat, double maxLat,
@@ -499,7 +555,7 @@ public class KDTree2D {
     /**
      * Gets the execution time of the last range search query.
      *
-     * @return Time in nanoseconds
+     * @return Time in nanoseconds.
      */
     public long getLastQueryTimeNanos() {
         return lastQueryTimeNanos;
@@ -508,25 +564,28 @@ public class KDTree2D {
     /**
      * Gets the execution time of the last range search query in milliseconds.
      *
-     * @return Time in milliseconds
+     * @return Time in milliseconds.
      */
     public double getLastQueryTimeMs() {
         return lastQueryTimeNanos / 1_000_000.0;
     }
 
 
-
     // ---  METHODS FOR USEI09 (Proximity Search) ---
 
     /**
-     * Finds the N nearest *locations* (nodes) to a target coordinate.
-     * Complies with USEI09: Handles N < X cases and optional time zone filtering.
+     * USEI09 - Finds the N nearest stations to a target coordinate.
+     * <p>
+     * Uses a Nearest-Neighbor search algorithm on the KD-Tree.
+     * Maintains a Max-Heap of size N to track the closest stations found so far.
+     * </p>
      *
-     * @param targetLat Target latitude
-     * @param targetLon Target longitude
-     * @param N         The number of nearest locations to find (must be > 0)
-     * @param filter    Optional TimeZoneFilter (null for no filter)
-     * @return A list of all stations from the N nearest locations, sorted by distance.
+     * @param targetLat Target latitude.
+     * @param targetLon Target longitude.
+     * @param N         The number of nearest locations to find (must be > 0).
+     * @param filter    Optional {@link TimeZoneFilter} (pass {@code null} for no filter).
+     * @return A list of all stations from the N nearest locations, sorted by distance (closest first).
+     * @throws IllegalArgumentException if N is less than or equal to 0.
      */
     public List<Station> findNearestNStations(double targetLat, double targetLon, int N, TimeZoneFilter filter) {
         if (N <= 0) {
@@ -563,15 +622,23 @@ public class KDTree2D {
     }
 
     /**
-     * Recursive helper for the k-NN search.
+     * Recursive helper for the k-Nearest Neighbors search.
+     * <p>
+     * <strong>Logic:</strong>
+     * <ol>
+     * <li>Checks distance from target to current node. Updates heap if closer.</li>
+     * <li>Recursively searches the "good" side (closer to target) first.</li>
+     * <li>Checks if the "bad" side intersects the hypersphere defined by the current kth-farthest distance.
+     * If it intersects, searches the "bad" side as well.</li>
+     * </ol>
      *
-     * @param node      Current node to check
-     * @param targetLat Target latitude
-     * @param targetLon Target longitude
-     * @param N         Number of neighbors to find
-     * @param filter    Optional time zone filter
-     * @param depth     Current depth in the tree
-     * @param maxHeap   The Max-Heap (size N) holding the N-best results found so far
+     * @param node      Current node to check.
+     * @param targetLat Target latitude.
+     * @param targetLon Target longitude.
+     * @param N         Number of neighbors to find.
+     * @param filter    Optional time zone filter.
+     * @param depth     Current depth in the tree.
+     * @param maxHeap   The Max-Heap (size N) holding the N-best results found so far.
      */
     private void findNearestNRecursive(Node node, double targetLat, double targetLon,
                                        int N, TimeZoneFilter filter, int depth,

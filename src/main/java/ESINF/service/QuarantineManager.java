@@ -10,7 +10,7 @@ import java.util.Map;
 
 /**
  * Controls the quarantine inspection process for returned goods.
- * Implements USEI05 - Returns & Quarantine.
+ * Implements USEI05 - Returns and Quarantine.
  */
 public class QuarantineManager {
 

@@ -67,6 +67,7 @@ package "Operators and Rolling Stock" {
     class Train {
         name
         status
+        scheduleDepartureTime
     }
 
     class TrainEvent {
@@ -102,6 +103,10 @@ package "Infrastructure" {
         id
         name
         city
+        latitude
+        longitude
+        country
+        timeZoneGroup
         isCity
         isMainStation
         isAirport
