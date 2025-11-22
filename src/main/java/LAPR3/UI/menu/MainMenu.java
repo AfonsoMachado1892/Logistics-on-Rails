@@ -30,6 +30,7 @@ public class MainMenu {
     private final KDTreeMenu kdTreeMenu;
     private final GeographicSearchMenu geoSearchMenu;
     private final ProximitySearchMenu proximitySearchMenu;
+    private final RadiusSearchResultMenu radiusSearchResultMenu;
     private final FreightManagerMenu freightManagerMenu;
 
     public MainMenu(Scanner scanner, DataController dataController, InputValidator validator) {
@@ -50,6 +51,7 @@ public class MainMenu {
         this.kdTreeMenu = new KDTreeMenu(scanner, validator, stationController);
         this.geoSearchMenu = new GeographicSearchMenu(scanner, validator, stationController);
         this.proximitySearchMenu = new ProximitySearchMenu(scanner, validator, stationController);
+        this.radiusSearchResultMenu = new RadiusSearchResultMenu(scanner, validator, stationController);
 
         // Initialize USLP07 - Train Dispatcher components
         this.freightManagerMenu = initializeFreightManagerMenu();
@@ -128,11 +130,12 @@ public class MainMenu {
         System.out.println("│  11. 2D-Tree Spatial Index (USEI07)            │");
         System.out.println("│  12. Geographic Area Search (USEI08)           │");
         System.out.println("│  13. Proximity Search (USEI09)                 │");
+        System.out.println("│  14. Proximity Search (USEI10)                 │");
         System.out.println("├────────────────────────────────────────────────┤");
         System.out.println("│  RAILWAY OPERATIONS                            │");
         System.out.println("├────────────────────────────────────────────────┤");
         System.out.println("│  9. Travel Time Calculation (USLP03)           │");
-        System.out.println("│  14. Train Dispatcher (USLP07) ⭐ NEW!         │");
+        System.out.println("│  15. Train Dispatcher (USLP07) ⭐ NEW!         │");
         System.out.println("├────────────────────────────────────────────────┤");
         System.out.println("│  0. Exit                                       │");
         System.out.println("└────────────────────────────────────────────────┘");
@@ -154,7 +157,8 @@ public class MainMenu {
             case 11 -> kdTreeMenu.show();
             case 12 -> geoSearchMenu.show();
             case 13 -> proximitySearchMenu.show();
-            case 14 -> freightManagerMenu.show(); // ⭐ NEW
+            case 14 -> radiusSearchResultMenu.show();
+            case 15 -> freightManagerMenu.show(); // ⭐ NEW
             default -> System.out.println("Invalid option!");
         }
     }
