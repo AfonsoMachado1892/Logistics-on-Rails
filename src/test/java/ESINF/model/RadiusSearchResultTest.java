@@ -45,5 +45,30 @@ public class RadiusSearchResultTest {
         result = new RadiusSearchResult(tree, summary, 40.0, -8.0, 20.0, 500000); // 0.5s
     }
 
+    // -------------------------- StationKey tests ------------------------------
+
+    @Test
+    void testKeyCompareByDistance() {
+        assertTrue(k2.compareTo(k1) < 0); // 5km < 10km
+    }
+
+    @Test
+    void testKeyCompareByNameDescending() {
+        // k2 and k3 distances equal → compare names DESC
+        assertTrue(k3.compareTo(k2) > 0); // "Gamma" > "Beta"
+    }
+
+    @Test
+    void testKeyEquals() {
+        RadiusSearchResult.StationKey clone = new RadiusSearchResult.StationKey(10.0, s1);
+        assertEquals(k1, clone);
+    }
+
+    @Test
+    void testKeyHash() {
+        RadiusSearchResult.StationKey clone = new RadiusSearchResult.StationKey(10.0, s1);
+        assertEquals(k1.hashCode(), clone.hashCode());
+    }
+
     
 }
