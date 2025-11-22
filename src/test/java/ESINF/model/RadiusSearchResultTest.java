@@ -54,9 +54,10 @@ public class RadiusSearchResultTest {
 
     @Test
     void testKeyCompareByNameDescending() {
-        // k2 and k3 distances equal → compare names DESC
-        assertTrue(k3.compareTo(k2) > 0); // "Gamma" > "Beta"
+        // k2 e k3 com mesma distância → compara nomes DESC
+        assertTrue(k3.compareTo(k2) < 0); // "Gamma" vem antes de "Beta"
     }
+
 
     @Test
     void testKeyEquals() {
@@ -92,4 +93,5 @@ public class RadiusSearchResultTest {
         assertTrue(text.contains("ES: 1"));
     }
 
+    
 }
