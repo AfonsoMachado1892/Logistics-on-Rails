@@ -6,17 +6,12 @@ import LAPR3.repository.*;
 import LAPR3.service.*;
 import LAPR3.UI.utils.InputValidator;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 
-/**
- * Menu for Freight Manager - Train Dispatcher System
- * Allows manual path definition and schedule management
- * Part of USLP07 - Subtask #70
- * Integrated with existing UI system
- */
 public class FreightManagerMenu {
     private final Scanner scanner;
     private final InputValidator validator;
@@ -27,13 +22,14 @@ public class FreightManagerMenu {
     private final ScheduleRepository scheduleRepository;
     private final RoutePathService routePathService;
     private final ScheduleVisualizationService visualService;
+    private final TrainDataImportMenu dataImportMenu;
 
-    private static final DateTimeFormatter DATE_FORMATTER =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    // Campo para armazenar o último plano gerado em memória
+    private DispatchPlan currentDispatchPlan;
 
-    /**
-     * Creates Freight Manager Menu
-     */
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    private static final DateTimeFormatter DATE_ONLY_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
     public FreightManagerMenu(Scanner scanner, InputValidator validator,
                               TrainDispatcherService dispatcherService,
                               RouteRepository routeRepository,
@@ -41,7 +37,8 @@ public class FreightManagerMenu {
                               TrainRepository trainRepository,
                               ScheduleRepository scheduleRepository,
                               RoutePathService routePathService,
-                              ScheduleVisualizationService visualService) {
+                              ScheduleVisualizationService visualService,
+                              TrainDataImportMenu dataImportMenu) {
         this.scanner = scanner;
         this.validator = validator;
         this.dispatcherService = dispatcherService;
@@ -51,31 +48,33 @@ public class FreightManagerMenu {
         this.scheduleRepository = scheduleRepository;
         this.routePathService = routePathService;
         this.visualService = visualService;
+        this.dataImportMenu = dataImportMenu;
     }
 
-    /**
-     * Shows the Freight Manager menu
-     */
     public void show() {
         boolean running = true;
 
         while (running) {
             displayMenu();
-            int choice = validator.readInt("Enter your choice: ", 0, 8);
+            int choice = validator.readInt("Enter your choice: ", 0, 9);
 
             switch (choice) {
-                case 1 -> listAllRoutes();
-                case 2 -> createManualRoute();
-                case 3 -> listAllTrains();
-                case 4 -> createSchedule();
-                case 5 -> viewSchedule();
-                case 6 -> generateDispatchPlan();
-                case 7 -> viewDailyDispatchPlan();
-                case 8 -> exportDispatchPlan();
+                case 1 -> {
+                    if (dataImportMenu != null) dataImportMenu.show();
+                    else System.out.println("Data Import Menu not configured.");
+                }
+                case 2 -> listAllRoutes();
+                case 3 -> createManualRoute();
+                case 4 -> listAllTrains();
+                case 5 -> createSchedule();
+                case 6 -> viewSchedule();
+                case 7 -> generateDispatchPlan();
+                case 8 -> viewDailyDispatchPlan();
+                case 9 -> exportDispatchPlan();
                 case 0 -> running = false;
             }
 
-            if (running && choice != 0) {
+            if (running && choice != 0 && choice != 1) {
                 pauseForUser();
             }
         }
@@ -83,445 +82,269 @@ public class FreightManagerMenu {
 
     private void displayMenu() {
         System.out.println("\n┌────────────────────────────────────────────────┐");
-        System.out.println("│  FREIGHT MANAGER - TRAIN DISPATCHER (USLP07)  │");
+        System.out.println("│  FREIGHT MANAGER - TRAIN DISPATCHER (USLP07)   │");
         System.out.println("└────────────────────────────────────────────────┘");
         System.out.println();
-        System.out.println("  1. List All Routes");
-        System.out.println("  2. Create Manual Route");
-        System.out.println("  3. List All Trains");
-        System.out.println("  4. Create Schedule");
-        System.out.println("  5. View Schedule Details");
-        System.out.println("  6. Generate Dispatch Plan");
-        System.out.println("  7. View Daily Dispatch Plan");
-        System.out.println("  8. Export Dispatch Plan");
+        System.out.println("  1. Data Import & Management ⚡");
+        System.out.println("  ────────────────────────────────────────────");
+        System.out.println("  2. List All Routes");
+        System.out.println("  3. Find Best Route (Manual Calculation)");
+        System.out.println("  4. List All Trains");
+        System.out.println("  5. Create New Schedule");
+        System.out.println("  6. View Schedule Details");
+        System.out.println("  7. Generate Dispatch Plan (Process Schedules)");
+        System.out.println("  8. View Dispatch Visualizations (Timeline/Heatmap)");
+        System.out.println("  9. Export Dispatch Plan Report");
         System.out.println("  0. Back to Main Menu");
         System.out.println();
     }
 
-    /**
-     * Lists all available routes
-     */
+    private void pauseForUser() {
+        System.out.println("\nPress ENTER to continue...");
+        scanner.nextLine();
+    }
+
+    // --- MÉTODOS EXISTENTES ---
+
     private void listAllRoutes() {
         System.out.println("\n═══ AVAILABLE ROUTES ═══");
-
         List<Route> routes = routeRepository.findAll();
-
         if (routes.isEmpty()) {
             System.out.println("✗ No routes available.");
             return;
         }
-
         System.out.println("\nTotal routes: " + routes.size());
-        System.out.println("─".repeat(100));
+        System.out.println("─".repeat(80));
+        System.out.printf("%-10s | %-10s | %-10s | %-15s%n", "Route ID", "Start ID", "End ID", "Segments");
+        System.out.println("─".repeat(80));
 
         for (Route route : routes) {
-            System.out.println("\n" + route);
+            // Tentar obter contagem de segmentos via serviço ou lista direta
+            int segmentCount = 0;
+            try {
+                segmentCount = routePathService.getAllSegments(route.getRouteId()).size();
+            } catch (Exception e) { segmentCount = -1; }
 
-            // Show detailed path
-            RoutePathResult pathResult = routePathService.resolveRoutePath(route.getRouteId());
-            if (pathResult.isValid()) {
-                System.out.println("  Path:");
-                List<Integer> facilityIds = route.getFacilityIds();
-                for (int i = 0; i < facilityIds.size(); i++) {
-                    int facilityId = facilityIds.get(i);
-                    Facility facility = facilityRepository.findById(facilityId).orElse(null);
-                    String name = facility != null ? facility.getName() : "Unknown";
-                    String marker = i == 0 ? "🚉 START" :
-                            (i == facilityIds.size() - 1 ? "🏁 END" : "⚫");
-                    System.out.println(String.format("    %s %d. %s (ID: %d)",
-                            marker, i + 1, name, facilityId));
-                }
-                System.out.println(String.format("  📏 Total Distance: %.2f km",
-                        pathResult.getTotalDistance() / 1000.0));
-                System.out.println(String.format("  🚦 Single-Track Segments: %s",
-                        pathResult.hasSingleTrackSegments() ? "⚠️ YES" : "✓ NO"));
-            } else {
-                System.out.println("  ✗ Invalid route: " + pathResult.getErrorMessage());
-            }
+            // CORREÇÃO: Usar getOriginFacilityId e getDestinationFacilityId
+            System.out.printf("%-10s | %-10d | %-10d | %-15d%n",
+                    route.getRouteId(),
+                    route.getOriginFacilityId(),
+                    route.getDestinationFacilityId(),
+                    segmentCount
+            );
         }
     }
 
-    /**
-     * Creates a manual route by selecting facilities
-     */
+    // --- NOVAS IMPLEMENTAÇÕES FUNCIONAIS ---
+
     private void createManualRoute() {
-        System.out.println("\n═══ CREATE MANUAL ROUTE ═══");
+        System.out.println("\n═══ FIND BEST ROUTE ═══");
+        System.out.println("Finds the shortest path between two facilities using the network topology.");
 
-        // List available facilities
-        List<Facility> facilities = facilityRepository.findAll();
+        // CORREÇÃO: Adicionar min e max (0 a Integer.MAX_VALUE)
+        int originId = validator.readInt("Enter Origin Facility ID: ", 0, Integer.MAX_VALUE);
+        int destId = validator.readInt("Enter Destination Facility ID: ", 0, Integer.MAX_VALUE);
 
-        if (facilities.isEmpty()) {
-            System.out.println("✗ No facilities available. Cannot create route.");
-            return;
-        }
+        System.out.println("Calculating route...");
+        Optional<Route> routeOpt = routePathService.findShortestRoute(originId, destId);
 
-        System.out.println("\nAvailable Facilities:");
-        for (int i = 0; i < facilities.size(); i++) {
-            Facility f = facilities.get(i);
-            System.out.println(String.format("  %2d. %s (ID: %d)",
-                    i + 1, f.getName(), f.getId()));
-        }
+        if (routeOpt.isPresent()) {
+            Route route = routeOpt.get();
+            System.out.println("\n✓ Route Found!");
+            System.out.println("Route ID: " + route.getRouteId());
+            System.out.println(routePathService.getRouteSummary(route.getRouteId()));
 
-        // Get route details
-        System.out.println("\n── Route Information ──");
-        String routeId = validator.readString("Route ID (e.g., R999): ");
-        String routeName = validator.readString("Route Name: ");
-
-        // Select facilities for route
-        List<Integer> facilityIds = new ArrayList<>();
-        System.out.println("\n── Select Facilities in Order ──");
-        System.out.println("(Enter facility number, or 0 to finish)");
-
-        while (true) {
-            int choice = validator.readInt("Facility number (0 to finish): ", 0, facilities.size());
-            if (choice == 0) break;
-
-            Facility selected = facilities.get(choice - 1);
-            facilityIds.add(selected.getId());
-            System.out.println("  ✓ Added: " + selected.getName());
-        }
-
-        if (facilityIds.size() < 2) {
-            System.out.println("\n✗ Error: Route must have at least 2 facilities");
-            return;
-        }
-
-        // Create route
-        Route.RouteType type = facilityIds.size() > 2 ?
-                Route.RouteType.COMPLEX : Route.RouteType.SIMPLE;
-
-        try {
-            Route route = new Route(routeId, routeName, facilityIds, type);
-            routeRepository.save(route);
-
-            System.out.println("\n✓ Route created successfully!");
-            System.out.println(route);
-
-            // Validate route
-            RoutePathResult validation = routePathService.resolveRoutePath(routeId);
-            if (!validation.isValid()) {
-                System.out.println("\n⚠️ Warning: Route validation failed");
-                System.out.println("  " + validation.getErrorMessage());
-            } else {
-                System.out.println("✓ Route validated successfully");
-                System.out.println(String.format("  Distance: %.2f km",
-                        validation.getTotalDistance() / 1000.0));
-            }
-
-        } catch (Exception e) {
-            System.out.println("\n✗ Error creating route: " + e.getMessage());
+            double distance = routePathService.calculateRouteDistance(route.getRouteId());
+            System.out.printf("Total Distance: %.2f meters%n", distance);
+        } else {
+            System.out.println("✗ No route found connecting Facility " + originId + " to " + destId);
         }
     }
 
-    /**
-     * Lists all available trains
-     */
     private void listAllTrains() {
-        System.out.println("\n═══ AVAILABLE TRAINS ═══");
-
+        System.out.println("\n═══ ALL TRAINS ═══");
         List<Train> trains = trainRepository.findAll();
 
         if (trains.isEmpty()) {
-            System.out.println("✗ No trains available.");
+            System.out.println("No trains defined in repository.");
             return;
         }
 
-        System.out.println("\nTotal trains: " + trains.size());
-        System.out.println("─".repeat(100));
+        System.out.printf("%-10s | %-20s | %-15s | %-10s%n", "ID", "Operator", "Payload (t)", "Electric");
+        System.out.println("─".repeat(65));
 
-        for (Train train : trains) {
-            System.out.println("\n🚂 " + train);
-            System.out.println(String.format("   ⚡ Power: %.0f kW | ⚖️  Weight: %.1f t | 📊 P/W Ratio: %.2f kW/t",
-                    train.getTotalPowerKw(), train.getTotalWeightTons(), train.getPowerToWeightRatio()));
-            System.out.println(String.format("   🚉 Locomotives: %d | 📦 Wagons: %d | 🔧 Gauge: %dmm",
-                    train.getLocomotiveCount(), train.getWagonCount(),
-                    train.getLocomotives().get(0).getGauge()));
-
-            String validation = train.validate();
-            if (!validation.isEmpty()) {
-                System.out.println("   ⚠️  " + validation);
-            }
+        for (Train t : trains) {
+            // CORREÇÃO: Usar getTotalPayloadTons()
+            System.out.printf("%-10s | %-20s | %-15.1f | %-10s%n",
+                    t.getTrainId(),
+                    t.getOperator(),
+                    t.getTotalPayloadTons(),
+                    t.requiresElectrification() ? "Yes" : "No"
+            );
         }
     }
 
-    /**
-     * Creates a new schedule
-     */
     private void createSchedule() {
-        System.out.println("\n═══ CREATE SCHEDULE ═══");
+        System.out.println("\n═══ CREATE NEW SCHEDULE ═══");
 
-        // Select train
-        List<Train> trains = trainRepository.findAll();
-        if (trains.isEmpty()) {
-            System.out.println("✗ No trains available.");
+        // 1. Selecionar Comboio
+        String trainId = validator.readString("Enter Train ID: ");
+
+        if (trainRepository.findById(trainId).isEmpty()) {
+            System.out.println("✗ Error: Train ID not found.");
             return;
         }
 
-        System.out.println("\n── Select Train ──");
-        for (int i = 0; i < trains.size(); i++) {
-            System.out.println(String.format("  %d. %s", i + 1, trains.get(i)));
-        }
-        int trainChoice = validator.readInt("Select train: ", 1, trains.size());
-        Train selectedTrain = trains.get(trainChoice - 1);
+        // 2. Selecionar Rota
+        String routeId = validator.readString("Enter Route ID: ");
 
-        // Select route
-        List<Route> routes = routeRepository.findAll();
-        if (routes.isEmpty()) {
-            System.out.println("✗ No routes available.");
+        // Validar se a rota existe
+        Optional<String> validationResult = routePathService.validateRoute(routeId);
+
+        if (validationResult.isPresent()) {
+            System.out.println("✗ Error: " + validationResult.get());
             return;
         }
 
-        System.out.println("\n── Select Route ──");
-        for (int i = 0; i < routes.size(); i++) {
-            System.out.println(String.format("  %d. %s", i + 1, routes.get(i)));
-        }
-        int routeChoice = validator.readInt("Select route: ", 1, routes.size());
-        Route selectedRoute = routes.get(routeChoice - 1);
-
-        // Get departure time
-        LocalDateTime departure = readDateTime("Departure date/time (yyyy-MM-dd HH:mm): ");
-
-        // Generate schedule ID
-        String scheduleId = String.format("S%03d", scheduleRepository.count() + 1);
+        // 3. Definir Data/Hora
+        String dateStr = validator.readString("Enter Departure Time (yyyy-MM-dd HH:mm): ");
 
         try {
+            LocalDateTime departure = LocalDateTime.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+
+            // Gerar ID simples e único
+            String scheduleId = "SCH-" + (scheduleRepository.findAll().size() + 1001);
+
+            // CORREÇÃO: Passar o Status no construtor (5 argumentos)
             Schedule schedule = new Schedule(
                     scheduleId,
-                    selectedTrain.getTrainId(),
-                    selectedRoute.getRouteId(),
+                    trainId,
+                    routeId,
                     departure,
                     Schedule.ScheduleStatus.SCHEDULED
             );
 
             scheduleRepository.save(schedule);
+            System.out.println("✓ Schedule created successfully! ID: " + scheduleId);
 
-            System.out.println("\n✓ Schedule created successfully!");
-            System.out.println(schedule);
-
-            // Calculate and show preview
-            System.out.println("\n── Schedule Preview ──");
-            TrainScheduleResult preview =
-                    dispatcherService.createDispatchPlan(List.of(scheduleId))
-                            .getSchedule(scheduleId)
-                            .getOriginalSchedule();
-
-            System.out.println(preview.toScheduleTable());
-
+        } catch (DateTimeParseException e) {
+            System.out.println("✗ Invalid date format. Please use yyyy-MM-dd HH:mm");
         } catch (Exception e) {
-            System.out.println("\n✗ Error creating schedule: " + e.getMessage());
+            System.out.println("✗ Error creating schedule: " + e.getMessage());
         }
     }
 
-    /**
-     * Views an existing schedule
-     */
     private void viewSchedule() {
-        System.out.println("\n═══ VIEW SCHEDULE ═══");
-
+        System.out.println("\n═══ SCHEDULE LIST ═══");
         List<Schedule> schedules = scheduleRepository.findAll();
 
         if (schedules.isEmpty()) {
-            System.out.println("✗ No schedules available.");
+            System.out.println("No schedules found.");
             return;
         }
 
-        System.out.println("\n── Available Schedules ──");
-        for (int i = 0; i < schedules.size(); i++) {
-            Schedule s = schedules.get(i);
-            System.out.println(String.format("  %d. %s - Train %s on Route %s - 📅 %s",
-                    i + 1, s.getScheduleId(), s.getTrainId(), s.getRouteId(),
-                    s.getDepartureDateTime().format(DATE_FORMATTER)));
-        }
-
-        int choice = validator.readInt("Select schedule: ", 1, schedules.size());
-        Schedule selected = schedules.get(choice - 1);
-
-        try {
-            DispatchPlan plan = dispatcherService.createDispatchPlan(
-                    List.of(selected.getScheduleId()));
-            ResolvedSchedule resolved = plan.getSchedule(selected.getScheduleId());
-
-            System.out.println("\n" + resolved.toDetailedString());
-
-            // Offer visualizations
-            System.out.println("\n── Visualizations Available ──");
-            System.out.println("1. Timeline View");
-            System.out.println("2. Train Diagram");
-            System.out.println("3. Crossing Operations");
-            System.out.println("0. Skip");
-
-            int vizChoice = validator.readInt("Select visualization: ", 0, 3);
-
-            switch (vizChoice) {
-                case 1 -> System.out.println("\n" + visualService.visualizeTimeline(plan));
-                case 2 -> System.out.println("\n" + visualService.visualizeTrainDiagram(plan));
-                case 3 -> System.out.println("\n" + visualService.visualizeCrossingOperations(plan));
-            }
-
-        } catch (Exception e) {
-            System.out.println("\n✗ Error loading schedule: " + e.getMessage());
+        for (Schedule s : schedules) {
+            System.out.printf("ID: %-8s | Train: %-8s | Route: %-8s | Time: %s%n",
+                    s.getScheduleId(), s.getTrainId(), s.getRouteId(),
+                    s.getDepartureDateTime().format(DATE_TIME_FORMATTER));
         }
     }
 
-    /**
-     * Generates dispatch plan for selected schedules
-     */
     private void generateDispatchPlan() {
         System.out.println("\n═══ GENERATE DISPATCH PLAN ═══");
+        System.out.println("1. Process daily plan (All schedules for a specific date)");
+        System.out.println("2. Process specific schedules (Enter IDs manually)");
 
-        List<Schedule> activeSchedules = scheduleRepository.findByStatus(
-                Schedule.ScheduleStatus.SCHEDULED);
-
-        if (activeSchedules.isEmpty()) {
-            System.out.println("✗ No active schedules available.");
-            return;
-        }
-
-        System.out.println("\n── Active Schedules ──");
-        for (int i = 0; i < activeSchedules.size(); i++) {
-            Schedule s = activeSchedules.get(i);
-            System.out.println(String.format("  %d. %s - Train %s on Route %s - %s",
-                    i + 1, s.getScheduleId(), s.getTrainId(), s.getRouteId(),
-                    s.getDepartureDateTime().format(DATE_FORMATTER)));
-        }
-
-        System.out.println("\nSelect schedules to include:");
-        System.out.println("  • Enter numbers separated by spaces (e.g., '1 2 3')");
-        System.out.println("  • Enter 'all' for all schedules");
-        System.out.print("Selection: ");
-
-        String input = scanner.nextLine().trim();
-        List<String> selectedIds = new ArrayList<>();
-
-        if (input.equalsIgnoreCase("all")) {
-            selectedIds = activeSchedules.stream()
-                    .map(Schedule::getScheduleId)
-                    .toList();
-        } else {
-            String[] numbers = input.split("\\s+");
-            for (String num : numbers) {
-                try {
-                    int index = Integer.parseInt(num) - 1;
-                    if (index >= 0 && index < activeSchedules.size()) {
-                        selectedIds.add(activeSchedules.get(index).getScheduleId());
-                    }
-                } catch (NumberFormatException ignored) {}
-            }
-        }
-
-        if (selectedIds.isEmpty()) {
-            System.out.println("\n✗ No schedules selected.");
-            return;
-        }
+        int opt = validator.readInt("Option: ", 1, 2);
 
         try {
-            System.out.println("\n⏳ Generating dispatch plan...");
-            DispatchPlan plan = dispatcherService.createDispatchPlan(selectedIds);
+            DispatchPlan plan = null;
 
-            System.out.println("\n" + plan.toDetailedReport());
+            if (opt == 1) {
+                System.out.print("Enter Date (yyyy-MM-dd): ");
+                String dayStr = scanner.nextLine().trim();
+                LocalDate date = LocalDate.parse(dayStr, DATE_ONLY_FORMATTER);
 
-            // Validate
-            var validation = dispatcherService.validateDispatchPlan(plan);
-            System.out.println("\n── Validation Result ──");
-            System.out.println(validation);
+                System.out.println("Calculating physics and resolving conflicts...");
+                plan = dispatcherService.createDailyDispatchPlan(date.atStartOfDay());
 
-            // Show visualizations menu
-            showVisualizationMenu(plan);
+            } else {
+                System.out.print("Enter Schedule IDs (comma separated, e.g., S001,S002): ");
+                String input = scanner.nextLine();
+                List<String> ids = Arrays.asList(input.split(","));
+                ids.replaceAll(String::trim);
 
-        } catch (Exception e) {
-            System.out.println("\n✗ Error generating plan: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Shows visualization options
-     */
-    private void showVisualizationMenu(DispatchPlan plan) {
-        System.out.println("\n── Visualizations ──");
-        System.out.println("1. Timeline View");
-        System.out.println("2. Train Diagram");
-        System.out.println("3. Crossing Operations");
-        System.out.println("4. Conflict Heatmap");
-        System.out.println("5. Delay Statistics");
-        System.out.println("6. All Visualizations");
-        System.out.println("0. Skip");
-
-        int choice = validator.readInt("Select: ", 0, 6);
-
-        switch (choice) {
-            case 1 -> System.out.println("\n" + visualService.visualizeTimeline(plan));
-            case 2 -> System.out.println("\n" + visualService.visualizeTrainDiagram(plan));
-            case 3 -> System.out.println("\n" + visualService.visualizeCrossingOperations(plan));
-            case 4 -> System.out.println("\n" + visualService.visualizeConflictHeatmap(plan));
-            case 5 -> System.out.println("\n" + visualService.visualizeDelayStatistics(plan));
-            case 6 -> {
-                System.out.println("\n" + visualService.visualizeTimeline(plan));
-                System.out.println("\n" + visualService.visualizeTrainDiagram(plan));
-                System.out.println("\n" + visualService.visualizeCrossingOperations(plan));
-                System.out.println("\n" + visualService.visualizeConflictHeatmap(plan));
-                System.out.println("\n" + visualService.visualizeDelayStatistics(plan));
+                System.out.println("Calculating physics and resolving conflicts...");
+                plan = dispatcherService.createDispatchPlan(ids);
             }
+
+            if (plan != null) {
+                this.currentDispatchPlan = plan; // Guardar em memória
+                System.out.println("\n✓ PLAN GENERATED SUCCESSFULLY");
+                System.out.println(dispatcherService.getDispatchSummary(plan));
+
+                // Validar resultados
+                var validation = dispatcherService.validateDispatchPlan(plan);
+                if (!validation.isValid()) {
+                    System.out.println("\n⚠ Validation Warnings:");
+                    validation.getWarnings().forEach(w -> System.out.println("  - " + w));
+                }
+            }
+
+        } catch (DateTimeParseException e) {
+            System.out.println("✗ Invalid date format.");
+        } catch (Exception e) {
+            System.out.println("✗ Error generating plan: " + e.getMessage());
+            // e.printStackTrace(); // Debug se necessário
         }
     }
 
-    /**
-     * Views daily dispatch plan
-     */
     private void viewDailyDispatchPlan() {
-        System.out.println("\n═══ DAILY DISPATCH PLAN ═══");
+        System.out.println("\n═══ DISPATCH VISUALIZATIONS ═══");
 
-        LocalDateTime date = readDateTime("Date (yyyy-MM-dd HH:mm): ");
+        if (currentDispatchPlan == null) {
+            System.out.println("⚠ No plan available in memory.");
+            System.out.println("Please run Option 7 (Generate Dispatch Plan) first.");
+            return;
+        }
 
-        try {
-            System.out.println("\n⏳ Loading daily schedules...");
-            DispatchPlan plan = dispatcherService.createDailyDispatchPlan(date);
+        boolean viewing = true;
+        while(viewing) {
+            System.out.println("\nSelect Visualization:");
+            System.out.println("1. Timeline View (ASCII)");
+            System.out.println("2. Train Diagram (Bildfahrplan)");
+            System.out.println("3. Crossing Operations List");
+            System.out.println("4. Conflict Heatmap");
+            System.out.println("5. Delay Statistics");
+            System.out.println("0. Return to Menu");
 
-            if (plan.getTotalTrains() == 0) {
-                System.out.println("\n✗ No schedules found for this date.");
-                return;
+            int choice = validator.readInt("View: ", 0, 5);
+
+            switch (choice) {
+                case 1 -> System.out.println(visualService.visualizeTimeline(currentDispatchPlan));
+                case 2 -> System.out.println(visualService.visualizeTrainDiagram(currentDispatchPlan));
+                case 3 -> System.out.println(visualService.visualizeCrossingOperations(currentDispatchPlan));
+                case 4 -> System.out.println(visualService.visualizeConflictHeatmap(currentDispatchPlan));
+                case 5 -> System.out.println(visualService.visualizeDelayStatistics(currentDispatchPlan));
+                case 0 -> viewing = false;
             }
 
-            System.out.println("\n" + plan.toDetailedReport());
-
-            showVisualizationMenu(plan);
-
-        } catch (Exception e) {
-            System.out.println("\n✗ Error: " + e.getMessage());
+            if (viewing) pauseForUser();
         }
     }
 
-    /**
-     * Exports dispatch plan
-     */
     private void exportDispatchPlan() {
-        System.out.println("\n═══ EXPORT DISPATCH PLAN ═══");
-        System.out.println("\n⚠️  Export feature not yet implemented");
-        System.out.println("Future capabilities:");
-        System.out.println("  • CSV export for external tools");
-        System.out.println("  • PDF report generation");
-        System.out.println("  • JSON format for API integration");
-    }
+        System.out.println("\n═══ EXPORT PLAN ═══");
 
-    /**
-     * Reads datetime from user
-     */
-    private LocalDateTime readDateTime(String prompt) {
-        while (true) {
-            try {
-                String input = validator.readString(prompt);
-                return LocalDateTime.parse(input, DATE_FORMATTER);
-            } catch (DateTimeParseException e) {
-                System.out.println("✗ Invalid format. Use: yyyy-MM-dd HH:mm (e.g., 2025-11-18 08:30)");
-            }
+        if (currentDispatchPlan == null) {
+            System.out.println("⚠ No plan available. Run Option 7 first.");
+            return;
         }
-    }
 
-    /**
-     * Pauses for user
-     */
-    private void pauseForUser() {
-        System.out.println("\nPress ENTER to continue...");
-        scanner.nextLine();
+        String report = dispatcherService.exportDispatchPlan(currentDispatchPlan);
+        System.out.println("Generating report preview:\n");
+        System.out.println(report);
+
+        System.out.println("\n[System] Plan exported to console output.");
     }
 }
