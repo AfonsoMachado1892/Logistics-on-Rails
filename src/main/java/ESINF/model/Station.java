@@ -1,5 +1,7 @@
 package ESINF.model;
 
+import java.text.Collator;
+import java.util.Locale;
 import java.util.Objects;
 
 public class Station implements Comparable<Station>{
@@ -44,7 +46,9 @@ public class Station implements Comparable<Station>{
      */
     @Override
     public int compareTo(Station other) {
-        return this.name.compareTo(other.name);
+        Collator collator = Collator.getInstance(new Locale("pt", "PT"));
+        collator.setStrength(Collator.PRIMARY); // Ignora acentos para ordenação
+        return collator.compare(this.name, other.name);
     }
 
     @Override
@@ -64,7 +68,8 @@ public class Station implements Comparable<Station>{
 
     @Override
     public String toString() {
-        return String.format("Station{name='%s', lat=%.5f, lon=%.5f, country='%s', tzGroup='%s'}",
+        return String.format(Locale.US,
+                "Station{name='%s', lat=%.5f, lon=%.5f, country='%s', tzGroup='%s'}",
                 name, latitude, longitude, country, timeZoneGroup);
     }
 }
