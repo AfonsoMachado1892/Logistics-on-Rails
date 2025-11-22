@@ -68,6 +68,7 @@ INSERT INTO line (id_line, name_line, owner, start_id, start_name, end_id, end_n
 INSERT INTO line (id_line, name_line, owner, start_id, start_name, end_id, end_name, gauge, ownerid_owner) VALUES (22, 'Ramal São Gemil - São Mamede', 'IP', 43, 'São Gemil', 45, 'São Mamede de Infesta', 1668, 1);
 INSERT INTO line (id_line, name_line, owner, start_id, start_name, end_id, end_name, gauge, ownerid_owner) VALUES (23, 'Ramal São Mamede - Leça', 'IP', 45, 'São Mamede de Infesta', 48, 'Leça do Balio', 1668, 1);
 INSERT INTO line (id_line, name_line, owner, start_id, start_name, end_id, end_name, gauge, ownerid_owner) VALUES (24, 'Ramal Leça - Leixões', 'IP', 48, 'Leça do Balio', 50, 'Leixões', 1668, 1);
+INSERT INTO line (id_line, name_line, owner, start_id, start_name, end_id, end_name, gauge, ownerid_owner) VALUES (25, 'Leixões - Valença', 'IP', 50, 'Leixões', 11, 'Valença', 1668, 1);
 
 -- GAUGE_LINE
 INSERT INTO Gauge_line (gauge_id, line_id) SELECT 1, id_line FROM line;
@@ -95,6 +96,9 @@ INSERT INTO segment (id_segment, line_id, "order", eletrified, weight, length, n
 INSERT INTO segment (id_segment, line_id, "order", eletrified, weight, length, number_tracks, siding_position, siding_lenght) VALUES (34, 23, 2, UTL_RAW.CAST_TO_RAW('Yes'), 8000, 1453, '2', 0, 0);
 INSERT INTO segment (id_segment, line_id, "order", eletrified, weight, length, number_tracks, siding_position, siding_lenght) VALUES (35, 24, 1, UTL_RAW.CAST_TO_RAW('Yes'), 8100, 3597, '2', 0, 0);
 INSERT INTO segment (id_segment, line_id, "order", eletrified, weight, length, number_tracks, siding_position, siding_lenght) VALUES (36, 24, 2, UTL_RAW.CAST_TO_RAW('Yes'), 8000, 4334, '2', 0, 0);
+INSERT INTO segment (id_segment, line_id, "order", eletrified, weight, length, number_tracks, siding_position, siding_lenght) VALUES (37, 25, 2, UTL_RAW.CAST_TO_RAW('Yes'), 8000, 4334, '2', 0, 0);
+INSERT INTO segment (id_segment, line_id, "order", eletrified, weight, length, number_tracks, siding_position, siding_lenght) VALUES (38, 25, 2, UTL_RAW.CAST_TO_RAW('Yes'), 8000, 4334, '2', 0, 0);
+
 
 -- ==============================================================
 -- 3. MATERIAL CIRCULANTE - LOCOMOTIVAS
