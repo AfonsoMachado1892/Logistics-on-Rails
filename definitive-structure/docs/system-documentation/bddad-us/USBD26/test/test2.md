@@ -1,0 +1,2 @@
+Cenário 2: Dia com muita atividade (03 de Outubro de 2025)
+Neste dia, tens os comboios 5421 e 5435 a circular. A lista resultante não deve conter os vagões associados a esses comboios (ex: 3330001, 3563077, 3330003, etc.)

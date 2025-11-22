@@ -1,0 +1,2 @@
+Cenário 4: Intervalo alargado (Todo o mês de Outubro)
+Este é o teste mais restritivo. Se um vagão foi usado no dia 3 OU no dia 6, ele não deve aparecer nesta lista. Só aparecerão os vagões que estiveram parados o mês inteiro.

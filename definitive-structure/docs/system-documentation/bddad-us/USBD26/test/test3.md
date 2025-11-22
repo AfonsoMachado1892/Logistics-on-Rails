@@ -1,0 +1,2 @@
+Cenário 3: Dia com atividade diferente (06 de Outubro de 2025)
+Neste dia circula o comboio 5437. Alguns vagões que foram usados no dia 3 podem estar livres no dia 6 (se não fizerem parte do 5437), e vice-versa. Este teste verifica se a filtragem é específica para a data
