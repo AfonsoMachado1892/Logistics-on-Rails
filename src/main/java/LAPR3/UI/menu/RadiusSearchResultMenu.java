@@ -46,7 +46,7 @@ public class RadiusSearchResultMenu {
 
             switch (choice) {
                 case 1 -> runRadiusSearch(kdTree); // Chama KDTree real
-               
+              
                 case 0 -> back = true;
                 default -> System.out.println("Invalid option!");
             }
@@ -82,7 +82,7 @@ public class RadiusSearchResultMenu {
             RadiusSearchResult result = kdTree.radiusSearchWithDensity(lat, lon, radius);
 
             displayResult(result);
-
+            offerToSaveResults(result);
 
         } catch (Exception e) {
             System.out.println(" Error: " + e.getMessage());
@@ -93,6 +93,40 @@ public class RadiusSearchResultMenu {
         System.out.println("\n" + "═".repeat(90));
         System.out.println(result); // Usa o toString do RadiusSearchResult
         System.out.println("═".repeat(90));
+    }
+
+    private void offerToSaveResults(RadiusSearchResult result) {
+        boolean save = validator.readConfirmation(
+                "\nSave ALL " + result.getTotalStations() + " stations to a log file?");
+        if (save) saveResultsToFile(result);
+    }
+
+    private void saveResultsToFile(RadiusSearchResult result) {
+        try {
+            String filename = "Logs/radius_search_" + System.currentTimeMillis() + ".csv";
+            try (FileWriter writer = new FileWriter(filename)) {
+                writer.write("station,distance_km,latitude,longitude,country,isCity\n");
+
+                for (RadiusSearchResult.StationKey key : result.getStationKeys()) {
+                    var station = key.getStation();
+                    String name = station.getName().contains(",")
+                            ? "\"" + station.getName().replace("\"", "\"\"") + "\""
+                            : station.getName();
+
+                    writer.write(String.format("%s,%.3f,%.5f,%.5f,%s,%b\n",
+                            name,
+                            key.getDistance(),
+                            station.getLatitude(),
+                            station.getLongitude(),
+                            station.getCountry(),
+                            station.isCity()));
+                }
+            }
+
+            System.out.println("\n ALL results saved to: " + filename);
+        } catch (IOException e) {
+            System.err.println(" Error saving file: " + e.getMessage());
+        }
     }
 
 
