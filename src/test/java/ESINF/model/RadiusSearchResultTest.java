@@ -70,5 +70,26 @@ public class RadiusSearchResultTest {
         assertEquals(k1.hashCode(), clone.hashCode());
     }
 
-    
+    // -------------------------- DensitySummary tests --------------------------
+
+    @Test
+    void testSummaryTotalCounts() {
+        assertEquals(3, summary.getTotalStations());
+        assertEquals(1, summary.getCityCount());
+        assertEquals(2, summary.getNonCityCount());
+    }
+
+    @Test
+    void testSummaryCountrySorting() {
+        List<String> keys = new ArrayList<>(summary.getCountryDistribution().keySet());
+        assertEquals(List.of("ES", "PT"), keys); // TreeMap → sorted
+    }
+
+    @Test
+    void testSummaryContainsPercentages() {
+        String text = summary.toString();
+        assertTrue(text.contains("PT: 2"));
+        assertTrue(text.contains("ES: 1"));
+    }
+
 }
