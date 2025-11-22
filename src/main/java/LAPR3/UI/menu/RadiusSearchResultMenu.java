@@ -46,7 +46,7 @@ public class RadiusSearchResultMenu {
 
             switch (choice) {
                 case 1 -> runRadiusSearch(kdTree); // Chama KDTree real
-          
+               
                 case 0 -> back = true;
                 default -> System.out.println("Invalid option!");
             }
@@ -81,11 +81,18 @@ public class RadiusSearchResultMenu {
             // Chama USEI10 no KDTree2D
             RadiusSearchResult result = kdTree.radiusSearchWithDensity(lat, lon, radius);
 
+            displayResult(result);
 
 
         } catch (Exception e) {
             System.out.println(" Error: " + e.getMessage());
         }
+    }
+
+    private void displayResult(RadiusSearchResult result) {
+        System.out.println("\n" + "═".repeat(90));
+        System.out.println(result); // Usa o toString do RadiusSearchResult
+        System.out.println("═".repeat(90));
     }
 
 
