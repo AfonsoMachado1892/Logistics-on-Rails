@@ -135,4 +135,166 @@ public class RadiusSearchResult {
         }
     }
 
+    // Fields
+    private final TreeMap<StationKey, Station> stationTree;
+    private final DensitySummary densitySummary;
+    private final double targetLat;
+    private final double targetLon;
+    private final double radius;
+    private final long queryTimeNanos;
+
+    /**
+     * Constructs a new RadiusSearchResult.
+     *
+     * @param stationTree    BST/AVL tree of stations sorted by distance and name
+     * @param densitySummary Density summary statistics
+     * @param targetLat      Target latitude
+     * @param targetLon      Target longitude
+     * @param radius         Search radius in kilometers
+     * @param queryTimeNanos Query execution time in nanoseconds
+     */
+    public RadiusSearchResult(TreeMap<StationKey, Station> stationTree,
+                              DensitySummary densitySummary,
+                              double targetLat,
+                              double targetLon,
+                              double radius,
+                              long queryTimeNanos) {
+        this.stationTree = stationTree;
+        this.densitySummary = densitySummary;
+        this.targetLat = targetLat;
+        this.targetLon = targetLon;
+        this.radius = radius;
+        this.queryTimeNanos = queryTimeNanos;
+    }
+
+    /**
+     * Gets the tree of stations sorted by distance (ASC) and name (DESC).
+     *
+     * @return TreeMap of station keys to stations
+     */
+    public TreeMap<StationKey, Station> getStationTree() {
+        return stationTree;
+    }
+
+    /**
+     * Gets all stations as a list in sorted order.
+     *
+     * @return List of stations sorted by distance and name
+     */
+    public List<Station> getStationList() {
+        return new ArrayList<>(stationTree.values());
+    }
+
+    /**
+     * Gets all station keys in sorted order.
+     *
+     * @return List of station keys
+     */
+    public List<StationKey> getStationKeys() {
+        return new ArrayList<>(stationTree.keySet());
+    }
+
+    /**
+     * Gets the density summary.
+     *
+     * @return Density summary object
+     */
+    public DensitySummary getDensitySummary() {
+        return densitySummary;
+    }
+
+    /**
+     * Gets the target latitude.
+     *
+     * @return Target latitude
+     */
+    public double getTargetLat() {
+        return targetLat;
+    }
+
+    /**
+     * Gets the target longitude.
+     *
+     * @return Target longitude
+     */
+    public double getTargetLon() {
+        return targetLon;
+    }
+
+    /**
+     * Gets the search radius.
+     *
+     * @return Radius in kilometers
+     */
+    public double getRadius() {
+        return radius;
+    }
+
+    /**
+     * Gets the query execution time in nanoseconds.
+     *
+     * @return Query time in nanoseconds
+     */
+    public long getQueryTimeNanos() {
+        return queryTimeNanos;
+    }
+
+    /**
+     * Gets the query execution time in milliseconds.
+     *
+     * @return Query time in milliseconds
+     */
+    public double getQueryTimeMs() {
+        return queryTimeNanos / 1_000_000.0;
+    }
+
+    /**
+     * Gets the total number of stations found.
+     *
+     * @return Number of stations
+     */
+    public int getTotalStations() {
+        return stationTree.size();
+    }
+
+    /**
+     * Gets the closest station (minimum distance).
+     *
+     * @return The closest station, or null if no stations found
+     */
+    public Station getClosestStation() {
+        if (stationTree.isEmpty()) return null;
+        return stationTree.firstEntry().getValue();
+    }
+
+    /**
+     * Gets the farthest station (maximum distance within radius).
+     *
+     * @return The farthest station, or null if no stations found
+     */
+    public Station getFarthestStation() {
+        if (stationTree.isEmpty()) return null;
+        return stationTree.lastEntry().getValue();
+    }
+
+    /**
+     * Gets the minimum distance found.
+     *
+     * @return Minimum distance in km, or Double.MAX_VALUE if empty
+     */
+    public double getMinDistance() {
+        if (stationTree.isEmpty()) return Double.MAX_VALUE;
+        return stationTree.firstKey().getDistance();
+    }
+
+    /**
+     * Gets the maximum distance found.
+     *
+     * @return Maximum distance in km, or 0 if empty
+     */
+    public double getMaxDistance() {
+        if (stationTree.isEmpty()) return 0;
+        return stationTree.lastKey().getDistance();
+    }
+
 }
