@@ -94,11 +94,25 @@ public class TrainDataImportMenu {
     }
 
     /**
-     * Imports all data in correct order using the DATA_DIR constant
+     * Imports all data in correct order using a user-specified path
      */
     private void importAllData() {
-        System.out.println("\n═══ IMPORT ALL DATA ═══");
-        System.out.println("Folder: " + DATA_DIR);
+        System.out.println("\n╔══ IMPORT ALL DATA ══╗");
+
+        // TODO: Suggestion path to be filled here
+        System.out.println("Suggested path: [TO BE FILLED]");
+
+        System.out.print("Enter data folder path (default: " + DATA_DIR + "): ");
+        String dataPath = scanner.nextLine().trim();
+
+        // Use default if empty, otherwise ensure path ends with /
+        if (dataPath.isEmpty()) {
+            dataPath = DATA_DIR;
+        } else if (!dataPath.endsWith("/") && !dataPath.endsWith("\\")) {
+            dataPath += "/";
+        }
+
+        System.out.println("Using folder: " + dataPath);
         System.out.println("Warning: This will clear existing data and reload from CSVs.");
 
         System.out.print("\nContinue? (y/n): ");
@@ -117,48 +131,48 @@ public class TrainDataImportMenu {
         // Ordem estrita de importação devido às dependências (foreign keys logicas)
 
         // 1. Infraestrutura
-        if (loadFile("facilities.csv", this::importFacilitiesFromFile)) totalLoaded += facilityRepo.count();
+        if (loadFile("facilities.csv", this::importFacilitiesFromFile, dataPath)) totalLoaded += facilityRepo.count();
         else success = false;
 
-        if (loadFile("lines.csv", this::importLinesFromFile)) totalLoaded += lineRepo.count();
+        if (loadFile("lines.csv", this::importLinesFromFile, dataPath)) totalLoaded += lineRepo.count();
         else success = false;
 
-        if (loadFile("segments.csv", this::importSegmentsFromFile)) totalLoaded += segmentRepo.count();
+        if (loadFile("segments.csv", this::importSegmentsFromFile, dataPath)) totalLoaded += segmentRepo.count();
         else success = false;
 
         // 2. Material Circulante
-        if (loadFile("locomotives.csv", this::importLocomotivesFromFile)) totalLoaded += locomotiveRepo.count();
+        if (loadFile("locomotives.csv", this::importLocomotivesFromFile, dataPath)) totalLoaded += locomotiveRepo.count();
         else success = false;
 
-        if (loadFile("wagons.csv", this::importWagonsFromFile)) totalLoaded += wagonRepo.count();
+        if (loadFile("wagons.csv", this::importWagonsFromFile, dataPath)) totalLoaded += wagonRepo.count();
         else success = false;
 
         // 3. Comboios (Depende de Loco + Wagon)
-        if (loadFile("trains.csv", this::importTrainsFromFile)) totalLoaded += trainRepo.count();
+        if (loadFile("trains.csv", this::importTrainsFromFile, dataPath)) totalLoaded += trainRepo.count();
         else success = false;
 
         // 4. Rotas (Depende de Facilities)
-        if (loadFile("routes.csv", this::importRoutesFromFile)) totalLoaded += routeRepo.count();
+        if (loadFile("routes.csv", this::importRoutesFromFile, dataPath)) totalLoaded += routeRepo.count();
         else success = false;
 
         // 5. Horários (Depende de Train + Route)
-        if (loadFile("schedules.csv", this::importSchedulesFromFile)) totalLoaded += scheduleRepo.count();
+        if (loadFile("schedules.csv", this::importSchedulesFromFile, dataPath)) totalLoaded += scheduleRepo.count();
         else success = false;
 
-        System.out.println("\n══════════════════════════════════════");
+        System.out.println("\n═══════════════════════════════════════");
         if (success) {
             System.out.println("✓ ALL DATA IMPORTED SUCCESSFULLY!");
             System.out.println("Total records loaded: " + totalLoaded);
         } else {
             System.out.println("⚠️  IMPORT COMPLETED WITH WARNINGS");
-            System.out.println("Ensure files exist in: " + DATA_DIR);
+            System.out.println("Ensure files exist in: " + dataPath);
         }
-        System.out.println("══════════════════════════════════════");
+        System.out.println("═══════════════════════════════════════");
     }
 
-    // Helper para carregar ficheiros usando o DATA_DIR padrão
-    private boolean loadFile(String filename, FileImporter importer) {
-        String filepath = DATA_DIR + filename;
+    // Helper para carregar ficheiros usando o caminho especificado
+    private boolean loadFile(String filename, FileImporter importer, String basePath) {
+        String filepath = basePath + filename;
         File file = new File(filepath);
 
         if (!file.exists()) {
