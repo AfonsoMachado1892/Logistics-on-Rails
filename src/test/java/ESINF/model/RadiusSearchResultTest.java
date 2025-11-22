@@ -93,5 +93,60 @@ public class RadiusSearchResultTest {
         assertTrue(text.contains("ES: 1"));
     }
 
-    
+    // -------------------------- RadiusSearchResult tests --------------------------
+
+    @Test
+    void testGetStationListSorted() {
+        List<Station> list = result.getStationList();
+
+        // Distances: Beta(5), Gamma(5), Alpha(10)
+        // Tiebreak real: name DESC => Gamma before Beta
+        assertEquals("Gamma", list.get(0).getName());
+        assertEquals("Beta", list.get(1).getName());
+        assertEquals("Alpha", list.get(2).getName());
+    }
+
+
+    @Test
+    void testClosestStation() {
+        assertEquals("Gamma", result.getClosestStation().getName());
+    }
+
+    @Test
+    void testFarthestStation() {
+        assertEquals("Alpha", result.getFarthestStation().getName());
+    }
+
+    @Test
+    void testDistanceLimits() {
+        assertEquals(5.0, result.getMinDistance());
+        assertEquals(10.0, result.getMaxDistance());
+    }
+
+    @Test
+    void testSummaryString() {
+        String s = result.toSummaryString();
+        assertTrue(s.contains("3 stations"));
+        assertTrue(s.contains("1 cities"));
+        assertTrue(s.contains("2 countries"));
+    }
+
+    @Test
+    void testToStringContainsSections() {
+        String txt = result.toString();
+        assertTrue(txt.contains("Radius Search Result"));
+        assertTrue(txt.contains("Density Summary"));
+        assertTrue(txt.contains("Station List"));
+    }
+
+    @Test
+    void testEmptyResult() {
+        TreeMap<RadiusSearchResult.StationKey, Station> empty = new TreeMap<>();
+        RadiusSearchResult emptyRes = new RadiusSearchResult(empty, summary, 0, 0, 5, 1000);
+
+        assertNull(emptyRes.getClosestStation());
+        assertNull(emptyRes.getFarthestStation());
+        assertEquals(Double.MAX_VALUE, emptyRes.getMinDistance());
+        assertEquals(0, emptyRes.getMaxDistance());
+    }
 }
