@@ -2,7 +2,6 @@ CREATE OR REPLACE FUNCTION get_all_train_endpoints
 RETURN SYS_REFCURSOR IS
     result_cursor SYS_REFCURSOR;
 BEGIN
-    -- Open the cursor for the query defined in USBD24-script.sql
 OPEN result_cursor FOR
 SELECT
     t.id_train AS "ID Comboio",
