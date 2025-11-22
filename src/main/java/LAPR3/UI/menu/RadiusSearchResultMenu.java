@@ -45,7 +45,8 @@ public class RadiusSearchResultMenu {
             int choice = validator.readInt("Enter your choice: ", 0, 3);
 
             switch (choice) {
-                
+                case 1 -> runRadiusSearch(kdTree); // Chama KDTree real
+          
                 case 0 -> back = true;
                 default -> System.out.println("Invalid option!");
             }
@@ -65,6 +66,26 @@ public class RadiusSearchResultMenu {
         System.out.println(" 2. View Complexity Analysis");
         System.out.println(" 3. About this Use Case");
         System.out.println(" 0. Back to Main Menu");
+    }
+
+    private void runRadiusSearch(KDTree2D kdTree) {
+        System.out.println("\n╔══ RADIUS SEARCH ══╗");
+
+        double lat = validator.readDouble("  Latitude [-90, 90]: ", -90, 90);
+        double lon = validator.readDouble("  Longitude [-180, 180]: ", -180, 180);
+        double radius = validator.readDouble("  Radius (km) [0-20000]: ", 0, 20000);
+
+        System.out.println("\n Searching stations in radius...");
+
+        try {
+            // Chama USEI10 no KDTree2D
+            RadiusSearchResult result = kdTree.radiusSearchWithDensity(lat, lon, radius);
+
+
+
+        } catch (Exception e) {
+            System.out.println(" Error: " + e.getMessage());
+        }
     }
 
 
