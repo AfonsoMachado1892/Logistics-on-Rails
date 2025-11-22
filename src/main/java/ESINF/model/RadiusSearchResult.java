@@ -79,4 +79,60 @@ public class RadiusSearchResult {
         }
     }
 
+    /**
+     * Represents density summary statistics for the search result.
+     */
+    public static class DensitySummary {
+        private final Map<String, Integer> countryDistribution;
+        private final Map<Boolean, Integer> cityDistribution;
+        private final int totalStations;
+
+        public DensitySummary(Map<String, Integer> countryDistribution,
+                              Map<Boolean, Integer> cityDistribution,
+                              int totalStations) {
+            this.countryDistribution = new TreeMap<>(countryDistribution);
+            this.cityDistribution = cityDistribution;
+            this.totalStations = totalStations;
+        }
+
+        public Map<String, Integer> getCountryDistribution() {
+            return countryDistribution;
+        }
+
+        public Map<Boolean, Integer> getCityDistribution() {
+            return cityDistribution;
+        }
+
+        public int getTotalStations() {
+            return totalStations;
+        }
+
+        public int getCityCount() {
+            return cityDistribution.getOrDefault(true, 0);
+        }
+
+        public int getNonCityCount() {
+            return cityDistribution.getOrDefault(false, 0);
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("=== Density Summary ===\n");
+            sb.append(String.format("Total Stations: %d\n", totalStations));
+            sb.append("\nBy Country:\n");
+            for (Map.Entry<String, Integer> entry : countryDistribution.entrySet()) {
+                double percentage = (entry.getValue() * 100.0) / totalStations;
+                sb.append(String.format("  %s: %d (%.1f%%)\n",
+                        entry.getKey(), entry.getValue(), percentage));
+            }
+            sb.append("\nBy City Status:\n");
+            sb.append(String.format("  Cities: %d (%.1f%%)\n",
+                    getCityCount(), (getCityCount() * 100.0) / totalStations));
+            sb.append(String.format("  Non-Cities: %d (%.1f%%)\n",
+                    getNonCityCount(), (getNonCityCount() * 100.0) / totalStations));
+            return sb.toString();
+        }
+    }
+
 }
