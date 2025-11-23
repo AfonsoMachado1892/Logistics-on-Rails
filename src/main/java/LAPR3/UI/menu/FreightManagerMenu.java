@@ -85,7 +85,7 @@ public class FreightManagerMenu {
         System.out.println("│  FREIGHT MANAGER - TRAIN DISPATCHER (USLP07)   │");
         System.out.println("└────────────────────────────────────────────────┘");
         System.out.println();
-        System.out.println("  1. Data Import & Management ⚡");
+        System.out.println("  1. Data Import & Management  ");
         System.out.println("  ────────────────────────────────────────────");
         System.out.println("  2. List All Routes");
         System.out.println("  3. Find Best Route (Manual Calculation)");

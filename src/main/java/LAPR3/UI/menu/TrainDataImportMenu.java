@@ -71,13 +71,13 @@ public class TrainDataImportMenu {
 
     private void displayMenu() {
         System.out.println("\n┌────────────────────────────────────────────────┐");
-        System.out.println("│  TRAIN DATA IMPORT (" + DATA_DIR + ")          │");
+        System.out.println("│  TRAIN DATA IMPORT (" + DATA_DIR + ")                  │");
         System.out.println("└────────────────────────────────────────────────┘");
         System.out.println();
 
         showDataStatus();
 
-        System.out.println("\n  1. ⚡ Import ALL Data (Recommended)");
+        System.out.println("\n  1. Import ALL Data              ");
         System.out.println("  ─────────────────────────────────────");
         System.out.println("  2. Import Facilities");
         System.out.println("  3. Import Lines");
@@ -100,7 +100,7 @@ public class TrainDataImportMenu {
         System.out.println("\n╔══ IMPORT ALL DATA ══╗");
 
         // TODO: Suggestion path to be filled here
-        System.out.println("Suggested path: [TO BE FILLED]");
+        System.out.println("Suggested path: [C:\\Users\\Migas\\Documents\\GitHub\\sem3-pi-25-26-g092-repo\\sem3-pi-25-26-g092-repo\\Dataset]");
 
         System.out.print("Enter data folder path (default: " + DATA_DIR + "): ");
         String dataPath = scanner.nextLine().trim();
