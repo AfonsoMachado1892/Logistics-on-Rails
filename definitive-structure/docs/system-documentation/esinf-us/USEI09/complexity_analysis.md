@@ -4,14 +4,14 @@
 
 ---
 
-### 🔹 Best / Average Case: **O(log n)**
+### Best / Average Case: **O(log n)**
 **When:** N is small, and the Filter matches local stations.
 **Example:** Finding the 5 nearest stations in Paris (no filter).
 **Why:** The algorithm finds valid neighbors quickly. The distance to the N-th neighbor becomes the "pruning threshold." As this threshold shrinks, the algorithm discards huge sections of the tree (subtrees) because their bounding boxes are farther away than the N-th neighbor found so far.
 
 ---
 
-### 🔹 Worst Case: **O(n * log N)**
+###  Worst Case: **O(n * log N)**
 **When:** 1. **Strict Filtering:** Searching for "Asia/Tokyo" stations while targeting coordinates in Portugal. The algorithm visits all local nodes, rejects them (filter mismatch), and cannot shrink the pruning threshold. It is forced to expand the search to the entire world (entire tree).
 2. **Large N:** Requesting N ≈ total stations.
    **Why:** The "pruning check" (`distToSplittingPlane < maxDist`) always returns true, forcing the recursion to visit both Left and Right children at every node.

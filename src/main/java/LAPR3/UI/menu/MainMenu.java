@@ -135,7 +135,7 @@ public class MainMenu {
         System.out.println("│  RAILWAY OPERATIONS                            │");
         System.out.println("├────────────────────────────────────────────────┤");
         System.out.println("│  9. Travel Time Calculation (USLP03)           │");
-        System.out.println("│  15. Train Dispatcher (USLP07) ⭐ NEW!         │");
+        System.out.println("│  15. Train Dispatcher (USLP07)                 │");
         System.out.println("├────────────────────────────────────────────────┤");
         System.out.println("│  0. Exit                                       │");
         System.out.println("└────────────────────────────────────────────────┘");
@@ -158,7 +158,7 @@ public class MainMenu {
             case 12 -> geoSearchMenu.show();
             case 13 -> proximitySearchMenu.show();
             case 14 -> radiusSearchResultMenu.show();
-            case 15 -> freightManagerMenu.show(); // ⭐ NEW
+            case 15 -> freightManagerMenu.show();
             default -> System.out.println("Invalid option!");
         }
     }
