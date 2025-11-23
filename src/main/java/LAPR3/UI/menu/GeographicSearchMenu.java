@@ -34,16 +34,16 @@ public class GeographicSearchMenu {
     public void show() {
         // Check if data is loaded and 2D-Tree is built
         if (!stationController.isDataLoaded()) {
-            System.out.println("\n❌ Station data not loaded!");
-            System.out.println("Please load station data first (Main Menu → Option 10 → Option 1)");
+            System.out.println("\n Station data not loaded!");
+            System.out.println("Please load station data first (Main Menu -> Option 10 -> Option 1)");
             return;
         }
 
         // Get KDTree from controller (assumes KDTree is built in KDTreeMenu)
         KDTree2D kdTree = getKDTreeFromController();
         if (kdTree == null || kdTree.getRoot() == null) {
-            System.out.println("\n❌ 2D-Tree not built!");
-            System.out.println("Please build 2D-Tree first (Main Menu → Option 11 → Option 1)");
+            System.out.println("\n 2D-Tree not built!");
+            System.out.println("Please build 2D-Tree first (Main Menu -> Option 11 -> Option 1)");
             return;
         }
 
@@ -113,7 +113,7 @@ public class GeographicSearchMenu {
             }
 
         } catch (Exception e) {
-            System.out.println("❌ Error: " + e.getMessage());
+            System.out.println(" Error: " + e.getMessage());
         }
     }
 
@@ -143,7 +143,7 @@ public class GeographicSearchMenu {
 
         String regionName = getRegionName(choice);
 
-        System.out.println("\n🔍 Searching in " + regionName + "...");
+        System.out.println("\n Searching in " + regionName + "...");
         System.out.println("Region: " + region);
 
         GeographicSearchController.SearchResult result =
@@ -174,7 +174,7 @@ public class GeographicSearchMenu {
             return;
         }
 
-        System.out.println("\n🔍 Searching with filter: " + filter);
+        System.out.println("\n Searching with filter: " + filter);
 
         try {
             GeographicSearchController.SearchResult result =
@@ -185,7 +185,7 @@ public class GeographicSearchMenu {
                 offerToSaveResults(result.getStations(), "region_filtered");
             }
         } catch (Exception e) {
-            System.out.println("❌ Error: " + e.getMessage());
+            System.out.println(" Error: " + e.getMessage());
         }
     }
 
@@ -231,7 +231,7 @@ public class GeographicSearchMenu {
         System.out.println("═".repeat(80));
 
         // Query 1: Portugal
-        System.out.println("\n📍 QUERY 1: All stations in Portugal");
+        System.out.println("\n QUERY 1: All stations in Portugal");
         System.out.println("─".repeat(80));
         GeographicSearchController.SearchResult result1 =
                 geoController.searchByGeographicArea(
@@ -240,7 +240,7 @@ public class GeographicSearchMenu {
         displaySearchResultSummary(result1);
 
         // Query 2: Madrid main stations
-        System.out.println("\n📍 QUERY 2: Main stations in Madrid region");
+        System.out.println("\n QUERY 2: Main stations in Madrid region");
         System.out.println("─".repeat(80));
         GeographicSearchController.SearchResult result2 =
                 geoController.searchByGeographicArea(
@@ -249,7 +249,7 @@ public class GeographicSearchMenu {
         displaySearchResultSummary(result2);
 
         // Query 3: Spanish coastal cities
-        System.out.println("\n📍 QUERY 3: Cities on Spanish Mediterranean coast");
+        System.out.println("\n QUERY 3: Cities on Spanish Mediterranean coast");
         System.out.println("─".repeat(80));
         GeographicSearchController.SearchResult result3 =
                 geoController.searchByGeographicArea(
@@ -258,7 +258,7 @@ public class GeographicSearchMenu {
         displaySearchResultSummary(result3);
 
         // Query 4: Switzerland
-        System.out.println("\n📍 QUERY 4: All stations in Switzerland");
+        System.out.println("\n QUERY 4: All stations in Switzerland");
         System.out.println("─".repeat(80));
         GeographicSearchController.SearchResult result4 =
                 geoController.searchByGeographicArea(
@@ -267,7 +267,7 @@ public class GeographicSearchMenu {
         displaySearchResultSummary(result4);
 
         // Query 5: Benelux cities
-        System.out.println("\n📍 QUERY 5: Cities in Benelux region");
+        System.out.println("\n QUERY 5: Cities in Benelux region");
         System.out.println("─".repeat(80));
         GeographicSearchController.SearchResult result5 =
                 geoController.searchByGeographicArea(
@@ -276,7 +276,7 @@ public class GeographicSearchMenu {
         displaySearchResultSummary(result5);
 
         System.out.println("\n═".repeat(80));
-        System.out.println("✅ All sample queries completed!");
+        System.out.println(" All sample queries completed!");
     }
 
     private void analyzeRegionDensity() {
@@ -291,7 +291,7 @@ public class GeographicSearchMenu {
 
         int gridSize = validator.readInt("Grid size (e.g., 5 for 5x5 grid): ", 2, 20);
 
-        System.out.println("\n🔍 Analyzing density with " + gridSize + "x" + gridSize + " grid...");
+        System.out.println("\n Analyzing density with " + gridSize + "x" + gridSize + " grid...");
 
         double latStep = (latMax - latMin) / gridSize;
         double lonStep = (lonMax - lonMin) / gridSize;
@@ -316,7 +316,7 @@ public class GeographicSearchMenu {
             }
         }
 
-        System.out.println("\n📊 Station Density Heatmap:");
+        System.out.println("\n Station Density Heatmap:");
         System.out.println("─".repeat(gridSize * 5 + 1));
 
         for (int i = gridSize - 1; i >= 0; i--) { // Print from top to bottom
@@ -379,14 +379,14 @@ public class GeographicSearchMenu {
         System.out.println("SEARCH RESULTS");
         System.out.println("═".repeat(80));
         System.out.println();
-        System.out.println("📍 Region: " + result.getRegion());
-        System.out.println("🔍 Filter: " + (result.hasFilter() ? result.getFilter() : "None"));
-        System.out.println("📊 Results: " + result.getStationCount() + " stations found");
-        System.out.println("⏱️  Execution time: " + String.format("%.3f", result.getExecutionTimeMs()) + " ms");
+        System.out.println(" Region: " + result.getRegion());
+        System.out.println(" Filter: " + (result.hasFilter() ? result.getFilter() : "None"));
+        System.out.println(" Results: " + result.getStationCount() + " stations found");
+        System.out.println(" Execution time: " + String.format("%.3f", result.getExecutionTimeMs()) + " ms");
         System.out.println();
 
         if (result.getStationCount() == 0) {
-            System.out.println("❌ No stations found in this region.");
+            System.out.println(" No stations found in this region.");
             return;
         }
 
@@ -417,9 +417,9 @@ public class GeographicSearchMenu {
                             station.getLatitude(),
                             station.getLongitude()
                     );
-                    if (station.isCity()) System.out.print("    🏙️  City");
-                    if (station.isMainStation()) System.out.print("    🚉 Main Station");
-                    if (station.isAirport()) System.out.print("    ✈️  Airport");
+                    if (station.isCity()) System.out.print("      City");
+                    if (station.isMainStation()) System.out.print("    Main Station");
+                    if (station.isAirport()) System.out.print("      Airport");
                     if (station.isCity() || station.isMainStation() || station.isAirport()) {
                         System.out.println();
                     }
@@ -435,7 +435,7 @@ public class GeographicSearchMenu {
     private void displaySearchResultSummary(GeographicSearchController.SearchResult result) {
         System.out.printf("Region: %s%n", result.getRegion());
         System.out.printf("Filter: %s%n", result.hasFilter() ? result.getFilter() : "None");
-        System.out.printf("✅ Found: %d stations in %.3f ms%n",
+        System.out.printf(" Found: %d stations in %.3f ms%n",
                 result.getStationCount(), result.getExecutionTimeMs());
 
         if (result.getStationCount() > 0) {

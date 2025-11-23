@@ -45,7 +45,7 @@ public class StationQueryMenu {
             try {
                 handleChoice(choice);
             } catch (Exception e) {
-                System.err.println("❌ Error: " + e.getMessage());
+                System.err.println(" Error: " + e.getMessage());
                 if (choice != 1) { // Don't show stack trace for file loading errors
                     e.printStackTrace();
                 }
@@ -63,9 +63,9 @@ public class StationQueryMenu {
 
         if (controller.isDataLoaded()) {
             var stats = controller.getStatistics();
-            System.out.println("📊 " + stats.toString());
+            System.out.println(stats.toString());
         } else {
-            System.out.println("⚠️  No station data loaded. Please import data first.");
+            System.out.println("No station data loaded. Please import data first.");
         }
 
         System.out.println();
@@ -102,7 +102,7 @@ public class StationQueryMenu {
         String defaultPath = "Dataset/train_stations_europe.csv";
         String filePath = validator.readFilePath("Enter CSV file path", defaultPath);
 
-        System.out.println("\n📥 Loading station data from: " + filePath);
+        System.out.println("\n Loading station data from: " + filePath);
         System.out.println("Please wait...");
 
         try {
@@ -110,11 +110,11 @@ public class StationQueryMenu {
             StationRepository.ImportResult result = controller.loadStations(filePath);
             long endTime = System.currentTimeMillis();
 
-            System.out.println("\n✅ " + result.summary());
-            System.out.printf("⏱️  Import completed in %.2f seconds%n", (endTime - startTime) / 1000.0);
+            System.out.println("\n " + result.summary());
+            System.out.printf("Import completed in %.2f seconds%n", (endTime - startTime) / 1000.0);
 
             if (result.hasErrors()) {
-                System.out.println("\n⚠️  Some records were rejected:");
+                System.out.println("\nSome records were rejected:");
                 int shown = 0;
                 for (String error : result.errors()) {
                     if (shown++ < 10) {
@@ -131,11 +131,11 @@ public class StationQueryMenu {
                 }
             }
 
-            System.out.println("\n📊 Index Statistics:");
+            System.out.println("\n Index Statistics:");
             System.out.println("   " + controller.getStatistics().toString());
 
         } catch (IOException e) {
-            System.err.println("❌ Failed to load file: " + e.getMessage());
+            System.err.println(" Failed to load file: " + e.getMessage());
         }
     }
 
@@ -148,7 +148,7 @@ public class StationQueryMenu {
 
         String tzGroup = validator.readString("\nEnter time zone group (e.g., CET, WET): ");
 
-        System.out.println("\n🔍 Searching for stations in time zone group: " + tzGroup);
+        System.out.println("\n Searching for stations in time zone group: " + tzGroup);
 
         List<Station> results = controller.queryByTimeZoneGroup(tzGroup);
 
@@ -170,7 +170,7 @@ public class StationQueryMenu {
 
         Set<String> countries = controller.getCountriesInTimeZoneGroup(tzGroup);
         if (countries.isEmpty()) {
-            System.out.println("❌ No countries found for time zone group: " + tzGroup);
+            System.out.println(" No countries found for time zone group: " + tzGroup);
             return;
         }
 
@@ -179,7 +179,7 @@ public class StationQueryMenu {
 
         String country = validator.readString("\nEnter country code (e.g., PT, ES, FR): ");
 
-        System.out.println("\n🔍 Searching for stations in " + tzGroup + " / " + country);
+        System.out.println("\n Searching for stations in " + tzGroup + " / " + country);
 
         List<Station> results = controller.queryByTimeZoneGroupAndCountry(tzGroup, country);
 
@@ -208,7 +208,7 @@ public class StationQueryMenu {
             tzGroups[i] = tzGroups[i].trim();
         }
 
-        System.out.println("\n🔍 Searching for stations in window: " + String.join(", ", tzGroups));
+        System.out.println("\n Searching for stations in window: " + String.join(", ", tzGroups));
 
         List<Station> results = controller.queryByTimeZoneWindow(tzGroups);
 
@@ -233,7 +233,7 @@ public class StationQueryMenu {
         System.out.print("Enter maximum latitude: ");
         double maxLat = Double.parseDouble(scanner.nextLine().trim());
 
-        System.out.printf("\n🔍 Searching for stations in latitude range [%.5f, %.5f]%n", minLat, maxLat);
+        System.out.printf("\n Searching for stations in latitude range [%.5f, %.5f]%n", minLat, maxLat);
 
         List<Station> results = controller.queryByLatitudeRange(minLat, maxLat);
 
@@ -258,7 +258,7 @@ public class StationQueryMenu {
         System.out.print("Enter maximum longitude: ");
         double maxLon = Double.parseDouble(scanner.nextLine().trim());
 
-        System.out.printf("\n🔍 Searching for stations in longitude range [%.5f, %.5f]%n", minLon, maxLon);
+        System.out.printf("\n Searching for stations in longitude range [%.5f, %.5f]%n", minLon, maxLon);
 
         List<Station> results = controller.queryByLongitudeRange(minLon, maxLon);
 
@@ -302,7 +302,7 @@ public class StationQueryMenu {
         System.out.println("═".repeat(90));
 
         if (results.isEmpty()) {
-            System.out.println("\n❌ No stations found.");
+            System.out.println("\n No stations found.");
             return;
         }
 
@@ -370,10 +370,10 @@ public class StationQueryMenu {
                 }
             }
 
-            System.out.println("✅ Results saved to: " + filename);
+            System.out.println(" Results saved to: " + filename);
 
         } catch (IOException e) {
-            System.err.println("❌ Error saving file: " + e.getMessage());
+            System.err.println(" Error saving file: " + e.getMessage());
         }
     }
 
@@ -390,16 +390,16 @@ public class StationQueryMenu {
                 }
             }
 
-            System.out.println("✅ Errors saved to: " + filename);
+            System.out.println(" Errors saved to: " + filename);
 
         } catch (IOException e) {
-            System.err.println("❌ Error saving errors file: " + e.getMessage());
+            System.err.println(" Error saving errors file: " + e.getMessage());
         }
     }
 
     private boolean ensureDataLoaded() {
         if (!controller.isDataLoaded()) {
-            System.out.println("\n❌ No station data loaded!");
+            System.out.println("\n No station data loaded!");
             System.out.println("Please import station data first (Option 1).");
             return false;
         }

@@ -34,7 +34,7 @@ public class ProximitySearchMenu {
         // Check if data is loaded and 2D-Tree is built
         if (!stationController.isDataLoaded()) {
             System.out.println("\n Station data not loaded!");
-            System.out.println("Please load station data first (Main Menu → Option 10 → Option 1)");
+            System.out.println("Please load station data first (Main Menu -> Option 10 -> Option 1)");
             return;
         }
 
@@ -42,7 +42,7 @@ public class ProximitySearchMenu {
         KDTree2D kdTree = stationController.getKDTree();
         if (kdTree == null || kdTree.getRoot() == null) {
             System.out.println("\n 2D-Tree not built!");
-            System.out.println("Please build 2D-Tree first (Main Menu → Option 11 → Option 1)");
+            System.out.println("Please build 2D-Tree first (Main Menu -> Option 11 -> Option 1)");
             return;
         }
 
@@ -178,10 +178,10 @@ public class ProximitySearchMenu {
 
         // Component Costs
         System.out.println(" COMPONENT COSTS:");
-        System.out.println("   • Tree Traversal:     O(log n) [depth] to O(n) [full scan]");
-        System.out.println("   • Priority Queue Ops: O(log N) [insert/poll]");
-        System.out.println("   • Distance Calc:      O(1)");
-        System.out.println("   • Filter Check:       O(1)");
+        System.out.println("    Tree Traversal:     O(log n) [depth] to O(n) [full scan]");
+        System.out.println("    Priority Queue Ops: O(log N) [insert/poll]");
+        System.out.println("    Distance Calc:      O(1)");
+        System.out.println("    Filter Check:       O(1)");
         System.out.println();
         System.out.println("   Where:");
         System.out.println("     n = Total stations (~64,000)");
@@ -192,8 +192,8 @@ public class ProximitySearchMenu {
 
         // Speedup
         System.out.println(" SPEEDUP vs LINEAR SCAN:");
-        System.out.println("   • Linear Scan: Always O(n) iterations.");
-        System.out.println("   • 2D-Tree:     Varies from O(log n) to O(n).");
+        System.out.println("   , Linear Scan: Always O(n) iterations.");
+        System.out.println("    2D-Tree:     Varies from O(log n) to O(n).");
         System.out.println("     -> Typically 100x-500x faster for small N (e.g., N=10)");
         System.out.println("        unless filters force a full traversal.");
         System.out.println();

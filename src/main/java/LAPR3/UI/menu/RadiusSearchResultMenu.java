@@ -28,14 +28,14 @@ public class RadiusSearchResultMenu {
     public void show() {
         if (!stationController.isDataLoaded()) {
             System.out.println("\n Station data not loaded!");
-            System.out.println("Please load station data first (Main Menu → Option 10 → Option 1)");
+            System.out.println("Please load station data first (Main Menu -> Option 10 -> Option 1)");
             return;
         }
 
         KDTree2D kdTree = stationController.getKDTree();
         if (kdTree == null || kdTree.getRoot() == null) {
             System.out.println("\n 2D-Tree not built!");
-            System.out.println("Please build 2D-Tree first (Main Menu → Option 11 → Option 1)");
+            System.out.println("Please build 2D-Tree first (Main Menu -> Option 11 -> Option 1)");
             return;
         }
 

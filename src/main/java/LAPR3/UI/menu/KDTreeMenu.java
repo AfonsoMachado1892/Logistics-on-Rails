@@ -132,11 +132,11 @@ public class KDTreeMenu {
         System.out.println("\n═══ LOAD STATION DATA ═══");
 
         if (stationController.isDataLoaded()) {
-            System.out.println("✓ Station data already loaded from USEI06!");
+            System.out.println("Station data already loaded from USEI06!");
             var stats = stationController.getStatistics();
-            System.out.println("  • Total stations: " + stats.totalStations());
-            System.out.println("  • Unique latitudes: " + stats.uniqueLatitudes());
-            System.out.println("  • Unique longitudes: " + stats.uniqueLongitudes());
+            System.out.println("Total stations: " + stats.totalStations());
+            System.out.println("Unique latitudes: " + stats.uniqueLatitudes());
+            System.out.println("Unique longitudes: " + stats.uniqueLongitudes());
             System.out.println("\nYou can proceed to build the 2D-Tree (option 2).");
             return;
         }
@@ -171,10 +171,10 @@ public class KDTreeMenu {
         lastStatistics = kdTree.buildBalanced(latitudeBST, longitudeBST);
         stationController.setKDTree(kdTree); // Share the built tree with USEI06 controller
 
-        System.out.println("\n✓ 2D-Tree built successfully!");
-        System.out.println("  • Size: " + lastStatistics.size + " nodes");
-        System.out.println("  • Height: " + lastStatistics.height);
-        System.out.println("  • Build time: " + String.format("%.3f ms", lastStatistics.buildTimeNanos / 1_000_000.0));
+        System.out.println("\n2D-Tree built successfully!");
+        System.out.println("Size: " + lastStatistics.size + " nodes");
+        System.out.println("Height: " + lastStatistics.height);
+        System.out.println("Build time: " + String.format("%.3f ms", lastStatistics.buildTimeNanos / 1_000_000.0));
     }
 
     /**
@@ -255,7 +255,7 @@ public class KDTreeMenu {
             String filename = validator.readString("Enter the filename (e.g., kdtree_export.csv): ");
             try {
                 int count = kdTree.exportTreeToCsv(filename);
-                System.out.println("\n✓ Tree successfully exported to " + filename + " (" + count + " nodes).");
+                System.out.println("\nTree successfully exported to " + filename + " (" + count + " nodes).");
             } catch (IOException e) {
                 System.err.println("\nError saving file: " + e.getMessage());
             } catch (Exception e) {
@@ -375,26 +375,26 @@ public class KDTreeMenu {
         System.out.println("   Time: O(n log n)"); // Limpo
         System.out.println("   Space: O(n)");
         System.out.println("\n   Why O(n log n)?");
-        System.out.println("   • Sorting/Median finding at each level: O(n) per level");
-        System.out.println("   • Tree has O(log n) levels (balanced)");
+        System.out.println("    Sorting/Median finding at each level: O(n) per level");
+        System.out.println("    Tree has O(log n) levels (balanced)");
         // Substituído LaTeX: O(n) \times O(\log n) = O(n \log n)
         System.out.println("   • Total: O(n) x O(log n) = O(n log n)");
 
         System.out.println("\n   Tree Construction Performance:");
-        System.out.printf("   • Number of stations (n): %,d\n", n);
-        System.out.printf("   • Actual build time: %,.3f ms\n", (double)buildTimeMs); // Usando valor fixo
+        System.out.printf("    Number of stations (n): %,d\n", n);
+        System.out.printf("    Actual build time: %,.3f ms\n", (double)buildTimeMs); // Usando valor fixo
 
         System.out.println("\n   Tree Balance Metrics:");
-        System.out.printf("   • Tree height: %d (ideal: %.0f)\n", actualHeight, idealHeight);
-        System.out.print("   • Balance quality: ");
+        System.out.printf("    Tree height: %d (ideal: %.0f)\n", actualHeight, idealHeight);
+        System.out.print("    Balance quality: ");
 
         double heightRatio = (double)actualHeight / idealHeight;
         if (heightRatio <= 1.2) {
-            System.out.println("✓ Excellent (well-balanced)");
+            System.out.println(" Excellent (well-balanced)");
         } else if (heightRatio <= 1.5) {
-            System.out.println("✓ Good (reasonably balanced)");
+            System.out.println(" Good (reasonably balanced)");
         } else {
-            System.out.println("⚠ Fair (could be better)");
+            System.out.println(" Fair (could be better)");
         }
 
         printSeparator(60);
