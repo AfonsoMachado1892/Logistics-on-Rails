@@ -1,0 +1,44 @@
+Title	URL	Priority	Size	Assignees	Status	Area	Item type	Sprint	Estimate	Actual
+Sprint 2 Report	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/81	P0	L	1241182-AfonsoMachado, 1241187-MiguelPereira, 1241243-marilialopes, 1241277-JoseOliveira, 1241883-diogooliveira	Done	LAPR3	Organization	Iteration 2	1.5	2
+USLP07	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/52	P0	XL	1241187-MiguelPereira	Done	LAPR3	US	Iteration 2	6	7.5
+Modelar Train Composition e validações	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/62	P0	L	1241187-MiguelPereira	Done			Iteration 2		
+USAC05	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/34			1241883-diogooliveira	Done	ARQCP	US	Iteration 2	1	1
+USEI10 - Radius search and density summary	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/44	P1	M	1241883-diogooliveira	Done	ESINF	US	Iteration 2	2.5	3
+Testes de integração end-to-end	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/72	P0	M	1241187-MiguelPereira	Done	LAPR3	Organization	Iteration 2	2	2.5
+USAC04	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/33	P1	M	1241182-AfonsoMachado	Done	ARQCP	US	Iteration 2	2.5	2.5
+Create PL/SQL functions (BD)	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/85	P1	S	1241182-AfonsoMachado, 1241187-MiguelPereira, 1241243-marilialopes, 1241277-JoseOliveira, 1241883-diogooliveira	Done			Iteration 2	1	2
+USBD26	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/48	P1	S	1241187-MiguelPereira	Done	BDDAD	US	Iteration 2	0.5	0.5
+USLP06 (Glossary)	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/51	P1	M	1241182-AfonsoMachado	Done	LAPR3	US	Iteration 2	2	2
+USBD22	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/46	P1	S	1241277-JoseOliveira	Done	BDDAD	US	Iteration 2	1	2
+USEI08 - Search by Geographical Area	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/42	P1	M	1241187-MiguelPereira	Done	ESINF	US	Iteration 2	4	4.5
+USBD23	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/50	P1	S	1241883-diogooliveira	Done	BDDAD	US	Iteration 2	0.5	1
+USAC08	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/37			1241187-MiguelPereira	Done	ARQCP	US	Iteration 2	1	0.75
+USAC03	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/32	P1	M	1241187-MiguelPereira	Done	ARQCP	US	Iteration 2	2	1.5
+USBD21	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/39	P1	M	1241883-diogooliveira	Done	BDDAD	US	Iteration 2	1	1
+USLP05	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/45	P1	M	1241243-marilialopes	Done	LAPR3	US	Iteration 2	0.5	1
+USAC01	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/30			1241277-JoseOliveira	Done	ARQCP	US	Iteration 2	2	2.5
+USAC06	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/35			1241277-JoseOliveira	Done	ARQCP	US	Iteration 2	3	2.5
+USEI06 - Time-Zone Index and Windowed Queries	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/40	P0	L	1241277-JoseOliveira	Done	ESINF	US	Iteration 2	3	3
+ARQCP TESTS INTEGRATION	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/82	P0	L	1241187-MiguelPereira	Done	ARQCP	US	Iteration 2	1	2.5
+USAC07	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/36	P1	M	1241243-marilialopes	Done	ARQCP	US	Iteration 2	1	2
+USAC02	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/31	P1	M	1241243-marilialopes	Done	ARQCP	US	Iteration 2	1	2
+USEI07 - Build a balanced 2D-Tree on Latitude/Longitude	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/41	P0	XL	1241243-marilialopes	Done	ESINF	US	Iteration 2	4	5
+USBD24	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/47	P1	M	1241243-marilialopes	Done	BDDAD	US	Iteration 2	1	1.5
+Implement recursive method in KDTree2D class	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/78	P1	M	1241182-AfonsoMachado	Done			Iteration 2	1	
+Implement findNearestNStations in class KDTree2D	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/77	P1	M	1241182-AfonsoMachado	Done			Iteration 2	1	
+Create Class TimeZoneFilter	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/75	P1	S	1241182-AfonsoMachado	Done			Iteration 2	0.5	
+USAC09	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/38	P1	M	1241182-AfonsoMachado	Done	ARQCP	US	Iteration 2	2.5	2.5
+USEI09 - Proximity Search (Nearest-N with Filters)	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/43	P0	XL	1241182-AfonsoMachado	Done	ESINF	US	Iteration 2	4	4.5
+USBD30	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/49	P1	M	1241182-AfonsoMachado	Done			Iteration 2	2	2
+Create Class ProximityResult	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/76	P1	S	1241182-AfonsoMachado	Done			Iteration 2	0.5	
+Temporal Complexity Analysis	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/80	P1	S	1241182-AfonsoMachado	Done			Iteration 2	1	
+Create unit tests	https://github.com/Departamento-de-Engenharia-Informatica/sem3-pi-25-26-g092-repo/issues/79	P1	S	1241182-AfonsoMachado	Done			Iteration 2	1	
+Daily Meeting October 29, 2025		P1	XS	1241182-AfonsoMachado, 1241187-MiguelPereira, 1241243-marilialopes, 1241277-JoseOliveira, 1241883-diogooliveira	Backlog	LAPR3	Organization	Iteration 2	0.1	0.1
+Daily Meeting November 2, 2025		P1	XS	1241182-AfonsoMachado, 1241187-MiguelPereira, 1241243-marilialopes, 1241277-JoseOliveira, 1241883-diogooliveira	Backlog	LAPR3	Organization	Iteration 2	0.1	0.1
+Daily Meeting November 5, 2025		P1	XS	1241182-AfonsoMachado, 1241187-MiguelPereira, 1241243-marilialopes, 1241277-JoseOliveira, 1241883-diogooliveira	Backlog	LAPR3	Organization	Iteration 2	0.1	0.1
+Daily Meeting November 10, 2025		P1	XS	1241182-AfonsoMachado, 1241187-MiguelPereira, 1241243-marilialopes, 1241277-JoseOliveira, 1241883-diogooliveira	Backlog	LAPR3	Organization	Iteration 2	0.1	0.1
+Daily Meeting November 16, 2025		P1	XS	1241182-AfonsoMachado, 1241187-MiguelPereira, 1241243-marilialopes, 1241277-JoseOliveira, 1241883-diogooliveira	Backlog	LAPR3	Organization	Iteration 2	0.1	0.1
+Daily Meeting November 19, 2025		P1	XS	1241182-AfonsoMachado, 1241187-MiguelPereira, 1241243-marilialopes, 1241277-JoseOliveira, 1241883-diogooliveira	Backlog	LAPR3	Organization	Iteration 2	0.1	0.1
+Daily Meeting 22 November, 2025		P1	XS	1241182-AfonsoMachado, 1241187-MiguelPereira, 1241243-marilialopes, 1241277-JoseOliveira, 1241883-diogooliveira	Backlog	LAPR3	Organization	Iteration 2	0.1	0.1
+Error on the commit message				1241182-AfonsoMachado	Backlog			Iteration 2		
+Planning Poker		P1		1241182-AfonsoMachado, 1241187-MiguelPereira, 1241243-marilialopes, 1241277-JoseOliveira, 1241883-diogooliveira	Backlog	LAPR3	Activity	Iteration 2	0.2	0.5

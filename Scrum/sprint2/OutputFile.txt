@@ -1,0 +1,44 @@
+Detailed Team Performance Assessment
+====================================
+
+Individual Evaluations:
+- 1241182-AfonsoMachado:
+  Tasks completed: 13
+  Estimated effort: 20.5h, Actual effort: 17.5h
+  Efficiency: 117.1%
+  Meetings attended: 7
+
+- 1241187-MiguelPereira:
+  Tasks completed: 10
+  Estimated effort: 19.0h, Actual effort: 23.8h
+  Efficiency: 80.0%
+  Meetings attended: 7
+
+- 1241243-marilialopes:
+  Tasks completed: 7
+  Estimated effort: 10.0h, Actual effort: 15.5h
+  Efficiency: 64.5%
+  Meetings attended: 7
+
+- 1241277-JoseOliveira:
+  Tasks completed: 6
+  Estimated effort: 11.5h, Actual effort: 14.0h
+  Efficiency: 82.1%
+  Meetings attended: 7
+
+- 1241883-diogooliveira:
+  Tasks completed: 6
+  Estimated effort: 7.5h, Actual effort: 10.0h
+  Efficiency: 75.0%
+  Meetings attended: 7
+
+Overall Team Performance:
+Total tasks completed: 42
+Total estimated effort: 68.5h, Total actual effort: 80.8h
+Overall efficiency: 84.8%
+Total daily meetings held: 7
+
+Observations:
+- Workload distribution shows varying contributions among members.
+- Meeting participation is consistent across the team, indicating good collaboration.
+- Efficiency varies; some members exceeded estimates, suggesting potential planning improvements.
