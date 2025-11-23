@@ -1,0 +1,7 @@
+Statement processed.
+Testing USBD23 for Train ID: 201
+--- Segments Found ---
+TrainID  | Line Name            | Seg ID   | Order  | Length
+-----------------------------------------------------------
+201      | Linha do Norte       | 201      | 1      | 100
+201      | Linha do Norte       | 202      | 2      | 200
