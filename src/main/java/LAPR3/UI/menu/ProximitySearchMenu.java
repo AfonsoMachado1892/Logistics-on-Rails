@@ -237,7 +237,32 @@ public class ProximitySearchMenu {
     private void offerToSaveResults(List<Station> results, String suffix) {
         boolean save = validator.readConfirmation("\nSave ALL " + results.size() + " stations to a log file?");
         if (save) {
-            saveResultsToFile(results, suffix);
+            // Generate default filename and path
+            String defaultFileName = "proximity_" + suffix + "_" + System.currentTimeMillis() + ".csv";
+            String defaultLogPath = "Logs/" + defaultFileName;
+
+            System.out.println("Enter file path to save results:");
+            System.out.println("[Press ENTER to use default: " + defaultLogPath + "]");
+            System.out.print("> ");
+
+            String customPath = scanner.nextLine().trim();
+            String finalPath;
+
+            if (customPath.isEmpty()) {
+                finalPath = defaultLogPath;
+            } else {
+                // Check if the user entered a directory
+                java.io.File userPath = new java.io.File(customPath);
+                if (userPath.isDirectory()) {
+                    // If it's a directory, append the filename to it
+                    finalPath = new java.io.File(userPath, defaultFileName).getPath();
+                    System.out.println(" (Target is a directory. Saving as: " + finalPath + ")");
+                } else {
+                    finalPath = customPath;
+                }
+            }
+
+            saveResultsToFile(results, finalPath);
         }
     }
 
@@ -245,11 +270,11 @@ public class ProximitySearchMenu {
      * Saves all station results to a timestamped CSV file in the Logs directory.
      * This method ensures all stations, regardless of the console print limit, are logged.
      */
-    private void saveResultsToFile(List<Station> results, String suffix) {
+    /**
+     * Saves all station results to a CSV file.
+     */
+    private void saveResultsToFile(List<Station> results, String filename) {
         try {
-            // Create a timestamped filename
-            String filename = "Logs/proximity_" + suffix + "_" + System.currentTimeMillis() + ".csv";
-
             try (FileWriter writer = new FileWriter(filename)) {
                 // Header
                 writer.write("station,latitude,longitude,country,timeZone,timeZoneGroup,isCity,isMainStation,isAirport\n");
