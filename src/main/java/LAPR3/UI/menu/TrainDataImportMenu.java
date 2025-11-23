@@ -100,7 +100,7 @@ public class TrainDataImportMenu {
         System.out.println("\n╔══ IMPORT ALL DATA ══╗");
 
         // TODO: Suggestion path to be filled here
-        System.out.println("Suggested path: [C:\\Users\\Migas\\Documents\\GitHub\\sem3-pi-25-26-g092-repo\\sem3-pi-25-26-g092-repo\\Dataset]");
+        System.out.println("Suggested path: [\\sem3-pi-25-26-g092-repo\\sem3-pi-25-26-g092-repo\\Dataset]");
 
         System.out.print("Enter data folder path (default: " + DATA_DIR + "): ");
         String dataPath = scanner.nextLine().trim();
