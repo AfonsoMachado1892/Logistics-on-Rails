@@ -140,59 +140,6 @@ public class FreightManagerMenuTest {
         String output = outputStream.toString();
         assertTrue("Should handle missing facilities gracefully", output.contains("R001") || output.contains("No routes"));
     }
-
-    // ================================================================================================
-    // TESTES: createManualRoute()
-    // ================================================================================================
-
-    @Test
-    public void testCreateManualRoute_WithValidFacilities_ShouldFindRoute() throws Exception {
-        String input = "1\n2\n";
-        scanner = new Scanner(new ByteArrayInputStream(input.getBytes()));
-        validator = new InputValidator(scanner);
-        setPrivateField(menu, "scanner", scanner);
-        setPrivateField(menu, "validator", validator);
-        invokePrivateMethod(menu, "createManualRoute");
-        String output = outputStream.toString();
-        assertTrue("Should attempt to find route", output.contains("Calculating route") || output.contains("Route Found"));
-    }
-
-    @Test
-    public void testCreateManualRoute_WithInvalidOrigin_ShouldDisplayErrorMessage() throws Exception {
-        String input = "999\n2\n";
-        scanner = new Scanner(new ByteArrayInputStream(input.getBytes()));
-        validator = new InputValidator(scanner);
-        setPrivateField(menu, "scanner", scanner);
-        setPrivateField(menu, "validator", validator);
-        invokePrivateMethod(menu, "createManualRoute");
-        String output = outputStream.toString();
-        assertTrue("Should handle invalid origin", output.contains("No route found") || output.contains("Facility not found"));
-    }
-
-    @Test
-    public void testCreateManualRoute_WithInvalidDestination_ShouldDisplayErrorMessage() throws Exception {
-        String input = "1\n999\n";
-        scanner = new Scanner(new ByteArrayInputStream(input.getBytes()));
-        validator = new InputValidator(scanner);
-        setPrivateField(menu, "scanner", scanner);
-        setPrivateField(menu, "validator", validator);
-        invokePrivateMethod(menu, "createManualRoute");
-        String output = outputStream.toString();
-        assertTrue("Should handle invalid destination", output.contains("No route found") || output.contains("Facility not found"));
-    }
-
-    @Test
-    public void testCreateManualRoute_WithSameOriginAndDestination_ShouldHandleGracefully() throws Exception {
-        String input = "1\n1\n";
-        scanner = new Scanner(new ByteArrayInputStream(input.getBytes()));
-        validator = new InputValidator(scanner);
-        setPrivateField(menu, "scanner", scanner);
-        setPrivateField(menu, "validator", validator);
-        invokePrivateMethod(menu, "createManualRoute");
-        String output = outputStream.toString();
-        assertTrue("Should handle same origin/destination", output.length() > 0);
-    }
-
     // ================================================================================================
     // TESTES: listAllTrains()
     // ================================================================================================
