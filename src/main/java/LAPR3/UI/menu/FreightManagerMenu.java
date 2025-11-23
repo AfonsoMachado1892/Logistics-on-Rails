@@ -150,14 +150,14 @@ public class FreightManagerMenu {
 
         if (routeOpt.isPresent()) {
             Route route = routeOpt.get();
-            System.out.println("\n✓ Route Found!");
+            System.out.println("\n Route Found!");
             System.out.println("Route ID: " + route.getRouteId());
             System.out.println(routePathService.getRouteSummary(route.getRouteId()));
 
             double distance = routePathService.calculateRouteDistance(route.getRouteId());
             System.out.printf("Total Distance: %.2f meters%n", distance);
         } else {
-            System.out.println("✗ No route found connecting Facility " + originId + " to " + destId);
+            System.out.println(" No route found connecting Facility " + originId + " to " + destId);
         }
     }
 
@@ -225,12 +225,12 @@ public class FreightManagerMenu {
             );
 
             scheduleRepository.save(schedule);
-            System.out.println("✓ Schedule created successfully! ID: " + scheduleId);
+            System.out.println(" Schedule created successfully! ID: " + scheduleId);
 
         } catch (DateTimeParseException e) {
-            System.out.println("✗ Invalid date format. Please use yyyy-MM-dd HH:mm");
+            System.out.println(" Invalid date format. Please use yyyy-MM-dd HH:mm");
         } catch (Exception e) {
-            System.out.println("✗ Error creating schedule: " + e.getMessage());
+            System.out.println(" Error creating schedule: " + e.getMessage());
         }
     }
 
@@ -280,21 +280,21 @@ public class FreightManagerMenu {
 
             if (plan != null) {
                 this.currentDispatchPlan = plan; // Guardar em memória
-                System.out.println("\n✓ PLAN GENERATED SUCCESSFULLY");
+                System.out.println("\n PLAN GENERATED SUCCESSFULLY");
                 System.out.println(dispatcherService.getDispatchSummary(plan));
 
                 // Validar resultados
                 var validation = dispatcherService.validateDispatchPlan(plan);
                 if (!validation.isValid()) {
-                    System.out.println("\n⚠ Validation Warnings:");
+                    System.out.println("\n Validation Warnings:");
                     validation.getWarnings().forEach(w -> System.out.println("  - " + w));
                 }
             }
 
         } catch (DateTimeParseException e) {
-            System.out.println("✗ Invalid date format.");
+            System.out.println(" Invalid date format.");
         } catch (Exception e) {
-            System.out.println("✗ Error generating plan: " + e.getMessage());
+            System.out.println(" Error generating plan: " + e.getMessage());
             // e.printStackTrace(); // Debug se necessário
         }
     }
@@ -303,7 +303,7 @@ public class FreightManagerMenu {
         System.out.println("\n═══ DISPATCH VISUALIZATIONS ═══");
 
         if (currentDispatchPlan == null) {
-            System.out.println("⚠ No plan available in memory.");
+            System.out.println(" No plan available in memory.");
             System.out.println("Please run Option 7 (Generate Dispatch Plan) first.");
             return;
         }
@@ -337,7 +337,7 @@ public class FreightManagerMenu {
         System.out.println("\n═══ EXPORT PLAN ═══");
 
         if (currentDispatchPlan == null) {
-            System.out.println("⚠ No plan available. Run Option 7 first.");
+            System.out.println(" No plan available. Run Option 7 first.");
             return;
         }
 

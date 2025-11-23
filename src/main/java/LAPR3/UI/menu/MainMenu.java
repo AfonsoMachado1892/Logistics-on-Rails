@@ -130,7 +130,7 @@ public class MainMenu {
         System.out.println("│  11. 2D-Tree Spatial Index (USEI07)            │");
         System.out.println("│  12. Geographic Area Search (USEI08)           │");
         System.out.println("│  13. Proximity Search (USEI09)                 │");
-        System.out.println("│  14. Proximity Search (USEI10)                 │");
+        System.out.println("│  14. Radius Search (USEI10)                    │");
         System.out.println("├────────────────────────────────────────────────┤");
         System.out.println("│  RAILWAY OPERATIONS                            │");
         System.out.println("├────────────────────────────────────────────────┤");
