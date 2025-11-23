@@ -3,8 +3,8 @@ CFLAGS = -Wall -Wextra -fanalyzer -g
 ARCHFLAGS = -march=rv32imd -mabi=ilp32d
 LIBRV32 = ${HOME}/bin/bootlin/riscv32-buildroot-linux-gnu/sysroot
 
-program.elf: main.o enqueue_value.o unity.o callfunc.o
-	$(CC) $(CFLAGS) $(ARCHFLAGS) main.o enqueue_value.o unity.o callfunc.o -o program.elf
+program.elf: main.o enqueue_value.o ../unity.o callfunc.o
+	$(CC) $(CFLAGS) $(ARCHFLAGS) main.o enqueue_value.o ../unity.o callfunc.o -o program.elf
 
 main.o: main.c enqueue_value.h
 	$(CC) $(CFLAGS) $(ARCHFLAGS) -c main.c -o main.o
