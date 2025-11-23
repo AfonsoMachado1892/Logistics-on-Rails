@@ -1,11 +1,9 @@
 package ESINF.model;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
+import org.junit.Before;
+import org.junit.Test;
 import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.*;
 
 public class RadiusSearchResultTest {
 
@@ -15,8 +13,8 @@ public class RadiusSearchResultTest {
     RadiusSearchResult.DensitySummary summary;
     RadiusSearchResult result;
 
-    @BeforeEach
-    void setup() {
+    @Before
+    public void setup() {
 
         s1 = new Station("Alpha", 10, 10, "PT", "UTC", "EU", true, false, false);
         s2 = new Station("Beta", 20, 20, "ES", "UTC+1", "EU", false, false, false);
@@ -48,25 +46,25 @@ public class RadiusSearchResultTest {
     // -------------------------- StationKey tests ------------------------------
 
     @Test
-    void testKeyCompareByDistance() {
+    public void testKeyCompareByDistance() {
         assertTrue(k2.compareTo(k1) < 0); // 5km < 10km
     }
 
     @Test
-    void testKeyCompareByNameDescending() {
+    public void testKeyCompareByNameDescending() {
         // k2 e k3 com mesma distância → compara nomes DESC
         assertTrue(k3.compareTo(k2) < 0); // "Gamma" vem antes de "Beta"
     }
 
 
     @Test
-    void testKeyEquals() {
+    public void testKeyEquals() {
         RadiusSearchResult.StationKey clone = new RadiusSearchResult.StationKey(10.0, s1);
         assertEquals(k1, clone);
     }
 
     @Test
-    void testKeyHash() {
+    public void testKeyHash() {
         RadiusSearchResult.StationKey clone = new RadiusSearchResult.StationKey(10.0, s1);
         assertEquals(k1.hashCode(), clone.hashCode());
     }
@@ -74,20 +72,20 @@ public class RadiusSearchResultTest {
     // -------------------------- DensitySummary tests --------------------------
 
     @Test
-    void testSummaryTotalCounts() {
+    public void testSummaryTotalCounts() {
         assertEquals(3, summary.getTotalStations());
         assertEquals(1, summary.getCityCount());
         assertEquals(2, summary.getNonCityCount());
     }
 
     @Test
-    void testSummaryCountrySorting() {
+    public void testSummaryCountrySorting() {
         List<String> keys = new ArrayList<>(summary.getCountryDistribution().keySet());
         assertEquals(List.of("ES", "PT"), keys); // TreeMap → sorted
     }
 
     @Test
-    void testSummaryContainsPercentages() {
+    public void testSummaryContainsPercentages() {
         String text = summary.toString();
         assertTrue(text.contains("PT: 2"));
         assertTrue(text.contains("ES: 1"));
@@ -96,7 +94,7 @@ public class RadiusSearchResultTest {
     // -------------------------- RadiusSearchResult tests --------------------------
 
     @Test
-    void testGetStationListSorted() {
+    public void testGetStationListSorted() {
         List<Station> list = result.getStationList();
 
         // Distances: Beta(5), Gamma(5), Alpha(10)
@@ -108,23 +106,23 @@ public class RadiusSearchResultTest {
 
 
     @Test
-    void testClosestStation() {
+    public void testClosestStation() {
         assertEquals("Gamma", result.getClosestStation().getName());
     }
 
     @Test
-    void testFarthestStation() {
+    public void testFarthestStation() {
         assertEquals("Alpha", result.getFarthestStation().getName());
     }
 
     @Test
-    void testDistanceLimits() {
+    public void testDistanceLimits() {
         assertEquals(5.0, result.getMinDistance());
         assertEquals(10.0, result.getMaxDistance());
     }
 
     @Test
-    void testSummaryString() {
+    public void testSummaryString() {
         String s = result.toSummaryString();
         assertTrue(s.contains("3 stations"));
         assertTrue(s.contains("1 cities"));
@@ -132,7 +130,7 @@ public class RadiusSearchResultTest {
     }
 
     @Test
-    void testToStringContainsSections() {
+    public void testToStringContainsSections() {
         String txt = result.toString();
         assertTrue(txt.contains("Radius Search Result"));
         assertTrue(txt.contains("Density Summary"));
@@ -140,7 +138,7 @@ public class RadiusSearchResultTest {
     }
 
     @Test
-    void testEmptyResult() {
+    public void testEmptyResult() {
         TreeMap<RadiusSearchResult.StationKey, Station> empty = new TreeMap<>();
         RadiusSearchResult emptyRes = new RadiusSearchResult(empty, summary, 0, 0, 5, 1000);
 
