@@ -15,8 +15,8 @@ enqueue_value.o: enqueue_value.s enqueue_value.h
 unity.o: ../unity.c ../unity.h
 	$(CC) $(CFLAGS) $(ARCHFLAGS) -c ../unity.c -o unity.o
 	
-callfunc.o: callfunc.s callfunc.h
-	$(CC) $(CFLAGS) $(ARCHFLAGS) -c .callfunc.s -o callfunc.o
+callfunc.o: ../callfunc.s ../callfunc.h
+	$(CC) $(CFLAGS) $(ARCHFLAGS) -c ../callfunc.s -o callfunc.o
 
 clean:
 	rm -f *.o *.elf
