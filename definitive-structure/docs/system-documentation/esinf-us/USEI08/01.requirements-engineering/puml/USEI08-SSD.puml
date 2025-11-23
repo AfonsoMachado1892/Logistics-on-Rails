@@ -1,0 +1,14 @@
+@startuml USEI08_SSD
+
+title USEI08 - Search by Geographical Area (SSD)
+
+actor "User" as User
+participant ":System" as System
+
+User -> System: searchByGeographicArea(latMin, latMax, lonMin, lonMax, filter)
+activate System
+
+System --> User: SearchResult(stations, executionTime)
+deactivate System
+
+@enduml
