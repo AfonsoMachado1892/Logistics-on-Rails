@@ -117,9 +117,10 @@ public class RadiusSearchResultTest {
 
     @Test
     public void testDistanceLimits() {
-        assertEquals(5.0, result.getMinDistance());
-        assertEquals(10.0, result.getMaxDistance());
+        assertEquals(5.0, result.getMinDistance(), 0.0001);
+        assertEquals(10.0, result.getMaxDistance(), 0.0001);
     }
+
 
     @Test
     public void testSummaryString() {
@@ -144,7 +145,8 @@ public class RadiusSearchResultTest {
 
         assertNull(emptyRes.getClosestStation());
         assertNull(emptyRes.getFarthestStation());
-        assertEquals(Double.MAX_VALUE, emptyRes.getMinDistance());
-        assertEquals(0, emptyRes.getMaxDistance());
+        assertEquals(Double.MAX_VALUE, emptyRes.getMinDistance(), 0.0001);
+        assertEquals(0, emptyRes.getMaxDistance(), 0.0001);
     }
+
 }
