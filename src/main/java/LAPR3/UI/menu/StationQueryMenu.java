@@ -376,13 +376,35 @@ public class StationQueryMenu {
 
     private void saveResultsToFile(List<Station> results, String suffix) {
         try {
-            String filename = "Logs/stations_" + suffix + "_" + System.currentTimeMillis() + ".csv";
+            String defaultFileName = "stations_" + suffix + "_" + System.currentTimeMillis() + ".csv";
+            String defaultPath = "Logs/" + defaultFileName;
 
-            try (FileWriter writer = new FileWriter(filename)) {
+            System.out.println("Enter file path to save results:");
+            System.out.println("[Press ENTER to use default: " + defaultPath + "]");
+            System.out.print("> ");
+
+            String customPath = scanner.nextLine().trim();
+            String finalPath;
+
+            if (customPath.isEmpty()) {
+                finalPath = defaultPath;
+            } else {
+                // Check if the user entered a directory
+                java.io.File userPath = new java.io.File(customPath);
+                if (userPath.isDirectory()) {
+                    // If it's a directory, append the filename to it
+                    finalPath = new java.io.File(userPath, defaultFileName).getPath();
+                    System.out.println(" (Target is a directory. Saving as: " + finalPath + ")");
+                } else {
+                    finalPath = customPath;
+                }
+            }
+
+            try (FileWriter writer = new FileWriter(finalPath)) {
                 writer.write("station,latitude,longitude,country,timeZone,timeZoneGroup,isCity,isMainStation,isAirport\n");
 
                 for (Station s : results) {
-                    writer.write(String.format("%s,%.5f,%.5f,%s,%s,%s,%b,%b,%b\n",
+                    writer.write(String.format(java.util.Locale.US, "%s,%.5f,%.5f,%s,%s,%s,%b,%b,%b\n",
                             escapeCsv(s.getName()),
                             s.getLatitude(),
                             s.getLongitude(),
@@ -395,7 +417,7 @@ public class StationQueryMenu {
                 }
             }
 
-            System.out.println(" Results saved to: " + filename);
+            System.out.println(" Results saved to: " + finalPath);
 
         } catch (IOException e) {
             System.err.println(" Error saving file: " + e.getMessage());

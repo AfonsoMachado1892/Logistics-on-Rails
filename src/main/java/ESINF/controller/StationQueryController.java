@@ -46,7 +46,7 @@ public class StationQueryController {
         long endTime = System.nanoTime();
 
         double elapsedMs = (endTime - startTime) / 1_000_000.0;
-        System.out.printf("⏱️  Query executed in %.3f ms%n", elapsedMs);
+        System.out.printf(" Query executed in %.3f ms%n", elapsedMs);
 
         return results;
     }
@@ -67,7 +67,7 @@ public class StationQueryController {
         long endTime = System.nanoTime();
 
         double elapsedMs = (endTime - startTime) / 1_000_000.0;
-        System.out.printf("⏱️  Query executed in %.3f ms%n", elapsedMs);
+        System.out.printf(" Query executed in %.3f ms%n", elapsedMs);
 
         return results;
     }
@@ -86,7 +86,7 @@ public class StationQueryController {
         long endTime = System.nanoTime();
 
         double elapsedMs = (endTime - startTime) / 1_000_000.0;
-        System.out.printf("⏱️  Query executed in %.3f ms%n", elapsedMs);
+        System.out.printf(" Query executed in %.3f ms%n", elapsedMs);
 
         return results;
     }
@@ -112,7 +112,7 @@ public class StationQueryController {
         long endTime = System.nanoTime();
 
         double elapsedMs = (endTime - startTime) / 1_000_000.0;
-        System.out.printf("⏱️  Query executed in %.3f ms%n", elapsedMs);
+        System.out.printf(" Query executed in %.3f ms%n", elapsedMs);
 
         return results;
     }
@@ -138,7 +138,7 @@ public class StationQueryController {
         long endTime = System.nanoTime();
 
         double elapsedMs = (endTime - startTime) / 1_000_000.0;
-        System.out.printf("⏱️  Query executed in %.3f ms%n", elapsedMs);
+        System.out.printf(" Query executed in %.3f ms%n", elapsedMs);
 
         return results;
     }
