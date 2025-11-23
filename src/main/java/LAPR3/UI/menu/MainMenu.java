@@ -96,10 +96,10 @@ public class MainMenu {
                 locoRepo, wagonRepo, trainRepo, routeRepo, scheduleRepo
         );
 
-        // Agora passar o trainImportMenu como o último argumento
+        // Agora passar o trainImportMenu e lineRepository como os últimos argumentos
         return new FreightManagerMenu(
                 scanner, validator, dispatcherService, routeRepo, facilityRepo,
-                trainRepo, scheduleRepo, routePathService, visualService, trainImportMenu
+                trainRepo, scheduleRepo, routePathService, visualService, trainImportMenu, lineRepo
         );
     }
 

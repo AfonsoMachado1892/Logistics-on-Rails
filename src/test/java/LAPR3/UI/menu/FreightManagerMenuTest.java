@@ -86,7 +86,7 @@ public class FreightManagerMenuTest {
         dataImportMenu = null; // Pode ser mockado se necessário
         menu = new FreightManagerMenu(
                 scanner, validator, dispatcherService, routeRepo, facilityRepo,
-                trainRepo, scheduleRepo, routePathService, visualService, dataImportMenu
+                trainRepo, scheduleRepo, routePathService, visualService, dataImportMenu, lineRepo
         );
     }
 
@@ -445,7 +445,7 @@ public class FreightManagerMenuTest {
     public void testMenu_WithNullDataImportMenu_ShouldHandleGracefully() throws Exception {
         FreightManagerMenu menuWithNull = new FreightManagerMenu(
                 scanner, validator, dispatcherService, routeRepo, facilityRepo,
-                trainRepo, scheduleRepo, routePathService, visualService, null
+                trainRepo, scheduleRepo, routePathService, visualService, null, lineRepo
         );
         assertNotNull("Menu should be created even with null dataImportMenu", menuWithNull);
     }

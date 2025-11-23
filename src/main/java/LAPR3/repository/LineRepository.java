@@ -116,4 +116,21 @@ public class LineRepository {
     public int count() {
         return lines.size();
     }
+
+    /**
+     * Find all facilities directly connected to a given facility
+     * @param facilityId the facility ID
+     * @return map of connected facility ID to the connecting line
+     */
+    public Map<Integer, Line> findDirectlyConnectedFacilities(int facilityId) {
+        Map<Integer, Line> connected = new HashMap<>();
+        for (Line line : lines.values()) {
+            if (line.getStartFacilityId() == facilityId) {
+                connected.put(line.getEndFacilityId(), line);
+            } else if (line.getEndFacilityId() == facilityId) {
+                connected.put(line.getStartFacilityId(), line);
+            }
+        }
+        return connected;
+    }
 }

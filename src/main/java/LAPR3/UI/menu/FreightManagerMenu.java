@@ -5,6 +5,7 @@ import LAPR3.model.*;
 import LAPR3.repository.*;
 import LAPR3.service.*;
 import LAPR3.UI.utils.InputValidator;
+import LAPR3.model.Line;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -23,6 +24,7 @@ public class FreightManagerMenu {
     private final RoutePathService routePathService;
     private final ScheduleVisualizationService visualService;
     private final TrainDataImportMenu dataImportMenu;
+    private final LineRepository lineRepository;
 
     // Campo para armazenar o último plano gerado em memória
     private DispatchPlan currentDispatchPlan;
@@ -38,7 +40,8 @@ public class FreightManagerMenu {
                               ScheduleRepository scheduleRepository,
                               RoutePathService routePathService,
                               ScheduleVisualizationService visualService,
-                              TrainDataImportMenu dataImportMenu) {
+                              TrainDataImportMenu dataImportMenu,
+                              LineRepository lineRepository) {
         this.scanner = scanner;
         this.validator = validator;
         this.dispatcherService = dispatcherService;
@@ -49,6 +52,7 @@ public class FreightManagerMenu {
         this.routePathService = routePathService;
         this.visualService = visualService;
         this.dataImportMenu = dataImportMenu;
+        this.lineRepository = lineRepository;
     }
 
     public void show() {
@@ -64,7 +68,7 @@ public class FreightManagerMenu {
                     else System.out.println("Data Import Menu not configured.");
                 }
                 case 2 -> listAllRoutes();
-                case 3 -> createManualRoute();
+                case 3 -> buildRoute();
                 case 4 -> listAllTrains();
                 case 5 -> createSchedule();
                 case 6 -> viewSchedule();
@@ -88,7 +92,7 @@ public class FreightManagerMenu {
         System.out.println("  1. Data Import & Management  ");
         System.out.println("  ────────────────────────────────────────────");
         System.out.println("  2. List All Routes");
-        System.out.println("  3. Find Best Route (Manual Calculation)");
+        System.out.println("  3. Build Route (Route Builder)");
         System.out.println("  4. List All Trains");
         System.out.println("  5. Create New Schedule");
         System.out.println("  6. View Schedule Details");
@@ -137,27 +141,216 @@ public class FreightManagerMenu {
 
     // --- NOVAS IMPLEMENTAÇÕES FUNCIONAIS ---
 
-    private void createManualRoute() {
-        System.out.println("\n═══ FIND BEST ROUTE ═══");
-        System.out.println("Finds the shortest path between two facilities using the network topology.");
-
-        // CORREÇÃO: Adicionar min e max (0 a Integer.MAX_VALUE)
-        int originId = validator.readInt("Enter Origin Facility ID: ", 0, Integer.MAX_VALUE);
-        int destId = validator.readInt("Enter Destination Facility ID: ", 0, Integer.MAX_VALUE);
-
-        System.out.println("Calculating route...");
-        Optional<Route> routeOpt = routePathService.findShortestRoute(originId, destId);
-
-        if (routeOpt.isPresent()) {
-            Route route = routeOpt.get();
-            System.out.println("\n Route Found!");
-            System.out.println("Route ID: " + route.getRouteId());
-            System.out.println(routePathService.getRouteSummary(route.getRouteId()));
-
-            double distance = routePathService.calculateRouteDistance(route.getRouteId());
-            System.out.printf("Total Distance: %.2f meters%n", distance);
+    private void buildRoute() {
+        System.out.println("\n=== ROUTE BUILDER ===");
+        
+        // 1. Starting facility
+        int startId = validator.readInt("Enter Starting Facility ID: ", 0, Integer.MAX_VALUE);
+        Facility startFacility = facilityRepository.findById(startId)
+                .orElse(null);
+        
+        if (startFacility == null) {
+            System.out.println("✗ Error: Starting facility not found.");
+            return;
+        }
+        
+        System.out.println("Starting facility: " + startFacility.getName());
+        
+        // 2. Mandatory stops (optional)
+        List<Integer> mandatoryStops = new ArrayList<>();
+        System.out.print("Enter Mandatory Stops (comma-separated Facility IDs, or press ENTER to skip): ");
+        String mandatoryInput = scanner.nextLine().trim();
+        
+        if (!mandatoryInput.isEmpty()) {
+            String[] stopIds = mandatoryInput.split(",");
+            for (String stopIdStr : stopIds) {
+                try {
+                    int stopId = Integer.parseInt(stopIdStr.trim());
+                    if (facilityRepository.findById(stopId).isPresent()) {
+                        mandatoryStops.add(stopId);
+                    } else {
+                        System.out.println("⚠ Warning: Facility ID " + stopId + " not found, skipping.");
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("⚠ Warning: Invalid facility ID: " + stopIdStr);
+                }
+            }
+        }
+        
+        // 3. Build route step by step
+        List<Integer> routeFacilities = new ArrayList<>();
+        routeFacilities.add(startId);
+        
+        int currentFacilityId = startId;
+        Set<Integer> visitedFacilities = new HashSet<>();
+        visitedFacilities.add(startId);
+        
+        System.out.println("\nCurrent route: " + getFacilityName(startId));
+        if (!mandatoryStops.isEmpty()) {
+            System.out.println("Mandatory stops:");
+            for (Integer stopId : mandatoryStops) {
+                System.out.println("  - " + getFacilityName(stopId) + " (ID " + stopId + ")");
+            }
+        }
+        
+        while (true) {
+            // Check if all mandatory stops are visited
+            List<Integer> remainingMandatory = new ArrayList<>();
+            for (Integer stopId : mandatoryStops) {
+                if (!routeFacilities.contains(stopId)) {
+                    remainingMandatory.add(stopId);
+                }
+            }
+            
+            if (!remainingMandatory.isEmpty()) {
+                System.out.println("\nMandatory destinations still required:");
+                for (Integer stopId : remainingMandatory) {
+                    System.out.println("  - " + getFacilityName(stopId) + " (ID " + stopId + ")");
+                }
+            }
+            
+            // Get directly connected facilities
+            Map<Integer, Line> connected = lineRepository.findDirectlyConnectedFacilities(currentFacilityId);
+            
+            // Filter out already visited facilities
+            List<Integer> availableOptions = connected.keySet().stream()
+                    .filter(id -> !visitedFacilities.contains(id))
+                    .sorted()
+                    .toList();
+            
+            if (availableOptions.isEmpty()) {
+                System.out.println("\n⚠ No more unvisited facilities directly connected to " + 
+                        getFacilityName(currentFacilityId));
+                System.out.println("Choose next stop (direct connections only):");
+                System.out.println("  0) Finish route");
+                
+                int choice = validator.readInt("Choose option: ", 0, 0);
+                if (choice == 0) break;
+            } else {
+                System.out.println("\nChoose next stop (direct connections only):");
+                int optionNum = 1;
+                for (Integer facilityId : availableOptions) {
+                    Facility fac = facilityRepository.findById(facilityId).orElse(null);
+                    String name = fac != null ? fac.getName() : "Unknown";
+                    System.out.printf("  %d) %s (ID %d)%n", optionNum, name, facilityId);
+                    optionNum++;
+                }
+                System.out.println("  0) Finish route");
+                
+                int maxOption = availableOptions.size();
+                int choice = validator.readInt("Choose option: ", 0, maxOption);
+                
+                if (choice == 0) {
+                    // Check if all mandatory stops are included
+                    if (!remainingMandatory.isEmpty()) {
+                        System.out.println("\n⚠ Warning: Route does not include all mandatory stops!");
+                        System.out.print("Finish route anyway? (y/n): ");
+                        String confirm = scanner.nextLine().trim().toLowerCase();
+                        if (!confirm.equals("y") && !confirm.equals("yes")) {
+                            continue;
+                        }
+                    }
+                    break;
+                }
+                
+                int selectedFacilityId = availableOptions.get(choice - 1);
+                routeFacilities.add(selectedFacilityId);
+                visitedFacilities.add(selectedFacilityId);
+                currentFacilityId = selectedFacilityId;
+                
+                System.out.println("✓ Added: " + getFacilityName(selectedFacilityId));
+                System.out.println("Current route: " + buildRouteString(routeFacilities));
+            }
+        }
+        
+        // 4. Validate route
+        if (routeFacilities.size() < 2) {
+            System.out.println("\n✗ Error: Route must have at least 2 facilities.");
+            return;
+        }
+        
+        // 5. Create route name
+        String routeName = buildRouteName(routeFacilities);
+        
+        // 6. Generate route ID
+        String routeId = "R" + String.format("%03d", routeRepository.count() + 1);
+        while (routeRepository.findById(routeId).isPresent()) {
+            routeId = "R" + String.format("%03d", Integer.parseInt(routeId.substring(1)) + 1);
+        }
+        
+        // 7. Determine route type (SIMPLE if 2 facilities, COMPLEX otherwise)
+        Route.RouteType routeType = routeFacilities.size() == 2 
+                ? Route.RouteType.SIMPLE 
+                : Route.RouteType.COMPLEX;
+        
+        // 8. Validate route path
+        Optional<String> validationError = routePathService.validateRoute(routeId);
+        if (validationError.isPresent() && !validationError.get().contains("not found")) {
+            // Try to create anyway, validation will happen when saving
+        }
+        
+        // 9. Create and save route
+        try {
+            Route newRoute = new Route(routeId, routeName, routeFacilities, routeType);
+            
+            // Validate the route path before saving
+            boolean isValid = true;
+            try {
+                // Check each leg
+                for (int i = 0; i < routeFacilities.size() - 1; i++) {
+                    int from = routeFacilities.get(i);
+                    int to = routeFacilities.get(i + 1);
+                    if (lineRepository.findLineConnecting(from, to).isEmpty()) {
+                        System.out.println("\n✗ Error: No direct line between " + 
+                                getFacilityName(from) + " and " + getFacilityName(to));
+                        isValid = false;
+                        break;
+                    }
+                }
+            } catch (Exception e) {
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                System.out.println("✗ Route validation failed. Route not saved.");
+                return;
+            }
+            
+            routeRepository.save(newRoute);
+            System.out.println("\n✓ Route created successfully!");
+            System.out.println("Route ID: " + routeId);
+            System.out.println("Route Name: " + routeName);
+            System.out.println("Facilities: " + buildRouteString(routeFacilities));
+            System.out.println("Type: " + routeType);
+            
+            // Show route summary
+            System.out.println("\n" + routePathService.getRouteSummary(routeId));
+            
+        } catch (IllegalArgumentException e) {
+            System.out.println("\n✗ Error creating route: " + e.getMessage());
+        }
+    }
+    
+    private String getFacilityName(int facilityId) {
+        return facilityRepository.findById(facilityId)
+                .map(Facility::getName)
+                .orElse("Unknown (ID " + facilityId + ")");
+    }
+    
+    private String buildRouteString(List<Integer> facilityIds) {
+        return facilityIds.stream()
+                .map(this::getFacilityName)
+                .reduce((a, b) -> a + " → " + b)
+                .orElse("");
+    }
+    
+    private String buildRouteName(List<Integer> facilityIds) {
+        if (facilityIds.size() == 2) {
+            return getFacilityName(facilityIds.get(0)) + "-" + getFacilityName(facilityIds.get(1));
         } else {
-            System.out.println(" No route found connecting Facility " + originId + " to " + destId);
+            return getFacilityName(facilityIds.get(0)) + " → " + 
+                   getFacilityName(facilityIds.get(facilityIds.size() - 1)) + 
+                   " (via " + (facilityIds.size() - 2) + " stops)";
         }
     }
 
