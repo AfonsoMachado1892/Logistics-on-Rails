@@ -1,0 +1,94 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+title USEI06 - Time-Zone Index and Windowed Queries
+
+autonumber
+
+actor "Planner" as Planner
+participant ":System" as System
+
+activate Planner
+
+Planner -> System : initiates station data import and provides file path
+activate System
+System --> Planner : displays import summary \n(valid count, invalid count, errors)
+deactivate System
+
+Planner -> System : requests query by time zone group
+activate System
+System --> Planner : displays available time zone groups
+deactivate System
+
+Planner -> System : selects time zone group
+activate System
+System --> Planner : displays stations ordered by country and name \n(with execution time)
+deactivate System
+
+alt Query by Time Zone Group and Country
+    Planner -> System : requests query by time zone group and country
+    activate System
+    System --> Planner : displays available countries in time zone group
+    deactivate System
+
+    Planner -> System : selects country
+    activate System
+    System --> Planner : displays filtered stations ordered by name \n(with execution time)
+    deactivate System
+end
+
+alt Query by Time Zone Window
+    Planner -> System : requests query by time zone window
+    activate System
+    System --> Planner : displays available time zone groups
+    deactivate System
+
+    Planner -> System : provides multiple time zone groups
+    activate System
+    System --> Planner : displays stations from all groups \nordered by time zone, country, and name \n(with execution time)
+    deactivate System
+end
+
+alt Query by Latitude Range
+    Planner -> System : requests query by latitude range
+    activate System
+    System --> Planner : requests minimum and maximum latitude
+    deactivate System
+
+    Planner -> System : provides latitude range
+    activate System
+    System --> Planner : displays stations within range \n(with execution time)
+    deactivate System
+end
+
+alt Query by Longitude Range
+    Planner -> System : requests query by longitude range
+    activate System
+    System --> Planner : requests minimum and maximum longitude
+    deactivate System
+
+    Planner -> System : provides longitude range
+    activate System
+    System --> Planner : displays stations within range \n(with execution time)
+    deactivate System
+end
+
+opt Save Results
+    Planner -> System : requests to save results to CSV
+    activate System
+    System --> Planner : displays confirmation message with file path
+    deactivate System
+end
+
+opt View Complexity Analysis
+    Planner -> System : requests temporal complexity analysis
+    activate System
+    System --> Planner : displays detailed complexity analysis \nfor all query operations
+    deactivate System
+end
+
+deactivate Planner
+
+@enduml
