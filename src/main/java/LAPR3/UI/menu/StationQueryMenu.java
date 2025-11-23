@@ -127,7 +127,32 @@ public class StationQueryMenu {
 
                 boolean saveErrors = validator.readConfirmation("\nSave all errors to file?");
                 if (saveErrors) {
-                    saveErrorsToFile(result.errors());
+                    // Logic to handle default vs custom path
+                    String defaultFileName = "import_errors_" + System.currentTimeMillis() + ".txt";
+                    String defaultLogPath = "Logs/" + defaultFileName;
+
+                    System.out.println("Enter file path to save errors:");
+                    System.out.println("[Press ENTER to use default: " + defaultLogPath + "]");
+                    System.out.print("> ");
+
+                    String customPath = scanner.nextLine().trim();
+                    String finalPath;
+
+                    if (customPath.isEmpty()) {
+                        finalPath = defaultLogPath;
+                    } else {
+                        // Check if the user entered a directory (e.g., C:\...\Logs)
+                        java.io.File userPath = new java.io.File(customPath);
+                        if (userPath.isDirectory()) {
+                            // If it's a directory, append the filename to it
+                            finalPath = new java.io.File(userPath, defaultFileName).getPath();
+                            System.out.println(" (Target is a directory. Saving as: " + finalPath + ")");
+                        } else {
+                            finalPath = customPath;
+                        }
+                    }
+
+                    saveErrorsToFile(result.errors(), finalPath);
                 }
             }
 
@@ -377,10 +402,8 @@ public class StationQueryMenu {
         }
     }
 
-    private void saveErrorsToFile(List<String> errors) {
+    private void saveErrorsToFile(List<String> errors, String filename) {
         try {
-            String filename = "Logs/import_errors_" + System.currentTimeMillis() + ".txt";
-
             try (FileWriter writer = new FileWriter(filename)) {
                 writer.write("Station Import Errors\n");
                 writer.write("=".repeat(80) + "\n\n");
