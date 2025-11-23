@@ -250,16 +250,50 @@ public class KDTreeMenu {
         System.out.println("  [LON] = Split by Longitude (odd depth)");
         System.out.println("  (n) = Number of stations at this coordinate");
 
-        String choice = validator.readString("Do you want to save the tree structure to a CSV file? (Y/N): ");
-        if (choice.equalsIgnoreCase("Y")) {
-            String filename = validator.readString("Enter the filename (e.g., kdtree_export.csv): ");
+        // --- UPDATED SAVE LOGIC (Matches ProximitySearchMenu) ---
+        boolean save = validator.readConfirmation("Do you want to save the tree structure to a CSV file?");
+        if (save) {
+            // 1. Define the filename ONLY (no directory)
+            String defaultFileName = "kdtree_export_" + System.currentTimeMillis() + ".csv";
+
+            // 2. Define the default full path for display and default usage
+            String defaultLogPath = "Logs/" + defaultFileName;
+
+            System.out.println("Enter file path to save export:");
+            System.out.println("[Press ENTER to use default: " + defaultLogPath + "]");
+            System.out.print("> ");
+
+            String customPath = scanner.nextLine().trim();
+            String finalPath;
+
+            if (customPath.isEmpty()) {
+                // User hit ENTER -> use the default path "Logs/filename.csv"
+                finalPath = defaultLogPath;
+            } else {
+                // User typed something
+                java.io.File userPath = new java.io.File(customPath);
+
+                if (userPath.isDirectory()) {
+                    // If user typed a folder (e.g. "Logs"), append ONLY the filename
+                    // This prevents "Logs\Logs\filename.csv" because we only append the NAME, not the default path.
+                    finalPath = new java.io.File(userPath, defaultFileName).getPath();
+                    System.out.println(" (Target is a directory. Saving as: " + finalPath + ")");
+                } else {
+                    // User typed a specific filename
+                    finalPath = customPath;
+                }
+            }
+
             try {
-                int count = kdTree.exportTreeToCsv(filename);
-                System.out.println("\nTree successfully exported to " + filename + " (" + count + " nodes).");
+                // Now we pass the FULL path to the model.
+                // NOTE: This requires KDTree2D.exportTreeToCsv to rely on the path we send,
+                // and NOT force "Logs/" itself.
+                int count = kdTree.exportTreeToCsv(finalPath);
+                System.out.println("\nTree successfully exported to " + finalPath + " (" + count + " nodes).");
             } catch (IOException e) {
-                System.err.println("\nError saving file: " + e.getMessage());
+                System.err.println(" Error saving file: " + e.getMessage());
             } catch (Exception e) {
-                System.err.println("\nAn unexpected error occurred during export: " + e.getMessage());
+                System.err.println(" Error: " + e.getMessage());
             }
         }
     }

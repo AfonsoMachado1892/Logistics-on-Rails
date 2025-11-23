@@ -389,10 +389,9 @@ public class KDTree2D {
      * @throws IOException If an error occurs during file creation or writing.
      */
     public int exportTreeToCsv(String filename) throws IOException {
-        // CONSTRÓI O CAMINHO DO ARQUIVO DENTRO DA PASTA 'Logs/'
-        String path = Paths.get("Logs", filename).toString();
-
-        try (FileWriter writer = new FileWriter(path)) {
+        // UPDATE: Use the filename/path exactly as provided by the Menu.
+        // Do not force "Logs" here, because the Menu now handles the full path construction.
+        try (FileWriter writer = new FileWriter(filename)) {
             // Write header
             writer.write("Depth,SplitAxis,Latitude,Longitude,BucketSize,StationNames\n");
 
