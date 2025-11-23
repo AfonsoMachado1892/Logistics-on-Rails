@@ -114,7 +114,7 @@ public class FreightManagerMenu {
         System.out.println("\n═══ AVAILABLE ROUTES ═══");
         List<Route> routes = routeRepository.findAll();
         if (routes.isEmpty()) {
-            System.out.println("✗ No routes available.");
+            System.out.println("No routes available.");
             return;
         }
         System.out.println("\nTotal routes: " + routes.size());
@@ -169,10 +169,10 @@ public class FreightManagerMenu {
                     if (facilityRepository.findById(stopId).isPresent()) {
                         mandatoryStops.add(stopId);
                     } else {
-                        System.out.println("⚠ Warning: Facility ID " + stopId + " not found, skipping.");
+                        System.out.println("Warning: Facility ID " + stopId + " not found, skipping.");
                     }
                 } catch (NumberFormatException e) {
-                    System.out.println("⚠ Warning: Invalid facility ID: " + stopIdStr);
+                    System.out.println(" Warning: Invalid facility ID: " + stopIdStr);
                 }
             }
         }

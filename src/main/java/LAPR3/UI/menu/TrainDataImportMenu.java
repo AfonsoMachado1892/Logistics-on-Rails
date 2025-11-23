@@ -123,7 +123,7 @@ public class TrainDataImportMenu {
             return;
         }
 
-        System.out.println("\n⏳ Starting data import...\n");
+        System.out.println("\n Starting data import...\n");
 
         boolean success = true;
         int totalLoaded = 0;
@@ -161,10 +161,10 @@ public class TrainDataImportMenu {
 
         System.out.println("\n═══════════════════════════════════════");
         if (success) {
-            System.out.println("✓ ALL DATA IMPORTED SUCCESSFULLY!");
+            System.out.println("ALL DATA IMPORTED SUCCESSFULLY!");
             System.out.println("Total records loaded: " + totalLoaded);
         } else {
-            System.out.println("⚠️  IMPORT COMPLETED WITH WARNINGS");
+            System.out.println("  IMPORT COMPLETED WITH WARNINGS");
             System.out.println("Ensure files exist in: " + dataPath);
         }
         System.out.println("═══════════════════════════════════════");
@@ -176,7 +176,7 @@ public class TrainDataImportMenu {
         File file = new File(filepath);
 
         if (!file.exists()) {
-            System.out.println("✗ File not found: " + filepath);
+            System.out.println(" File not found: " + filepath);
             return false;
         }
         return importer.importFile(filepath);
@@ -197,10 +197,10 @@ public class TrainDataImportMenu {
     private boolean importFacilitiesFromFile(String filepath) {
         try {
             facilityRepo.loadFromCSV(filepath);
-            System.out.println("✓ Facilities: " + facilityRepo.count());
+            System.out.println("Facilities: " + facilityRepo.count());
             return true;
         } catch (Exception e) {
-            System.err.println("✗ Error (Facilities): " + e.getMessage());
+            System.err.println(" Error (Facilities): " + e.getMessage());
             return false;
         }
     }
@@ -210,32 +210,32 @@ public class TrainDataImportMenu {
     // Vou incluir apenas os métodos auxiliares essenciais para compilar o importAllData:
 
     private boolean importLinesFromFile(String filepath) {
-        try { lineRepo.loadFromCSV(filepath); System.out.println("✓ Lines: " + lineRepo.count()); return true; }
-        catch (Exception e) { System.err.println("✗ Error (Lines): " + e.getMessage()); return false; }
+        try { lineRepo.loadFromCSV(filepath); System.out.println(" Lines: " + lineRepo.count()); return true; }
+        catch (Exception e) { System.err.println(" Error (Lines): " + e.getMessage()); return false; }
     }
     private boolean importSegmentsFromFile(String filepath) {
-        try { segmentRepo.loadFromCSV(filepath); System.out.println("✓ Segments: " + segmentRepo.count()); return true; }
-        catch (Exception e) { System.err.println("✗ Error (Segments): " + e.getMessage()); return false; }
+        try { segmentRepo.loadFromCSV(filepath); System.out.println(" Segments: " + segmentRepo.count()); return true; }
+        catch (Exception e) { System.err.println(" Error (Segments): " + e.getMessage()); return false; }
     }
     private boolean importLocomotivesFromFile(String filepath) {
-        try { locomotiveRepo.loadFromCSV(filepath); System.out.println("✓ Locomotives: " + locomotiveRepo.count()); return true; }
-        catch (Exception e) { System.err.println("✗ Error (Locomotives): " + e.getMessage()); return false; }
+        try { locomotiveRepo.loadFromCSV(filepath); System.out.println(" Locomotives: " + locomotiveRepo.count()); return true; }
+        catch (Exception e) { System.err.println(" Error (Locomotives): " + e.getMessage()); return false; }
     }
     private boolean importWagonsFromFile(String filepath) {
-        try { wagonRepo.loadFromCSV(filepath); System.out.println("✓ Wagons: " + wagonRepo.count()); return true; }
-        catch (Exception e) { System.err.println("✗ Error (Wagons): " + e.getMessage()); return false; }
+        try { wagonRepo.loadFromCSV(filepath); System.out.println(" Wagons: " + wagonRepo.count()); return true; }
+        catch (Exception e) { System.err.println(" Error (Wagons): " + e.getMessage()); return false; }
     }
     private boolean importTrainsFromFile(String filepath) {
-        try { trainRepo.loadFromCSV(filepath); System.out.println("✓ Trains: " + trainRepo.count()); return true; }
-        catch (Exception e) { System.err.println("✗ Error (Trains): " + e.getMessage()); return false; }
+        try { trainRepo.loadFromCSV(filepath); System.out.println(" Trains: " + trainRepo.count()); return true; }
+        catch (Exception e) { System.err.println(" Error (Trains): " + e.getMessage()); return false; }
     }
     private boolean importRoutesFromFile(String filepath) {
-        try { routeRepo.loadFromCSV(filepath); System.out.println("✓ Routes: " + routeRepo.count()); return true; }
-        catch (Exception e) { System.err.println("✗ Error (Routes): " + e.getMessage()); return false; }
+        try { routeRepo.loadFromCSV(filepath); System.out.println(" Routes: " + routeRepo.count()); return true; }
+        catch (Exception e) { System.err.println(" Error (Routes): " + e.getMessage()); return false; }
     }
     private boolean importSchedulesFromFile(String filepath) {
-        try { scheduleRepo.loadFromCSV(filepath); System.out.println("✓ Schedules: " + scheduleRepo.count()); return true; }
-        catch (Exception e) { System.err.println("✗ Error (Schedules): " + e.getMessage()); return false; }
+        try { scheduleRepo.loadFromCSV(filepath); System.out.println(" Schedules: " + scheduleRepo.count()); return true; }
+        catch (Exception e) { System.err.println(" Error (Schedules): " + e.getMessage()); return false; }
     }
 
     // Métodos "dummy" para o menu individual (opções 2-9) funcionarem se o utilizador quiser usar outro path
