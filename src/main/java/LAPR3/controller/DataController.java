@@ -163,13 +163,13 @@ public class DataController {
         StringBuilder sb = new StringBuilder();
         sb.append("\n═══ DATA STATUS ═══\n");
         sb.append(String.format("Items:      %s (%d loaded)\n",
-                itemsLoaded ? "✓" : "✗", items != null ? items.size() : 0));
+                itemsLoaded ? "✓" : "0", items != null ? items.size() : 0));
         sb.append(String.format("Warehouses: %s (%d loaded)\n",
-                baysLoaded ? "✓" : "✗", warehouses != null ? warehouses.size() : 0));
+                baysLoaded ? "✓" : "0", warehouses != null ? warehouses.size() : 0));
         sb.append(String.format("Wagons:     %s (%d loaded)\n",
-                wagonsLoaded ? "✓" : "✗", wagons != null ? wagons.size() : 0));
+                wagonsLoaded ? "✓" : "0", wagons != null ? wagons.size() : 0));
         sb.append(String.format("Orders:     %s (%d loaded)\n",
-                ordersLoaded ? "✓" : "✗", orders != null ? orders.size() : 0));
+                ordersLoaded ? "✓" : "0", orders != null ? orders.size() : 0));
         sb.append(String.format("Current WH: %s\n",
                 currentWarehouse != null ? currentWarehouse.getId() : "None"));
         sb.append("═══════════════════\n");

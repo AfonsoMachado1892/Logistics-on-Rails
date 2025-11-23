@@ -88,7 +88,7 @@ public class DataImportMenu {
         dataController.loadItems(path);
 
         int count = dataController.getItems().size();
-        System.out.println("✓ Successfully loaded " + count + " items!");
+        System.out.println("Successfully loaded " + count + " items!");
     }
 
     private void loadBays() throws IOException {
@@ -99,7 +99,7 @@ public class DataImportMenu {
         dataController.loadBays(path);
 
         int count = dataController.getWarehouses().size();
-        System.out.println("✓ Successfully loaded " + count + " warehouse(s)!");
+        System.out.println(" Successfully loaded " + count + " warehouse(s)!");
     }
 
     private void loadWagons() throws IOException {
@@ -116,7 +116,7 @@ public class DataImportMenu {
         dataController.loadWagons(path);
 
         int count = dataController.getWagons().size();
-        System.out.println("✓ Successfully loaded " + count + " wagon(s)!");
+        System.out.println(" Successfully loaded " + count + " wagon(s)!");
     }
 
     private void loadOrders() throws IOException {
@@ -134,7 +134,7 @@ public class DataImportMenu {
         dataController.loadOrders(ordersPath, linesPath);
 
         int count = dataController.getOrders().size();
-        System.out.println("✓ Successfully loaded " + count + " order(s)!");
+        System.out.println(" Successfully loaded " + count + " order(s)!");
     }
 
     private void loadAllBaseData() throws IOException {
@@ -147,7 +147,7 @@ public class DataImportMenu {
         System.out.println("\nLoading all base data...");
         dataController.loadAllBaseData(itemsPath, baysPath, wagonsPath);
 
-        System.out.println("✓ All base data loaded successfully!");
+        System.out.println(" All base data loaded successfully!");
         System.out.println("  • Items: " + dataController.getItems().size());
         System.out.println("  • Warehouses: " + dataController.getWarehouses().size());
         System.out.println("  • Wagons: " + dataController.getWagons().size());
@@ -178,7 +178,7 @@ public class DataImportMenu {
         String selectedId = warehouses.get(choice - 1);
 
         if (dataController.setCurrentWarehouse(selectedId)) {
-            System.out.println("✓ Warehouse " + selectedId + " selected!");
+            System.out.println(" Warehouse " + selectedId + " selected!");
         } else {
             System.out.println("Failed to select warehouse!");
         }

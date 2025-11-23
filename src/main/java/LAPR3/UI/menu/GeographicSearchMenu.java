@@ -479,24 +479,39 @@ public class GeographicSearchMenu {
         return stationController.getKDTree();
     }
 
+
     // ---  HELPER METHODS FOR LOGGING ---
 
     private void offerToSaveResults(List<Station> results, String suffix) {
         boolean save = validator.readConfirmation("\nSave ALL " + results.size() + " stations to a log file?");
+
         if (save) {
-            saveResultsToFile(results, suffix);
+            // -----------------------------------------------------------
+            // CONFIGURAÇÃO DO CAMINHO SUGERIDO
+            // Preencha o espaço abaixo com o caminho base desejado (ex: "Logs/")
+            String suggestedBasePath = "Logs/"; // <-- MODIFY THIS PATH AS NEEDED                                ";
+            // -----------------------------------------------------------
+
+            String defaultFilename = "geographic_" + suffix + "_" + System.currentTimeMillis() + ".csv";
+            String fullSuggestedPath = suggestedBasePath + defaultFilename;
+
+            System.out.println("\nDestination file path:");
+            System.out.println("Default: " + fullSuggestedPath);
+            System.out.print("Press ENTER to accept default or type new path: ");
+
+            String input = scanner.nextLine().trim();
+            String finalPath = input.isEmpty() ? fullSuggestedPath : input;
+
+            saveResultsToFile(results, finalPath);
         }
     }
 
     /**
-     * Saves all station results to a timestamped CSV file in the Logs directory.
+     * Saves all station results to the specified CSV file path.
      */
-    private void saveResultsToFile(List<Station> results, String suffix) {
+    private void saveResultsToFile(List<Station> results, String filePath) {
         try {
-            // Create a timestamped filename
-            String filename = "Logs/geographic_" + suffix + "_" + System.currentTimeMillis() + ".csv";
-
-            try (FileWriter writer = new FileWriter(filename)) {
+            try (FileWriter writer = new FileWriter(filePath)) {
                 // Header
                 writer.write("station,latitude,longitude,country,timeZone,timeZoneGroup,isCity,isMainStation,isAirport\n");
 
@@ -518,10 +533,11 @@ public class GeographicSearchMenu {
                 }
             }
 
-            System.out.println("\nALL results saved to: " + filename);
+            System.out.println("\nSuccess! Results saved to: " + filePath);
 
         } catch (IOException e) {
             System.err.println(" Error saving file: " + e.getMessage());
+            System.err.println(" Please check if the directory exists and you have write permissions.");
         }
     }
 }
