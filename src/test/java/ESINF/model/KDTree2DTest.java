@@ -230,7 +230,7 @@ public class KDTree2DTest {
 
     @Test
     public void testFindNearestN_N_is_2_SecondNearestIsAveiro() {
-        // Search near Lisbon (38, -9) for N=2. The second nearest should be Aveiro.
+        // Search near Lisbon (38, -9) for N=2. The second is Aveiro.
         List<Station> results = tree.findNearestNStations(38.0, -9.0, 2, null);
 
         assertEquals(aveiro.getName(), results.get(1).getName());
@@ -307,6 +307,115 @@ public class KDTree2DTest {
         List<Station> results = emptyTree.findNearestNStations(38.0, -9.0, 3, null);
 
         assertTrue(results.isEmpty());
+    }
+
+
+    /**
+     * Inner class or struct to hold the Synthetic Tree and its known nodes
+     * for verification.
+     */
+    private static class SyntheticTreeContext {
+        KDTree2D tree;
+        Station root, leftChild, rightChild, llChild, lrChild, rlChild, rrChild;
+    }
+
+    /**
+     * Builds a perfectly balanced tree with integer coordinates to strictly
+     * test pruning logic (Latitude split at 0, Longitude split at 0).
+     */
+    private SyntheticTreeContext buildSyntheticTree() {
+        SyntheticTreeContext ctx = new SyntheticTreeContext();
+        // Construct stations to force a specific balanced structure
+        // Root: (0,0)
+        // L: (-20, 0) | R: (20, 0)
+        // LL: (-10, -10) | LR: (-10, 10) | RL: (10, -10) | RR: (10, 10)
+
+        ctx.root = buildStation("Root", 0, 0, "X", true, true);
+        ctx.leftChild = buildStation("Left", -20, 0, "X", true, true);
+        ctx.rightChild = buildStation("Right", 20, 0, "X", true, true);
+        ctx.llChild = buildStation("LL", -10, -10, "X", true, true);
+        ctx.lrChild = buildStation("LR", -10, 10, "X", true, true);
+        ctx.rlChild = buildStation("RL", 10, -10, "X", true, true);
+        ctx.rrChild = buildStation("RR", 10, 10, "X", true, true);
+
+        List<Station> sList = Arrays.asList(
+                ctx.root, ctx.leftChild, ctx.rightChild,
+                ctx.llChild, ctx.lrChild, ctx.rlChild, ctx.rrChild
+        );
+
+        ctx.tree = new KDTree2D();
+        ctx.tree.buildBalanced(sList, sList);
+        return ctx;
+    }
+
+    @Test
+    public void testExtensive_Pruning_NorthRegion_IgnoresSouthSubtree() {
+        //         // Region: Lat [5, 30]. Root is Lat 0.
+        // Logic: MinLat (5) > NodeLat (0). Should PRUNE Left (South) Subtree.
+        // Should only look at Right Child (20, 0) and its kids.
+
+        SyntheticTreeContext ctx = buildSyntheticTree();
+        GeographicRegion northRegion = new GeographicRegion(5, 30, -50, 50);
+
+        List<Station> result = ctx.tree.rangeSearchWithFilter(northRegion, null);
+
+        // Expect: Right, RL, RR
+        assertEquals(3, result.size());
+        assertTrue(result.contains(ctx.rightChild));
+        assertTrue(result.contains(ctx.rlChild));
+        assertTrue(result.contains(ctx.rrChild));
+        assertFalse("South node (LeftChild) should be pruned", result.contains(ctx.leftChild));
+    }
+
+    @Test
+    public void testExtensive_Pruning_SouthRegion_IgnoresNorthSubtree() {
+        // Region: Lat [-30, -5]. Root is Lat 0.
+        // Logic: MaxLat (-5) < NodeLat (0). Should PRUNE Right (North) Subtree.
+
+        SyntheticTreeContext ctx = buildSyntheticTree();
+        GeographicRegion southRegion = new GeographicRegion(-30, -5, -50, 50);
+
+        List<Station> result = ctx.tree.rangeSearchWithFilter(southRegion, null);
+
+        // Expect: Left, LL, LR
+        assertEquals(3, result.size());
+        assertTrue(result.contains(ctx.leftChild));
+        assertTrue(result.contains(ctx.llChild));
+        assertTrue(result.contains(ctx.lrChild));
+        assertFalse("North node (RightChild) should be pruned", result.contains(ctx.rightChild));
+    }
+
+    @Test
+    public void testExtensive_Pruning_EastRegion_IgnoresWest_AtDepth1() {
+        // Region: Lat [5, 30] (Forces Right Subtree), Lon [5, 50] (Forces East).
+        // Right Child is C(20, 0).
+        // Logic: MinLon (5) > NodeLon (0). Should PRUNE Left Child of C (RL: 10, -10).
+        // Should keep Right Child of C (RR: 10, 10).
+
+        SyntheticTreeContext ctx = buildSyntheticTree();
+        GeographicRegion northEastRegion = new GeographicRegion(5, 30, 5, 50);
+
+        List<Station> result = ctx.tree.rangeSearchWithFilter(northEastRegion, null);
+
+        assertEquals("Should only find RR(10,10)", 1, result.size());
+        assertTrue(result.contains(ctx.rrChild));
+        assertFalse("Should prune RL based on Longitude", result.contains(ctx.rlChild));
+    }
+
+    @Test
+    public void testExtensive_Boundary_RegionStartsExactlyAtRootLat() {
+        // Region Lat [0, 10]. Root is 0.
+        // Logic: MinLat (0) <= NodeLat (0) -> Must visit Left? Yes (technically).
+        // But MaxLat (10) >= NodeLat (0) -> Must visit Right? Yes.
+        // Root should be included.
+
+        SyntheticTreeContext ctx = buildSyntheticTree();
+        GeographicRegion boundaryRegion = new GeographicRegion(0, 10, -50, 50);
+        List<Station> result = ctx.tree.rangeSearchWithFilter(boundaryRegion, null);
+
+        assertTrue("Root is on boundary 0, must be included", result.contains(ctx.root));
+        assertTrue("Right child (20) is outside [0,10] range check, but traversed", !result.contains(ctx.rightChild));
+        assertTrue("RR child (10) is on boundary 10, must be included", result.contains(ctx.rrChild));
     }
 
     // Helper methods
