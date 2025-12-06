@@ -1,6 +1,7 @@
 package LAPR3.UI.menu;
 
 import ESINF.controller.StationQueryController;
+import ESINF.controller.UpgradePlanController;
 import LAPR3.controller.DataController;
 import LAPR3.UI.utils.InputValidator;
 import LAPR3.repository.*;
@@ -10,7 +11,7 @@ import java.util.Scanner;
 
 /**
  * Main menu for the Cargo Handling System
- * Updated to include USLP07 - Train Dispatcher System
+ * Updated to include Sprint 3 - Railway Network Optimization
  */
 public class MainMenu {
 
@@ -18,6 +19,7 @@ public class MainMenu {
     private final DataController dataController;
     private final InputValidator validator;
     private final StationQueryController stationController;
+    private final UpgradePlanController upgradePlanController;
 
     private final DataImportMenu dataImportMenu;
     private final WagonOperationsMenu wagonMenu;
@@ -32,6 +34,7 @@ public class MainMenu {
     private final ProximitySearchMenu proximitySearchMenu;
     private final RadiusSearchResultMenu radiusSearchResultMenu;
     private final FreightManagerMenu freightManagerMenu;
+    private final UpgradePlanMenu upgradePlanMenu;
 
     public MainMenu(Scanner scanner, DataController dataController, InputValidator validator) {
         this.scanner = scanner;
@@ -39,6 +42,7 @@ public class MainMenu {
         this.validator = validator;
 
         this.stationController = new StationQueryController();
+        this.upgradePlanController = new UpgradePlanController();
 
         this.dataImportMenu = new DataImportMenu(scanner, dataController, validator);
         this.wagonMenu = new WagonOperationsMenu(scanner, dataController, validator);
@@ -55,6 +59,9 @@ public class MainMenu {
 
         // Initialize USLP07 - Train Dispatcher components
         this.freightManagerMenu = initializeFreightManagerMenu();
+
+        // Initialize USEI11 - Upgrade Plan (Sprint 3)
+        this.upgradePlanMenu = new UpgradePlanMenu(scanner, validator, upgradePlanController);
     }
 
     /**
@@ -90,13 +97,12 @@ public class MainMenu {
         ScheduleVisualizationService visualService =
                 new ScheduleVisualizationService(facilityRepo);
 
-        // --- CORREÇÃO: Inicializar o TrainDataImportMenu ---
+        // Initialize TrainDataImportMenu
         TrainDataImportMenu trainImportMenu = new TrainDataImportMenu(
                 scanner, validator, facilityRepo, lineRepo, segmentRepo,
                 locoRepo, wagonRepo, trainRepo, routeRepo, scheduleRepo
         );
 
-        // Agora passar o trainImportMenu e lineRepository como os últimos argumentos
         return new FreightManagerMenu(
                 scanner, validator, dispatcherService, routeRepo, facilityRepo,
                 trainRepo, scheduleRepo, routePathService, visualService, trainImportMenu, lineRepo
@@ -104,41 +110,45 @@ public class MainMenu {
     }
 
     public void display() {
-        System.out.println("\n╔════════════════════════════════════════════════╗");
-        System.out.println("║   CARGO HANDLING SYSTEM - MAIN MENU            ║");
-        System.out.println("╚════════════════════════════════════════════════╝");
+        System.out.println("\n╔════════════════════════════════════════════════════════════╗");
+        System.out.println("║   CARGO HANDLING SYSTEM - MAIN MENU                       ║");
+        System.out.println("╚════════════════════════════════════════════════════════════╝");
         System.out.println();
 
         // Show data status
         System.out.println(dataController.getDataSummary());
 
-        System.out.println("┌────────────────────────────────────────────────┐");
-        System.out.println("│  WAREHOUSE OPERATIONS (Sprint 1)               │");
-        System.out.println("├────────────────────────────────────────────────┤");
-        System.out.println("│  1. Data Import & Management                   │");
-        System.out.println("│  2. Wagon Operations (USEI01)                  │");
-        System.out.println("│  3. Order Management (USEI02)                  │");
-        System.out.println("│  4. Picking Plans (USEI03)                     │");
-        System.out.println("│  5. Pick Path Sequencing (USEI04)              │");
-        System.out.println("│  6. Returns & Quarantine (USEI05)              │");
-        System.out.println("│  7. View Current Inventory                     │");
-        System.out.println("│  8. View Logs                                  │");
-        System.out.println("├────────────────────────────────────────────────┤");
-        System.out.println("│  SPATIAL QUERIES (Sprint 2)                    │");
-        System.out.println("├────────────────────────────────────────────────┤");
-        System.out.println("│  10. Station Queries - Time Zone (USEI06)      │");
-        System.out.println("│  11. 2D-Tree Spatial Index (USEI07)            │");
-        System.out.println("│  12. Geographic Area Search (USEI08)           │");
-        System.out.println("│  13. Proximity Search (USEI09)                 │");
-        System.out.println("│  14. Radius Search (USEI10)                    │");
-        System.out.println("├────────────────────────────────────────────────┤");
-        System.out.println("│  RAILWAY OPERATIONS                            │");
-        System.out.println("├────────────────────────────────────────────────┤");
-        System.out.println("│  9. Travel Time Calculation (USLP03)           │");
-        System.out.println("│  15. Train Dispatcher (USLP07)                 │");
-        System.out.println("├────────────────────────────────────────────────┤");
-        System.out.println("│  0. Exit                                       │");
-        System.out.println("└────────────────────────────────────────────────┘");
+        System.out.println("┌────────────────────────────────────────────────────────────┐");
+        System.out.println("│  WAREHOUSE OPERATIONS (Sprint 1)                           │");
+        System.out.println("├────────────────────────────────────────────────────────────┤");
+        System.out.println("│  1. Data Import & Management                               │");
+        System.out.println("│  2. Wagon Operations (USEI01)                              │");
+        System.out.println("│  3. Order Management (USEI02)                              │");
+        System.out.println("│  4. Picking Plans (USEI03)                                 │");
+        System.out.println("│  5. Pick Path Sequencing (USEI04)                          │");
+        System.out.println("│  6. Returns & Quarantine (USEI05)                          │");
+        System.out.println("│  7. View Current Inventory                                 │");
+        System.out.println("│  8. View Logs                                              │");
+        System.out.println("├────────────────────────────────────────────────────────────┤");
+        System.out.println("│  SPATIAL QUERIES (Sprint 2)                                │");
+        System.out.println("├────────────────────────────────────────────────────────────┤");
+        System.out.println("│  10. Station Queries - Time Zone (USEI06)                  │");
+        System.out.println("│  11. 2D-Tree Spatial Index (USEI07)                        │");
+        System.out.println("│  12. Geographic Area Search (USEI08)                       │");
+        System.out.println("│  13. Proximity Search (USEI09)                             │");
+        System.out.println("│  14. Radius Search (USEI10)                                │");
+        System.out.println("├────────────────────────────────────────────────────────────┤");
+        System.out.println("│  RAILWAY NETWORK OPTIMIZATION (Sprint 3)                   │");
+        System.out.println("├────────────────────────────────────────────────────────────┤");
+        System.out.println("│  16. Directed Line Upgrade Plan (USEI11)                   │");
+        System.out.println("├────────────────────────────────────────────────────────────┤");
+        System.out.println("│  RAILWAY OPERATIONS                                        │");
+        System.out.println("├────────────────────────────────────────────────────────────┤");
+        System.out.println("│  9. Travel Time Calculation (USLP03)                       │");
+        System.out.println("│  15. Train Dispatcher (USLP07)                             │");
+        System.out.println("├────────────────────────────────────────────────────────────┤");
+        System.out.println("│  0. Exit                                                   │");
+        System.out.println("└────────────────────────────────────────────────────────────┘");
         System.out.println();
     }
 
@@ -159,6 +169,7 @@ public class MainMenu {
             case 13 -> proximitySearchMenu.show();
             case 14 -> radiusSearchResultMenu.show();
             case 15 -> freightManagerMenu.show();
+            case 16 -> upgradePlanMenu.show();  // ← NOVO: USEI11
             default -> System.out.println("Invalid option!");
         }
     }
