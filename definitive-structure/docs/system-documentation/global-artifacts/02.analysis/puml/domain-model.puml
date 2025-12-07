@@ -6,95 +6,27 @@ hide methods
 
 title Domain Model
 
-' ============================================================
-' OPERATORS AND ROLLING STOCK
-' ============================================================
-
-package "Operators and Rolling Stock" {
-
-    class Operator {
-        name
-        shortName
-        vatNumber
-        country
-    }
-
-    class LocomotiveModel {
-        make
-        model
-        type
-        powerKw
-        maxSpeedKmH
-        tractionKN
-        totalWeightTons
-        lengthM
-        widthM
-        heightM
-        numBogies
-        bogieType
-        voltage
-        frequency
-        fuelCapacityL
-    }
-
-    class Locomotive {
-        number
-        name
-        serviceYear
-    }
-
-    class WagonModel {
-        id
-        model
-        maker
-        numBogies
-        bogieType
-        lengthM
-        widthM
-        heightM
-        tareWeightTons
-        payloadTons
-        maxSpeedKmH
-        volumeM3
-        type
-    }
-
-    class Wagon {
-        number
-        serviceYear
-    }
-
-    class Train {
-        name
-        status
-        scheduleDepartureTime
-    }
-
-    class TrainEvent {
-        timestamp
-        eventType
-    }
-
-    Operator "1" -- "*" Locomotive : operates >
-    Operator "1" -- "*" RailwayLine : owns >
-    Operator "1" -- "*" Wagon : operates >
-    Operator "1" -- "*" Train : manages >
-
-    LocomotiveModel "1" -- "*" Locomotive : defines >
-    WagonModel "1" -- "*" Wagon : defines >
-
-    Train "*" -- "*" Locomotive : uses >
-    Train "*" -- "*" Wagon : pulls >
-    TrainEvent "1" -- "1" Station
-}
-
-' ============================================================
-' INFRASTRUCTURE
-' ============================================================
 
 package "Infrastructure" {
+    class RailwayLine {
+        id
+        name
+        owner
+        totalLengthKm
+    }
+
+    class LineSegment {
+        id
+        lengthKm
+        trackType
+        gauge
+        maxWeightKgPerMeter
+        speedLimitKmH
+        electrified
+    }
 
     class Gauge {
+        id
         name
         measureMM
     }
@@ -106,187 +38,241 @@ package "Infrastructure" {
         latitude
         longitude
         country
+        timeZone
         timeZoneGroup
         isCity
         isMainStation
         isAirport
         hasWarehouse
+        hasGrainSilo
+        hasRefrigeratedStorage
     }
 
-    class Facility {
-        id
-        name
-        type
-        isIntermodal
-        hasGrainSilos
-        hasRefrigeratedAreas
-    }
-
-    class RailwayLine {
-        id
-        name
-        + totalLengthKm()
-    }
-
-    class LineSegment {
-        id
-        order
-        electrified
-        maxWeightKgPerMeter
-        lengthM
-        numberTracks
-        speedLimitKmH
-    }
-
-    Station "1" -- "*" Facility : hosts >
-
-    RailwayLine "1" -- "*" LineSegment : composed of >
-    LineSegment "1" -- "1" Station : start >
-    LineSegment "1" -- "1" Station : end >
-
-    RailwayLine "1" -- "1" Station : begins at >
-    RailwayLine "1" -- "1" Station : ends at >
-
-    Gauge "1" -- "*" LineSegment : defines >
-    Gauge "*" -- "*" Locomotive : supports >
-    Gauge "1" -- "*" Wagon : supports >
-    Gauge "1" -- "*" RailwayLine : allowed on >
+    RailwayLine "1" -- "*" LineSegment : composed of
+    Gauge "1" -- "*" LineSegment : defines
+    Station "1" -- "*" LineSegment : occurs at
+    Station "1" -- "*" LineSegment : start / end
 }
 
-' ============================================================
-' FREIGHT AND ROUTES
-' ============================================================
-
 package "Freight and Routes" {
-
     class Route {
+        id
         description
+        type
     }
 
     class RouteSegment {
         sequenceOrder
+        estimatedArrival
+        estimatedDeparture
+        actualArrival
+        actualDeparture
+        stopAtStation
     }
 
     class Freight {
+        id
         departureTime
         arrivalTime
         status
     }
 
-    class FreightWagon {
+    class CrossingOperation {
+        id
+        station
+        estimatedTime
+        trainsPriority
+    }
+
+    class FreightWagon{
         cargoDescription
         grossWeightKg
+        loaded
     }
 
-    Route "1" -- "*" RouteSegment : consists of >
-    RouteSegment "*" -- "1" LineSegment : references >
-    Freight "1" -- "1" Route : follows >
-    Freight "1" -- "*" Wagon : includes >
-    Freight "1" -- "*" FreightWagon : includes >
-    Station "1" -- "*" Freight : dispatches/receives >
-    Freight "1" -- "1" Station : origin >
-    Freight "1" -- "1" Station : destination >
-    FreightWagon "1" -- "1" Wagon : carried by >
+    Route "1" -- "*" RouteSegment : consists of
+    Route "1" -- "*" Freight : contains
+    Route "1" -- "*" CrossingOperation : requires
+    RouteSegment "*" -- "1" Station : passes through
+    CrossingOperation "*" -- "1" Station : occurs at
+    Freight "1" -- "*" FreightWagon : includes
+    Freight "*" -- "1" Station : origin
+    Freight "*" -- "1" Station : destination
+    Freight "*" -- "*" Station : assigned to
 }
 
-' ============================================================
-' WAREHOUSE MANAGEMENT (ESINF)
-' ============================================================
+package "Operators and Rolling Stock" {
+    class Operator {
+        name
+        country
+    }
+
+    class Train {
+        id
+        name
+        status
+        scheduledDeparture
+    }
+
+    class Locomotive {
+        id
+        make
+        model
+        year
+        powerKw
+        maxSpeedKmH
+        tareWeightTons
+        numBogies
+        gauge
+    }
+
+    class ElectricLocomotive extends Locomotive {
+        voltageV
+        frequencyHz
+    }
+
+    class DieselLocomotive extends Locomotive {
+        fuelCapacityL
+    }
+
+    class Wagon {
+        id
+        type
+        payloadCapacityKg
+        volumeM3
+        tareWeightKg
+        gauge
+    }
+
+    Operator "1" -- "*" Train : manages
+    Operator "1" -- "*" Locomotive : owns
+    Operator "1" -- "*" Wagon : owns
+
+    Train "*" -- "*" Locomotive : uses
+    Train "*" -- "*" Wagon : pulls
+    Train "1" -- "1" Route : follows
+
+    Locomotive "*" -- "1" Gauge : supports
+
+    Wagon "*" -- "1" Freight: references
+    Wagon "*" -- "1" Gauge : supports
+    Wagon "1" -- "*" FreightWagon : assigned to
+}
 
 package "Warehouse Management" {
-
-    class Item {
-        SKU
-        name
-        category
-        unit
-        unitWeight
-        volume
+    class Inventory {
+        bayCapacityBoxes
     }
 
-    class Warehouse {
+    class Trolley {
         id
-        name
-    }
-
-    class Aisle {
-        number
-        xCoord
-    }
-
-    class Bay {
-        number
-        yCoord
-        capacityBoxes
-    }
-
-    class Box {
-        boxId
-        qty
-        expiryDate
-        receivedAt
-    }
-
-    class Order {
-        orderId
-        dueDate
-        priority
-    }
-
-    class OrderLine {
-        lineNo
-        requestedQty
-    }
-
-    class Allocation {
-        qty
-        status
-    }
-
-    class Return {
-        returnId
-        SKU
-        qty
-        reason
-        timestamp
-        expiryDate
-    }
-
-    class PickBatch {
-        id
-        heuristic
         capacityKg
         usedWeightKg
     }
 
-    class PickTask {
-        id
-        aisleCoord
-        bayCoord
-        qty
+    class MovementLog {
+        timestamp
+        type
+        boxID
+        quantity
+        origin
+        destination
     }
 
-    class PickPath {
-        strategy
-        totalDistance
+    class Allocation {
+        orderID
+        lineNo
+        quantity
+        boxID
+        aisle
+        bay
     }
 
-    Station "1" -- "*" Warehouse : contains >
-    Warehouse "1" -- "*" Aisle : has >
-    Aisle "1" -- "*" Bay : has >
-    Bay "1" -- "*" Box : stores >
-    Item "1" -- "*" Box : stocked as >
+    class ReturnsEntry {
+        returnsID
+        quantity
+        timestamp
+        reason
+        expiryDate
+    }
 
-    Order "1" -- "*" OrderLine : contains >
-    OrderLine "1" -- "*" Allocation : allocates >
-    Allocation "*" -- "1" Box : taken from >
-    Allocation "*" -- "1" Bay : located at >
+    class Coordinate {
+        aisle
+        bay
+    }
 
-    Return "*" -- "1" Item : refers to >
-    Return "1" -- "*" Box : generates >
+    class Eligibility {
+        orderID
+        lineNo
+        requiredQty
+        allowedQty
+        status
+    }
 
-    PickBatch "1" -- "*" PickTask : groups >
-    PickPath "1" -- "*" PickTask : sequences >
+    class Order {
+        orderID
+        priority
+        dueDate
+    }
+
+    class Box {
+        boxID
+        quantity
+        entryDate
+        receivedAt
+    }
+
+    class Item {
+        sku
+        name
+        category
+        unit
+        volume
+        unitWeight
+    }
+
+    class OrderLine {
+        lineNo
+        quantity
+    }
+
+    class BayID {
+        wharehouseID
+        aisle
+        bay
+    }
+
+    Station "1" -- "1" Inventory : manages
+
+    Inventory "1" -- "*" MovementLog : logs
+    Inventory "1" -- "*" Box : contains
+
+    Trolley "1" -- "*" Allocation : carries
+    Trolley "1" -- "*" Coordinate : visits
+
+    MovementLog "*" -- "0..1" BayID : from
+    MovementLog "*" -- "0..1" BayID : to
+    MovementLog "*" -- "1" Box : references
+
+    Allocation "*" -- "1" BayID : located at
+    Allocation "*" -- "1" Box : references
+    Allocation "*" -- "0..1" Order: allocated to
+
+    ReturnsEntry "1" -- "1" Box : restocks as
+    ReturnsEntry "*" -- "1" Item : references
+
+    BayID "1" -- "*" Box : stored in
+
+    Order "1" -- "*" OrderLine : contains
+    Order "1" -- "*" Eligibility : evaluates
+
+    OrderLine "*" -- "1" Item : references
+    OrderLine "1" -- "*" Eligibility : evaluates
+
+    Box "*" -- "1" Item : references
 }
+
+' Relações Inter-Pacote
+RouteSegment "1" -- "1" LineSegment : follows
 
 @enduml
