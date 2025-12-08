@@ -1,6 +1,7 @@
 package ESINF.repository;
 
 import ESINF.model.RailwayStation;
+import Graph.Edge;
 import Graph.Graph;
 import Graph.map.MapGraph;
 
@@ -205,6 +206,46 @@ public class RailwayNetworkRepository {
      */
     public Set<Integer> getAllStationIds() {
         return new HashSet<>(stationById.keySet());
+    }
+
+    /**
+     * Gets the railway network graph modeled as an UNDIRECTED graph,
+     * using the distance (Double) as the edge weight.
+     * This is required for Centrality Analysis (USEI13).
+     *
+     * @return An UNDIRECTED Graph for SSSP (Shortest Path) based calculations.
+     */
+    public Graph<RailwayStation, Double> getRailNetworkWithDistanceAsWeight() {
+        if (!dataLoaded) {
+            return new MapGraph<>(false); // Return empty undirected graph if no data is loaded
+        }
+
+        // Cria um novo grafo não direcionado
+        MapGraph<RailwayStation, Double> undirectedGraph = new MapGraph<>(false);
+
+        // 1. Adiciona todos os vértices
+        for (RailwayStation station : this.graph.vertices()) {
+            undirectedGraph.addVertex(station);
+        }
+
+        // 2. Adiciona as arestas
+        // Usamos iteração com cast seguro para evitar problemas genéricos do compilador.
+        for (Object obj : this.graph.edges()) {
+
+            @SuppressWarnings("unchecked")
+            Edge<RailwayStation, Double> edge = (Edge<RailwayStation, Double>) obj;
+
+            RailwayStation vOrig = edge.getVOrig();
+            RailwayStation vDest = edge.getVDest();
+            Double weight = edge.getWeight();
+
+            // Adicionamos apenas o sentido vOrig -> vDest no grafo não direcionado.
+            if (undirectedGraph.edge(vOrig, vDest) == null) {
+                undirectedGraph.addEdge(vOrig, vDest, weight);
+            }
+        }
+
+        return undirectedGraph;
     }
 
     /**
