@@ -159,6 +159,10 @@ public class UpgradePlanController {
         return UpgradePlanDTO.withTopologicalOrder(stationNames);  // ← FACTORY METHOD
     }
 
+    public RailwayNetworkRepository getRepository() {
+        return networkRepository;
+    }
+
     /**
      * Inner class for network statistics
      */

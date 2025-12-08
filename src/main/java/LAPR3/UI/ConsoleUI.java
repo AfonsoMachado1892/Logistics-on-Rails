@@ -36,7 +36,7 @@ public class ConsoleUI {
         while (running) {
             try {
                 mainMenu.display();
-                int choice = validator.readInt("Enter your choice: ", 0, 16);
+                int choice = validator.readInt("Enter your choice: ", 0, 17);
 
                 if (choice == 0) {
                     if (confirmExit()) {
