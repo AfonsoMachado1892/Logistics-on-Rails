@@ -6,6 +6,7 @@ hide methods
 
 title Domain Model
 
+"Freight and Routes" -down-> Infrastructure
 
 package "Infrastructure" {
     class RailwayLine {
