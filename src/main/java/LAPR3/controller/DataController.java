@@ -8,6 +8,7 @@ import ESINF.model.Order;
 import ESINF.model.Wagon;
 import ESINF.model.Warehouse;
 import ESINF.service.WarehouseManager;
+import ESINF.repository.RailwayNetworkRepository;
 
 import java.io.IOException;
 import java.util.List;
@@ -39,9 +40,11 @@ public class DataController {
     private boolean wagonsLoaded = false;
     private boolean ordersLoaded = false;
 
-    public DataController() {
+    public DataController(RailwayNetworkRepository railwayNetworkRepository) {
+        this.railwayNetworkRepository = railwayNetworkRepository;
         this.logger = new ImportLogger();
     }
+    private final RailwayNetworkRepository railwayNetworkRepository;
 
     /**
      * Load all base data (items, bays, wagons)
@@ -138,6 +141,13 @@ public class DataController {
     public List<String> getAvailableWarehouses() {
         if (warehouses == null) return List.of();
         return warehouses.keySet().stream().sorted().toList();
+    }
+
+    /**
+     * Getter para expor a instância carregada do RailwayNetworkRepository.
+     */
+    public RailwayNetworkRepository getRailwayNetworkRepository() {
+        return railwayNetworkRepository;
     }
 
     // Getters
