@@ -4,6 +4,10 @@ import ESINF.controller.MinimalBackboneController;
 import ESINF.controller.StationQueryController;
 import ESINF.controller.UpgradePlanController;
 import LAPR3.UI.menu.MinimalBackboneMenu;
+import ESINF.controller.CentralityController;
+import ESINF.controller.StationQueryController;
+import ESINF.controller.UpgradePlanController;
+import ESINF.repository.RailwayNetworkRepository;
 import LAPR3.controller.DataController;
 import LAPR3.UI.utils.InputValidator;
 import LAPR3.repository.*;
@@ -14,7 +18,6 @@ import java.util.Scanner;
 /**
  * Main menu for the Cargo Handling System
  * Updated to include Sprint 3 - Railway Network Optimization
- * Includes USEI11 and USEI12
  */
 public class MainMenu {
 
@@ -23,7 +26,8 @@ public class MainMenu {
     private final InputValidator validator;
     private final StationQueryController stationController;
     private final UpgradePlanController upgradePlanController;
-    private final MinimalBackboneController minimalBackboneController; // ← NOVO USEI12
+    private final MinimalBackboneController minimalBackboneController;
+    private final CentralityAnalysisMenu centralityAnalysisMenu;
 
     private final DataImportMenu dataImportMenu;
     private final WagonOperationsMenu wagonMenu;
@@ -39,7 +43,7 @@ public class MainMenu {
     private final RadiusSearchResultMenu radiusSearchResultMenu;
     private final FreightManagerMenu freightManagerMenu;
     private final UpgradePlanMenu upgradePlanMenu;
-    private final MinimalBackboneMenu minimalBackboneMenu; // ← NOVO USEI12
+    private final MinimalBackboneMenu minimalBackboneMenu;
 
     public MainMenu(Scanner scanner, DataController dataController, InputValidator validator) {
         this.scanner = scanner;
@@ -53,6 +57,9 @@ public class MainMenu {
         this.minimalBackboneController = new MinimalBackboneController(
                upgradePlanController.getRepository()
         );
+
+        RailwayNetworkRepository railNetworkRepo = new RailwayNetworkRepository();
+        CentralityController centralityController = new CentralityController(railNetworkRepo);
 
         this.dataImportMenu = new DataImportMenu(scanner, dataController, validator);
         this.wagonMenu = new WagonOperationsMenu(scanner, dataController, validator);
@@ -75,6 +82,9 @@ public class MainMenu {
 
         // Initialize USEI12 - Minimal Backbone Network (Sprint 3) ← NOVO
         this.minimalBackboneMenu = new MinimalBackboneMenu(scanner, validator, minimalBackboneController);
+        
+        // USEI13
+        this.centralityAnalysisMenu = new CentralityAnalysisMenu(scanner, validator, railNetworkRepo);
     }
 
     /**
@@ -154,7 +164,8 @@ public class MainMenu {
         System.out.println("│  RAILWAY NETWORK OPTIMIZATION (Sprint 3)                   │");
         System.out.println("├────────────────────────────────────────────────────────────┤");
         System.out.println("│  16. Directed Line Upgrade Plan (USEI11)                   │");
-        System.out.println("│  17. Minimal Backbone Network (USEI12)                     │"); // ← NOVO
+        System.out.println("│  17. Minimal Backbone Network (USEI12)                     │");
+        System.out.println("│  18. Rail Hub Centrality Analysis (USEI13)                 │");
         System.out.println("├────────────────────────────────────────────────────────────┤");
         System.out.println("│  RAILWAY OPERATIONS                                        │");
         System.out.println("├────────────────────────────────────────────────────────────┤");
@@ -184,7 +195,8 @@ public class MainMenu {
             case 14 -> radiusSearchResultMenu.show();
             case 15 -> freightManagerMenu.show();
             case 16 -> upgradePlanMenu.show();
-            case 17 -> minimalBackboneMenu.show(); // ← NOVO: USEI12
+            case 17 -> minimalBackboneMenu.show();
+            case 18 -> centralityAnalysisMenu.run();
             default -> System.out.println("Invalid option!");
         }
     }
