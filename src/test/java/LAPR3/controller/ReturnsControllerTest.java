@@ -2,6 +2,7 @@ package LAPR3.controller;
 
 import ESINF.model.Bay;
 import ESINF.model.Warehouse;
+import ESINF.repository.RailwayNetworkRepository;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -65,7 +66,7 @@ public class ReturnsControllerTest {
                 "R002,SKU002,3,damaged,2025-10-22T11:00:00," // Discardable (damaged)
         );
 
-        dataController = new DataController();
+        dataController = new DataController(new RailwayNetworkRepository());
         returnsController = new ReturnsController(dataController);
 
         dataController.loadItems(itemsFile.getAbsolutePath());
@@ -98,7 +99,7 @@ public class ReturnsControllerTest {
     @Test(expected = IllegalStateException.class)
     public void loadReturns_throwsException_whenItemsNotLoaded() throws IOException {
         // Cria um novo controlador sem items pré-carregados
-        DataController freshDataController = new DataController();
+        DataController freshDataController = new DataController(new RailwayNetworkRepository());
         ReturnsController freshReturnsController = new ReturnsController(freshDataController);
 
         freshReturnsController.loadReturns(returnsFile.getAbsolutePath());
@@ -166,7 +167,7 @@ public class ReturnsControllerTest {
         returnsController.loadReturns(returnsFile.getAbsolutePath());
 
         // Cria um novo controller sem armazém selecionado
-        DataController freshDataController = new DataController();
+        DataController freshDataController = new DataController(new RailwayNetworkRepository());
         freshDataController.loadItems(itemsFile.getAbsolutePath());
 
         // Carregar Bays, mas não selecionar armazém
