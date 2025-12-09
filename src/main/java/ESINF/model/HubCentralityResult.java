@@ -69,7 +69,8 @@ public class HubCentralityResult implements Comparable<HubCentralityResult> {
     @Override
     public String toString() {
         // stid, stname, degree, strength, betweenness, harmonic_closeness, hubscore
-        return String.format("%s, %s, %.0f, %.4f, %.4f, %.4f, %.4f",
+        // Usa Locale root para garantir ponto decimal independente da locale do SO.
+        return String.format(java.util.Locale.ROOT, "%s, %s, %.0f, %.4f, %.4f, %.4f, %.4f",
                 station.getStationId(), station.getName(), degree, strength, betweenness, harmonicCloseness, hubScore);
     }
 }
