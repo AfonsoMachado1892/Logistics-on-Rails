@@ -1,42 +1,76 @@
-# USLP08 - Route Planner for Pending Freights
+# USLP08 – Route Planner for Pending Freights
 
 ## 1. Requirements Engineering
 
 ### 1.1. User Story Description
 
-As a **Freight Manager**, I want to use a route planner that allows me to define and assign routes (simple or complex) to fulfill a list of pending freights, so that each freight has a clear sequence of stops and operations.
+As a **Freight Manager**, I want to use a **route planner** that allows me to **define and assign routes** in order to accomplish a list of **pending freights**, where a route can be **simple or complex**, so that freights can be properly transported across the railway network.
 
-### 1.2. Acceptance Criteria
+---
 
-- **AC1:** The system must allow selecting one or more pending freights to be planned.
-- **AC2:** A route can be **simple** (direct sequence of stations) or **complex** (multiple segments/branches) and must be stored/associated to the freight(s).
-- **AC3:** The planned route must list the **ordered sequence of stations** involved.
-- **AC4:** For each station in the sequence, the system must specify the **cargo to load and/or unload** (quantities and SKUs/containers).
-- **AC5:** The system must present the final route plan (stations + load/unload actions) before confirmation/assignment.
-- **AC6:** Once confirmed, the route is marked as **assigned** to the selected freight(s).
+### 1.2. Customer Specifications and Clarifications
 
-### 1.3. Dependencies and Assumptions
+> No additional clarifications were made up to now for this User Story.
 
-- Requires pending freights data to be available (e.g., freight ID, cargo manifest, origin/destination).
-- Requires stations/facilities master data to be loaded.
-- Assumes that cargo compatibility/availability and path feasibility checks are handled in related USs or domain services (not detailed here).
+---
 
-### 1.4. Input and Output Data
+### 1.3. Acceptance Criteria
 
-**Input:**
-- List of pending freights (with cargo manifest).
-- Stations/facilities catalog.
-- User selections: freight(s) to plan, route type (simple/complex), station sequence, load/unload actions per station.
+- **AC1:** A list with the sequence of stations and the cargos to be loaded/unloaded should be presented
+---
 
-**Output:**
-- Draft route plan (preview): ordered stations with load/unload actions per station.
-- Confirmation of assignment to the selected freight(s).
-- Error/validation messages if required data is missing or route is invalid.
+### 1.4. Found out Dependencies
 
-### 1.5. Open Questions / To Clarify
+- This User Story depends on **freight data being available**, namely pending freights and their cargo manifests.
+- There is a dependency on **Facilities (Stations)** being previously loaded into the system.
+- There is an implicit dependency on **USLP01 (Domain Model)** for the definition of:
+    - Freight
+    - Cargo
+    - Route
+    - Station
+- This User Story is conceptually related to **USLP07 (Scheduler)** and precedes **USLP09 (Assemble and assign a train to a route)**.
+- Data availability depends on the **BDDAD component** (database and/or file-based integration).
 
-- Are there constraints on maximum hops/stations per route?
-- Should the system auto-suggest routes or only capture manual plans?
-- How are capacity and timing constraints validated (separate US)? 
-- Required format for exporting/sharing the route plan?
+---
 
+### 1.5. Input and Output Data
+
+#### Input Data
+
+- **Pre-loaded data:**
+    - List of pending freights
+    - Cargo information per freight
+    - List of stations/facilities
+- **User-selected data:**
+    - Freight(s) to be planned
+    - Route type (simple or complex)
+    - Ordered list of stations
+    - Load/unload operations per station
+
+#### Output Data
+
+- List of pending freights (for selection)
+- Planned route containing:
+    - Ordered sequence of stations
+    - For each station:
+        - Cargo(s) to be loaded
+        - Cargo(s) to be unloaded
+- Confirmation of successful route assignment
+- Error messages in case of:
+    - Invalid route definition
+    - Missing or inconsistent cargo operations
+- (In)Success of the operation
+
+---
+
+### 1.6. System Sequence Diagram (SSD)
+
+To be defined.
+
+---
+
+### 1.7. Other Relevant Remarks
+
+- This User Story focuses only on **route planning from a logistics perspective**, not on train composition or scheduling.
+- No automatic pathfinding is required at this stage; routes are explicitly defined by the Freight Manager.
+- Timing, crossings, and speed calculations are handled in subsequent User Stories.
