@@ -19,13 +19,21 @@ public class RailwayNetworkRepository {
     private Graph<RailwayStation, Double> graph;
     private Map<Integer, RailwayStation> stationById;
     private Map<String, RailwayStation> stationByName;
+    private Graph<RailwayStation, Double> costGraph;
     private boolean dataLoaded;
+
+    // Contadores mantidos como campos para uso em toString() e estado da instância
+    private int stationsLoaded;
+    private int connectionsLoaded;
 
     public RailwayNetworkRepository() {
         this.graph = new MapGraph<>(true); // Directed graph
+        this.costGraph = new MapGraph<>(true);
         this.stationById = new HashMap<>();
         this.stationByName = new HashMap<>();
         this.dataLoaded = false;
+        this.stationsLoaded = 0;
+        this.connectionsLoaded = 0;
     }
 
     /**
@@ -39,16 +47,17 @@ public class RailwayNetworkRepository {
         graph = new MapGraph<>(true); // Reset graph
         stationById.clear();
         stationByName.clear();
+        this.costGraph = new MapGraph<>(true); // [NEW]
 
         // Step 1: Load stations
-        int stationsLoaded = loadStations(stationsPath);
+        this.stationsLoaded = loadStations(stationsPath);
 
         // Step 2: Load connections
-        int connectionsLoaded = loadConnections(linesPath);
+        this.connectionsLoaded = loadConnections(linesPath);
 
         dataLoaded = stationsLoaded > 0 && connectionsLoaded > 0;
 
-        return new LoadResult(stationsLoaded, connectionsLoaded);
+        return new LoadResult(this.stationsLoaded, this.connectionsLoaded);
     }
 
     /**
@@ -87,6 +96,7 @@ public class RailwayNetworkRepository {
                     graph.addVertex(station);
 
                     loaded++;
+                    costGraph.addVertex(station);
 
                 } catch (Exception e) {
                     // Skip lines with parsing errors
@@ -119,8 +129,7 @@ public class RailwayNetworkRepository {
                     int departureId = Integer.parseInt(parts[0].trim());
                     int arrivalId = Integer.parseInt(parts[1].trim());
                     double distance = parseDouble(parts[2].trim());
-                    // int capacity = Integer.parseInt(parts[3].trim()); // Not used for USEI11
-                    // double cost = parseDouble(parts[4].trim()); // Not used for USEI11
+                    //int capacity = Integer.parseInt(parts[3].trim()); // Not used for USEI11
 
                     // Get stations
                     RailwayStation fromStation = stationById.get(departureId);
@@ -129,6 +138,15 @@ public class RailwayNetworkRepository {
                     if (fromStation != null && toStation != null) {
                         // Add directed edge with distance as weight
                         graph.addEdge(fromStation, toStation, distance);
+                        if (parts.length >= 5) {
+                            try {
+                                double cost = Double.parseDouble(parts[4].trim());
+                                costGraph.addEdge(fromStation, toStation, cost);
+                            } catch (NumberFormatException e) {
+                                System.err.println("Warning: Invalid cost for edge " + departureId + "->" + arrivalId);
+                            }
+                        }
+
                         loaded++;
                     } else {
                         System.err.println("Warning: Station not found for connection: "
@@ -183,6 +201,10 @@ public class RailwayNetworkRepository {
     /**
      * Gets a station by ID
      */
+    public Graph<RailwayStation, Double> getCostGraph() {
+        return costGraph;
+    }
+
     public RailwayStation getStationById(int stationId) {
         return stationById.get(stationId);
     }
@@ -259,11 +281,11 @@ public class RailwayNetworkRepository {
             this.stationsLoaded = stationsLoaded;
             this.connectionsLoaded = connectionsLoaded;
         }
+    }
 
-        @Override
-        public String toString() {
-            return String.format("✓ Loaded %d stations and %d connections",
-                    stationsLoaded, connectionsLoaded);
-        }
+    @Override
+    public String toString() {
+        return String.format("Loaded %d stations and %d connections",
+                stationsLoaded, connectionsLoaded);
     }
 }
