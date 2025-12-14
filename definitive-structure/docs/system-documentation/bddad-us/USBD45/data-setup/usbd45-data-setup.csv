@@ -1,0 +1,25 @@
+Statement processed.
+
+INFO
+Railway Gauges:
+
+GAUGE_VALUE	DESCRIPTION
+1668	Bitola Ibérica
+1435	Bitola Standard Europeia
+
+INFO
+Line Owners:
+
+VAT_NUMBER	NAME	SHORT_NAME
+PT503933813	Infraestruturas de Portugal, SA	IP
+
+INFO
+Test Facilities:
+
+ID	NAME
+5	Porto Campanhã
+8	Barcelos
+10	Midões
+15	São Frutuoso
+20	Nine
+30	Braga
