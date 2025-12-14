@@ -40,18 +40,16 @@ public class RailwayNetworkOptimizationService {
         Graph<RailwayStation, Double> graph = repository.getCostGraph();
 
         int numVertices = graph.numVertices();
-
-        // Initialization
         Map<RailwayStation, Double> dist = new HashMap<>();
         Map<RailwayStation, RailwayStation> predecessor = new HashMap<>();
 
+        // Initialize distances
         for (RailwayStation v : graph.vertices()) {
             dist.put(v, Double.MAX_VALUE);
-            predecessor.put(v, null);
         }
         dist.put(source, 0.0);
 
-        // Relaxation (V - 1 times)
+        // Relax edges |V| - 1 times
         for (int i = 1; i < numVertices; i++) {
             boolean changed = false;
             for (Edge<RailwayStation, Double> edge : graph.edges()) {
@@ -59,10 +57,10 @@ public class RailwayNetworkOptimizationService {
                     changed = true;
                 }
             }
-            if (!changed) break; // Optimization
+            if (!changed) break; // Optimization: stop if no changes
         }
 
-        // Negative Cycle Detection
+        // Check for negative cycles
         for (Edge<RailwayStation, Double> edge : graph.edges()) {
             RailwayStation u = edge.getVOrig();
             RailwayStation v = edge.getVDest();
@@ -70,23 +68,26 @@ public class RailwayNetworkOptimizationService {
 
             if (dist.get(u) != Double.MAX_VALUE && dist.get(u) + weight < dist.get(v)) {
                 // Negative cycle detected
-                return new RiskAwarePathResult(true, null, 0.0, identifyCycle(v, predecessor));
+                List<RailwayStation> cycle = identifyCycle(v, predecessor);
+                return new RiskAwarePathResult(true, null, null, 0.0, cycle);
             }
         }
 
-        // Construct Path
         if (dist.get(target) == Double.MAX_VALUE) {
-            return new RiskAwarePathResult(false, Collections.emptyList(), Double.MAX_VALUE, null);
+            return new RiskAwarePathResult(false, Collections.emptyList(), Collections.emptyList(), Double.MAX_VALUE, null);
         }
 
+        // Reconstruct path AND costs
         LinkedList<RailwayStation> path = new LinkedList<>();
+        LinkedList<Double> pathCosts = new LinkedList<>();
         RailwayStation current = target;
         while (current != null) {
             path.addFirst(current);
+            pathCosts.addFirst(dist.get(current));
             current = predecessor.get(current);
         }
 
-        return new RiskAwarePathResult(false, path, dist.get(target), null);
+        return new RiskAwarePathResult(false, path, pathCosts, dist.get(target), null);
     }
 
     private boolean relax(Edge<RailwayStation, Double> edge,
@@ -117,9 +118,10 @@ public class RailwayNetworkOptimizationService {
         do {
             cycle.add(curr);
             curr = pred.get(curr);
-        } while (curr != cycleStart && curr != null);
-        cycle.add(cycleStart);
+        } while (curr != null && !curr.equals(cycleStart));
+        cycle.add(cycleStart); // Close loop
 
+        Collections.reverse(cycle);
         return cycle;
     }
 }
