@@ -92,9 +92,15 @@ public class RailwayNetworkOptimizationServiceTest {
         repository.addEdge(s3, s2, -2.0);
 
         RiskAwarePathResult result = service.getRiskAwareShortestPath(1, 2);
-        List<RailwayStation> expected = Arrays.asList(s1, s3, s2);
+        List<RailwayStation> expectedPath = Arrays.asList(s1, s3, s2);
 
-        assertEquals("Path should be [s1, s3, s2]", expected, result.getPath());
+        // Cumulative costs: S1(0.0) -> S3(5.0) -> S2(5.0 - 2.0 = 3.0)
+        List<Double> expectedCosts = Arrays.asList(0.0, 5.0, 3.0);
+
+        assertEquals("Path should be [s1, s3, s2]", expectedPath, result.getPath());
+
+        // FIX: Verify pathCosts are correct
+        assertEquals("Path costs should match cumulative weights", expectedCosts, result.getPathCosts());
     }
 
     @Test
@@ -154,6 +160,7 @@ public class RailwayNetworkOptimizationServiceTest {
         RiskAwarePathResult result = service.getRiskAwareShortestPath(1, 4);
 
         assertTrue("Path list should be empty for disconnected stations", result.getPath().isEmpty());
+        assertTrue("Path costs should be empty for disconnected stations", result.getPathCosts().isEmpty());
     }
 
     // --- SCENARIO 4: Validations ---
@@ -201,9 +208,13 @@ public class RailwayNetworkOptimizationServiceTest {
         repository.addEdge(s4, s2, 5.0);
 
         RiskAwarePathResult result = service.getRiskAwareShortestPath(1, 2);
-        List<RailwayStation> expected = Arrays.asList(s1, s3, s4, s2);
+        List<RailwayStation> expectedPath = Arrays.asList(s1, s3, s4, s2);
 
-        assertEquals(expected, result.getPath());
+        // Cumulative: 0 -> 5 -> 10 -> 15
+        List<Double> expectedCosts = Arrays.asList(0.0, 5.0, 10.0, 15.0);
+
+        assertEquals(expectedPath, result.getPath());
+        assertEquals(expectedCosts, result.getPathCosts());
     }
 
     // --- SCENARIO 6: Massive Negative Bonus ---
@@ -310,7 +321,7 @@ public class RailwayNetworkOptimizationServiceTest {
         assertEquals(-10.0, result.getTotalCost(), 0.001);
 
         // Verify sequence
-        List<RailwayStation> expected = Arrays.asList(s1, s4, s5, s2, s3, s6);
-        assertEquals(expected, result.getPath());
+        List<RailwayStation> expectedPath = Arrays.asList(s1, s4, s5, s2, s3, s6);
+        assertEquals(expectedPath, result.getPath());
     }
 }

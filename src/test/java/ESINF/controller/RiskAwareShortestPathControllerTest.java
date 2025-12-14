@@ -10,6 +10,7 @@ import org.junit.Test;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 
@@ -19,14 +20,13 @@ public class RiskAwareShortestPathControllerTest {
     private StubOptimizationService stubService;
 
     // --- Inner Stub Class for Service ---
-    // Allows controlling the exact output the controller receives without running the algorithm
     private static class StubOptimizationService extends RailwayNetworkOptimizationService {
 
         private RiskAwarePathResult resultToReturn;
         private RuntimeException exceptionToThrow;
 
         public StubOptimizationService() {
-            super(null); // Pass null as repo since we override the method using it
+            super(null);
         }
 
         public void setResultToReturn(RiskAwarePathResult result) {
@@ -49,87 +49,87 @@ public class RiskAwareShortestPathControllerTest {
 
     @Before
     public void setUp() throws Exception {
-        // Use a dummy repository for the constructor (it won't be used due to injection)
         RailwayNetworkRepository dummyRepo = new RailwayNetworkRepository();
-
         controller = new RiskAwareShortestPathController(dummyRepo);
         stubService = new StubOptimizationService();
 
-        // Inject the stub service into the private field 'optimizationService'
-        // This forces the controller to use our stub instead of the real service
+        // Inject the stub service using Reflection
         Field serviceField = RiskAwareShortestPathController.class.getDeclaredField("optimizationService");
         serviceField.setAccessible(true);
         serviceField.set(controller, stubService);
     }
 
     @Test
-    public void calculateShortestPath() {
-        RailwayStation s1 = new RailwayStation(1, "A", 0, 0, 0, 0);
-        RailwayStation s2 = new RailwayStation(2, "B", 0, 0, 0, 0);
+    public void testOutputContainsCalculationHeader() {
+        RailwayStation s1 = new RailwayStation(1, "S1", 0, 0, 0, 0);
+        RiskAwarePathResult result = new RiskAwarePathResult(false, Collections.singletonList(s1), Collections.singletonList(0.0), 0.0, null);
 
-        RiskAwarePathResult successResult = new RiskAwarePathResult(
-                false, Arrays.asList(s1, s2), 10.5, null
-        );
+        stubService.setResultToReturn(result);
+        String resultStr = controller.calculateShortestPath(1, 1);
 
-        stubService.setResultToReturn(successResult);
-
-        String output = controller.calculateShortestPath(1, 2);
-
-        assertTrue("Output should contain 'Shortest Path Found'", output.contains("Shortest Path Found"));
+        assertTrue("Output should contain header", resultStr.contains("Calculation Result:"));
     }
 
     @Test
-    public void testControllerDisplaysTotalCostInResult() {
-        RailwayStation s1 = new RailwayStation(1, "A", 0, 0, 0, 0);
+    public void testOutputContainsFormattedPathSequence() {
+        RailwayStation s1 = new RailwayStation(1, "S1", 0, 0, 0, 0);
+        RailwayStation s2 = new RailwayStation(2, "S2", 0, 0, 0, 0);
+        List<Double> costs = Arrays.asList(0.0, 50.0);
 
-        RiskAwarePathResult successResult = new RiskAwarePathResult(
-                false, Collections.singletonList(s1), 50.0, null
-        );
+        // Path sequence for 1 -> 2 with cost 50
+        RiskAwarePathResult result = new RiskAwarePathResult(false, Arrays.asList(s1, s2), costs, 50.0, null);
 
-        stubService.setResultToReturn(successResult);
+        stubService.setResultToReturn(result);
+        String resultStr = controller.calculateShortestPath(1, 2);
 
-        String result = controller.calculateShortestPath(1, 2);
+        // Fixed Assertion: Matches the format (ID, CumulativeCost, ID, CumulativeCost)
+        // Checks for both dot (.) and comma (,) decimal separators
+        boolean hasPattern = resultStr.contains("(1, 0.00, 2, 50.00)") ||
+                resultStr.contains("(1, 0,00, 2, 50,00)");
 
-        // Check for 50,00 or 50.00 depending on Locale
-        assertTrue("Output should contain the cost", result.contains("50,00") || result.contains("50.00"));
+        assertTrue("Output should contain correct path sequence. Actual: " + resultStr, hasPattern);
     }
 
     @Test
-    public void testControllerFormatsNegativeCycleWarningCorrectly() {
+    public void testOutputContainsTotalCost() {
+        RailwayStation s1 = new RailwayStation(1, "S1", 0, 0, 0, 0);
+        RiskAwarePathResult result = new RiskAwarePathResult(false, Collections.singletonList(s1), Collections.singletonList(0.0), 123.45, null);
+
+        stubService.setResultToReturn(result);
+        String resultStr = controller.calculateShortestPath(1, 1);
+
+        boolean hasCost = resultStr.contains("123.45") || resultStr.contains("123,45");
+        assertTrue("Output should contain total cost", hasCost);
+    }
+
+    @Test
+    public void testOutputFormatsNegativeCycleWarning() {
         RailwayStation s1 = new RailwayStation(1, "CycleNode", 0, 0, 0, 0);
+        RiskAwarePathResult result = new RiskAwarePathResult(true, null, null, 0.0, Collections.singletonList(s1));
 
-        // Prepare cycle result (hasNegativeCycle = true)
-        RiskAwarePathResult cycleResult = new RiskAwarePathResult(
-                true, null, 0.0, Collections.singletonList(s1)
-        );
+        stubService.setResultToReturn(result);
+        String resultStr = controller.calculateShortestPath(1, 2);
 
-        stubService.setResultToReturn(cycleResult);
-
-        String result = controller.calculateShortestPath(1, 2);
-
-        assertTrue("Output should warn about negative cycle", result.contains("Negative cycle detected"));
+        assertTrue("Output should warn about negative cycle", resultStr.contains("Negative cycle detected"));
     }
 
     @Test
-    public void testControllerFormatsNoPathMessageCorrectly() {
-        // Prepare empty result (no path)
-        RiskAwarePathResult emptyResult = new RiskAwarePathResult(
-                false, Collections.emptyList(), Double.MAX_VALUE, null
-        );
+    public void testOutputFormatsNoPathMessage() {
+        RiskAwarePathResult result = new RiskAwarePathResult(false, Collections.emptyList(), Collections.emptyList(), Double.MAX_VALUE, null);
 
-        stubService.setResultToReturn(emptyResult);
+        stubService.setResultToReturn(result);
+        String resultStr = controller.calculateShortestPath(1, 2);
 
-        String result = controller.calculateShortestPath(1, 2);
-
-        assertTrue("Output should indicate no path exists", result.contains("No path exists"));
+        assertTrue("Output should indicate no path exists", resultStr.contains("No path exists"));
     }
 
     @Test
-    public void testControllerHandlesServiceExceptions() {
-        stubService.setExceptionToThrow(new IllegalArgumentException("Invalid ID"));
+    public void testOutputHandlesExceptions() {
+        stubService.setExceptionToThrow(new IllegalArgumentException("TestError"));
 
-        String result = controller.calculateShortestPath(1, 2);
+        String resultStr = controller.calculateShortestPath(1, 2);
 
-        assertTrue("Output should report an error occurred", result.contains("Error calculating path"));
+        // Fixed: Controller outputs "Error calculating path: TestError"
+        assertTrue("Output should contain error message", resultStr.contains("Error calculating path: TestError"));
     }
 }
