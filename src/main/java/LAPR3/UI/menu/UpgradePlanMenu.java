@@ -182,6 +182,8 @@ public class UpgradePlanMenu {
 
             List<UpgradePlanDTO.CycleInfo> cycles = result.getCycles();
             System.out.printf("Total cycles detected: %d%n", cycles.size());
+            System.out.printf("Unique stations involved in cycles: %d%n",
+                    result.getUniqueStationsInCycles());
             System.out.println();
 
             int displayLimit = Math.min(cycles.size(), 10);
@@ -274,13 +276,15 @@ public class UpgradePlanMenu {
 
             // Write results to file
             try (FileWriter writer = new FileWriter(finalPath)) {
-                writer.write("═══════════════════════════════════════════════════════════════\n");
+                writer.write("═".repeat(65) + "\n");
                 writer.write("  DIRECTED LINE UPGRADE PLAN RESULTS (USEI11)\n");
-                writer.write("═══════════════════════════════════════════════════════════════\n\n");
+                writer.write("═".repeat(65) + "\n\n");
 
                 if (result.hasCycles()) {
                     writer.write("⚠ GRAPH CONTAINS CYCLES\n\n");
-                    writer.write("Total cycles detected: " + result.getCycles().size() + "\n\n");
+                    writer.write("Total cycles detected: " + result.getCycles().size() + "\n");
+                    writer.write("Unique stations involved in cycles: " +
+                            result.getUniqueStationsInCycles() + "\n\n");
 
                     for (int i = 0; i < result.getCycles().size(); i++) {
                         UpgradePlanDTO.CycleInfo cycle = result.getCycles().get(i);
@@ -308,7 +312,7 @@ public class UpgradePlanMenu {
             System.out.println("✓ Results saved to: " + finalPath);
 
         } catch (IOException e) {
-            System.err.println("❌ Error saving file: " + e.getMessage());
+            System.err.println("✖ Error saving file: " + e.getMessage());
         }
     }
 

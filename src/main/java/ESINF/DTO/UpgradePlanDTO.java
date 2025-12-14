@@ -13,14 +13,17 @@ public class UpgradePlanDTO {
     private final boolean hasCycles;
     private final List<String> topologicalOrder;
     private final List<CycleInfo> cycles;
+    private final int uniqueStationsInCycles; // NEW: count of unique stations
 
     /**
      * Private constructor - use factory methods instead
      */
-    private UpgradePlanDTO(boolean hasCycles, List<String> topologicalOrder, List<CycleInfo> cycles) {
+    private UpgradePlanDTO(boolean hasCycles, List<String> topologicalOrder,
+                           List<CycleInfo> cycles, int uniqueStationsInCycles) {
         this.hasCycles = hasCycles;
         this.topologicalOrder = topologicalOrder != null ? new ArrayList<>(topologicalOrder) : new ArrayList<>();
         this.cycles = cycles != null ? new ArrayList<>(cycles) : new ArrayList<>();
+        this.uniqueStationsInCycles = uniqueStationsInCycles;
     }
 
     /**
@@ -32,7 +35,7 @@ public class UpgradePlanDTO {
         if (topologicalOrder == null) {
             throw new IllegalArgumentException("Topological order cannot be null");
         }
-        return new UpgradePlanDTO(false, topologicalOrder, null);
+        return new UpgradePlanDTO(false, topologicalOrder, null, 0);
     }
 
     /**
@@ -44,7 +47,14 @@ public class UpgradePlanDTO {
         if (cycles == null || cycles.isEmpty()) {
             throw new IllegalArgumentException("Cycles list cannot be null or empty");
         }
-        return new UpgradePlanDTO(true, null, cycles);
+
+        // Calculate unique stations involved in cycles
+        Set<String> uniqueStations = new HashSet<>();
+        for (CycleInfo cycle : cycles) {
+            uniqueStations.addAll(cycle.getVertices());
+        }
+
+        return new UpgradePlanDTO(true, null, cycles, uniqueStations.size());
     }
 
     public boolean hasCycles() {
@@ -57,6 +67,14 @@ public class UpgradePlanDTO {
 
     public List<CycleInfo> getCycles() {
         return new ArrayList<>(cycles);
+    }
+
+    /**
+     * Returns the number of unique stations involved in cycles
+     * @return count of unique stations, or 0 if no cycles
+     */
+    public int getUniqueStationsInCycles() {
+        return uniqueStationsInCycles;
     }
 
     /**
@@ -91,6 +109,7 @@ public class UpgradePlanDTO {
     public String toString() {
         if (hasCycles) {
             StringBuilder sb = new StringBuilder("Graph contains cycles:\n");
+            sb.append(String.format("Unique stations involved: %d\n", uniqueStationsInCycles));
             for (int i = 0; i < cycles.size(); i++) {
                 sb.append(String.format("  Cycle %d: %s\n", i + 1, cycles.get(i)));
             }
