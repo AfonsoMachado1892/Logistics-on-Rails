@@ -3,6 +3,7 @@ package LAPR3.UI.menu;
 import ESINF.controller.MinimalBackboneController;
 import ESINF.controller.StationQueryController;
 import ESINF.controller.UpgradePlanController;
+import ESINF.controller.RiskAwareShortestPathController; // [Import Added]
 import LAPR3.UI.menu.MinimalBackboneMenu;
 import ESINF.controller.CentralityController;
 import ESINF.controller.StationQueryController;
@@ -45,6 +46,9 @@ public class MainMenu {
     private final UpgradePlanMenu upgradePlanMenu;
     private final MinimalBackboneMenu minimalBackboneMenu;
 
+    // [Field Added for USEI15]
+    private final RiskAwareShortestPathMenu riskAwareShortestPathMenu;
+
     public MainMenu(Scanner scanner, DataController dataController, InputValidator validator) {
         this.scanner = scanner;
         this.dataController = dataController;
@@ -55,11 +59,17 @@ public class MainMenu {
 
         // USEI12 shares the same repository as USEI11
         this.minimalBackboneController = new MinimalBackboneController(
-               upgradePlanController.getRepository()
+                upgradePlanController.getRepository()
         );
 
+        // This repository is shared for Network Analysis (USEI13 & USEI15)
         RailwayNetworkRepository railNetworkRepo = new RailwayNetworkRepository();
+
+        // Controllers
         CentralityController centralityController = new CentralityController(railNetworkRepo);
+
+        // [Controller Init Added for USEI15]
+        RiskAwareShortestPathController riskController = new RiskAwareShortestPathController(railNetworkRepo);
 
         this.dataImportMenu = new DataImportMenu(scanner, dataController, validator);
         this.wagonMenu = new WagonOperationsMenu(scanner, dataController, validator);
@@ -80,11 +90,14 @@ public class MainMenu {
         // Initialize USEI11 - Upgrade Plan (Sprint 3)
         this.upgradePlanMenu = new UpgradePlanMenu(scanner, validator, upgradePlanController);
 
-        // Initialize USEI12 - Minimal Backbone Network (Sprint 3) ← NOVO
+        // Initialize USEI12 - Minimal Backbone Network (Sprint 3)
         this.minimalBackboneMenu = new MinimalBackboneMenu(scanner, validator, minimalBackboneController);
         
         // USEI13
         this.centralityAnalysisMenu = new CentralityAnalysisMenu(scanner, validator, railNetworkRepo);
+
+        // Initialize USEI15 - Risk Aware Shortest Path [Menu Init Added]
+        this.riskAwareShortestPathMenu = new RiskAwareShortestPathMenu(scanner, validator, riskController);
     }
 
     /**
@@ -166,6 +179,7 @@ public class MainMenu {
         System.out.println("│  16. Directed Line Upgrade Plan (USEI11)                   │");
         System.out.println("│  17. Minimal Backbone Network (USEI12)                     │");
         System.out.println("│  18. Rail Hub Centrality Analysis (USEI13)                 │");
+        System.out.println("│  19. Risk-Aware Shortest Paths (USEI15)                    │");
         System.out.println("├────────────────────────────────────────────────────────────┤");
         System.out.println("│  RAILWAY OPERATIONS                                        │");
         System.out.println("├────────────────────────────────────────────────────────────┤");
@@ -197,6 +211,7 @@ public class MainMenu {
             case 16 -> upgradePlanMenu.show();
             case 17 -> minimalBackboneMenu.show();
             case 18 -> centralityAnalysisMenu.run();
+            case 19 -> riskAwareShortestPathMenu.show();
             default -> System.out.println("Invalid option!");
         }
     }
@@ -245,4 +260,4 @@ public class MainMenu {
         System.out.println("─".repeat(80));
         System.out.println("\nFull log saved to: Logs/import_log.txt");
     }
-}
+}   
