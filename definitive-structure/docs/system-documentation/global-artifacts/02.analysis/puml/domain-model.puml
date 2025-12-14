@@ -6,8 +6,6 @@ hide methods
 
 title Domain Model
 
-"Freight and Routes" -down-> Infrastructure
-
 package "Infrastructure" {
     class RailwayLine {
         id
@@ -62,15 +60,6 @@ package "Freight and Routes" {
         type
     }
 
-    class RouteSegment {
-        sequenceOrder
-        estimatedArrival
-        estimatedDeparture
-        actualArrival
-        actualDeparture
-        stopAtStation
-    }
-
     class Freight {
         id
         departureTime
@@ -91,10 +80,9 @@ package "Freight and Routes" {
         loaded
     }
 
-    Route "1" -- "*" RouteSegment : consists of
     Route "1" -- "*" Freight : contains
     Route "1" -- "*" CrossingOperation : requires
-    RouteSegment "*" -- "1" Station : passes through
+    Route "1" -- "*" LineSegment : composed of
     CrossingOperation "*" -- "1" Station : occurs at
     Freight "1" -- "*" FreightWagon : includes
     Freight "*" -- "1" Station : origin
@@ -272,8 +260,5 @@ package "Warehouse Management" {
 
     Box "*" -- "1" Item : references
 }
-
-' Relações Inter-Pacote
-RouteSegment "1" -- "1" LineSegment : follows
 
 @enduml
