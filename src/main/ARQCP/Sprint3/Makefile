@@ -10,7 +10,12 @@ INCLUDES = -I./common -I./manager -I./board
 MANAGER_SOURCES = manager/manager.c manager/sensors_comm.c manager/setup.c board/board.c
 
 # 3. Fontes Assembly (Adicionados encrypt_data.s e track_utils.s)
-ASSEMBLY_SOURCES = assembly/extract_data.s assembly/encrypt_data.s assembly/track_utils.s
+# ... (conteúdo anterior)
+
+# 3. Fontes Assembly (ADICIONAR format_command.s AQUI)
+ASSEMBLY_SOURCES = assembly/extract_data.s assembly/encrypt_data.s assembly/track_utils.s assembly/format_command.s
+
+# ... (resto do ficheiro)
 
 # 4. Regra Principal (Atualizada para usar as variáveis e includes)
 program.elf: $(MANAGER_SOURCES) $(ASSEMBLY_SOURCES)
