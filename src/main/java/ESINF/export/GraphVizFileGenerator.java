@@ -92,7 +92,7 @@ public class GraphVizFileGenerator {
         try {
             ProcessBuilder processBuilder = new ProcessBuilder(
                     GRAPHVIZ_NEATO,
-                    "-n",  // Adicionado: Modo no-layout para posições fixas
+                    "-n2",  // Adicionado: Modo no-layout para posições fixas
                     "-Tsvg",
                     "-Goverlap=false",
                     dotFilePath,
