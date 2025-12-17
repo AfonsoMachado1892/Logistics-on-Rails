@@ -4,11 +4,8 @@ import ESINF.controller.MinimalBackboneController;
 import ESINF.controller.StationQueryController;
 import ESINF.controller.UpgradePlanController;
 import ESINF.controller.RiskAwareShortestPathController; // [Import Added]
-import LAPR3.UI.menu.MinimalBackboneMenu;
-import ESINF.controller.CentralityController;
-import ESINF.controller.StationQueryController;
-import ESINF.controller.UpgradePlanController;
 import ESINF.repository.RailwayNetworkRepository;
+import LAPR3.UI.menu.MinimalBackboneMenu;
 import LAPR3.controller.DataController;
 import LAPR3.UI.utils.InputValidator;
 import LAPR3.repository.*;
@@ -57,17 +54,13 @@ public class MainMenu {
         this.stationController = new StationQueryController();
         this.upgradePlanController = new UpgradePlanController();
 
+        // All Sprint 3 Railway Network features (USEI11, USEI12, USEI13, USEI15) share the same repository
+        RailwayNetworkRepository railNetworkRepo = upgradePlanController.getRepository();
+
         // USEI12 shares the same repository as USEI11
-        this.minimalBackboneController = new MinimalBackboneController(
-                upgradePlanController.getRepository()
-        );
+        this.minimalBackboneController = new MinimalBackboneController(railNetworkRepo);
 
-        // This repository is shared for Network Analysis (USEI13 & USEI15)
-        RailwayNetworkRepository railNetworkRepo = new RailwayNetworkRepository();
-
-        // Controllers
-        CentralityController centralityController = new CentralityController(railNetworkRepo);
-
+        // Controllers for USEI13 and USEI15 (controllers are created inside their menus)
         // [Controller Init Added for USEI15]
         RiskAwareShortestPathController riskController = new RiskAwareShortestPathController(railNetworkRepo);
 
