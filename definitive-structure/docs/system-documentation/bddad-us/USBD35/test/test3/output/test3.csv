@@ -1,0 +1,6 @@
+Statement processed.
+--- TEST 3: Null/Empty Input Validation ---
+Testing NULL input...
+RESULT: SUCCESS (NULL blocked).
+Testing Empty String (spaces)...
+RESULT: SUCCESS (Empty spaces blocked).

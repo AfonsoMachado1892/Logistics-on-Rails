@@ -1,0 +1,4 @@
+Statement processed.
+--- TEST 1: Insert Valid Facility ---
+Returned ID: 100
+RESULT: SUCCESS. Name matches input exactly.

@@ -1,0 +1,4 @@
+Statement processed.
+--- TEST 2: Duplicate Detection (Case & Spaces) ---
+Step 1: Inserted "Aveiro Test Node"
+RESULT: SUCCESS. Caught expected duplicate error.

@@ -1,0 +1,4 @@
+Statement processed.
+--- TEST 4: Duplicate against pre-existing data ---
+Attempting to insert duplicate "  VALENÇA  "...
+RESULT: SUCCESS. "Valença" was correctly identified as a duplicate.
