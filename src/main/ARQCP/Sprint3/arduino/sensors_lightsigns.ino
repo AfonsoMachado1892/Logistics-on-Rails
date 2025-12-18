@@ -31,28 +31,7 @@ typedef struct {
 
 Track tracks[MAX_TRACKS];
 
-void setup() {
-    Serial.begin(115200); // Must match Manager serial config
-    dht.begin();
-    for (int i = 0; i < MAX_TRACKS; i++) {
-        tracks[i].id = i;
-        tracks[i].redPin = RED_LED_BASE + (i * 3);
-        tracks[i].yellowPin = YELLOW_LED_BASE + (i * 3);
-        tracks[i].greenPin = GREEN_LED_BASE + (i * 3);
-        tracks[i].blinking = false;
-
-        pinMode(tracks[i].redPin, OUTPUT);
-        pinMode(tracks[i].yellowPin, OUTPUT);
-        pinMode(tracks[i].greenPin, OUTPUT);
-
-        // Initial state: Free (Green On) [cite: 234]
-        digitalWrite(tracks[i].redPin, LOW);
-        digitalWrite(tracks[i].yellowPin, LOW);
-        digitalWrite(tracks[i].greenPin, HIGH);
-    }
-}
-
-// USAC10: Moving Median Implementation [cite: 358-359, 366]
+// USAC10: Moving Median Implementation
 int applyMovingMedian(int val, int* buf) {
     buf[bufIdx % 5] = val;
     int sorted[5];
@@ -94,8 +73,24 @@ void update_track(int id, int r, int y, int g, bool blink) {
     tracks[id].blinking = blink;
 }
 
+void setup() {
+    Serial.begin(115200); // USAC13/14: Match C Manager baud rate
+    dht.begin();
+    for (int i = 0; i < MAX_TRACKS; i++) {
+        tracks[i].id = i;
+        tracks[i].redPin = RED_LED_BASE + (i * 3);
+        tracks[i].yellowPin = YELLOW_LED_BASE + (i * 3);
+        tracks[i].greenPin = GREEN_LED_BASE + (i * 3);
+        tracks[i].blinking = false;
+        pinMode(tracks[i].redPin, OUTPUT);
+        pinMode(tracks[i].yellowPin, OUTPUT);
+        pinMode(tracks[i].greenPin, OUTPUT);
+        digitalWrite(tracks[i].greenPin, HIGH); // Default: FREE
+    }
+}
+
 void loop() {
-    // USAC10: Handle Red Blinking (RB) without blocking [cite: 31-33]
+    // USAC10: Handle Red Blinking (RB) without blocking
     unsigned long now = millis();
     for (int i=0; i<MAX_TRACKS; i++) {
         if (tracks[i].blinking && (now - tracks[i].lastBlink >= BLINK_INTERVAL)) {
@@ -111,7 +106,7 @@ void loop() {
         if (cmd == "GTH") {
             process_gth();
         } else {
-            // Process light commands (Format: CMD,x) [cite: 363-364]
+            // Process light commands (Format: CMD,x)
             int comma = cmd.indexOf(',');
             if (comma != -1) {
                 String type = cmd.substring(0, comma);
