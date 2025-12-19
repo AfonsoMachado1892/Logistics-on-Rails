@@ -13,7 +13,7 @@ MANAGER_SOURCES = manager/manager.c manager/sensors_comm.c manager/setup.c board
 # ... (conteúdo anterior)
 
 # 3. Fontes Assembly (ADICIONAR format_command.s AQUI)
-ASSEMBLY_SOURCES = assembly/extract_data.s assembly/encrypt_data.s assembly/track_utils.s assembly/format_command.s
+ASSEMBLY_SOURCES = assembly/extract_data.s assembly/encrypt_data.s assembly/track_utils.s assembly/format_command.s assembly/enqueue_value.s
 
 # ... (resto do ficheiro)
 
