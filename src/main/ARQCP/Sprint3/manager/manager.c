@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <time.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include "../common/domain.h"
 #include "sensors_comm.h"
 #include "setup.h"
@@ -20,6 +23,10 @@ Track* tracks = NULL;
 int num_tracks = 0;
 SystemConfig sys_config;
 const char* SERIAL_PORT = "/dev/ttyACM0"; // Porta padrão
+Log* system_logs = NULL;
+int num_logs = 0;
+User* current_user = NULL;
+
 
 // Estados das Tracks (conforme board.c e lógica)
 #define STATE_FREE 0
@@ -38,6 +45,93 @@ void send_track_command(int track_id, char* op_code) {
     } else {
         printf("[ERROR] Failed to format command for LightSigns\n");
     }
+}
+
+// AC12 - Record action with Track ID Persistence
+void record_action(User* user, const char* action, int track_id) {
+    if (user == NULL) return;
+
+    mkdir("logs", 0777);
+
+    Log* temp = (Log*) realloc(system_logs, (num_logs + 1) * sizeof(Log));
+    if (temp == NULL) return;
+    system_logs = temp;
+
+    system_logs[num_logs].id = num_logs + 1;
+    strncpy(system_logs[num_logs].username, user->username, 19);
+
+    // Format action with Track ID (e.g., "FREED TRACK #2")
+    if (track_id != -1) {
+        snprintf(system_logs[num_logs].action, 49, "%s #%d", action, track_id);
+    } else {
+        strncpy(system_logs[num_logs].action, action, 49);
+    }
+
+    time_t now = time(NULL);
+    struct tm *t = localtime(&now);
+    strftime(system_logs[num_logs].timestamp, sizeof(system_logs[num_logs].timestamp),
+             "%Y-%m-%d %H:%M:%S", t);
+
+    // Persistent Master Audit
+    FILE* master_f = fopen("logs/master_audit.log", "a");
+    if (master_f) {
+        fprintf(master_f, "[ID: %03d] %s | User: %s | Action: %s\n",
+                system_logs[num_logs].id,
+                system_logs[num_logs].timestamp,
+                system_logs[num_logs].username,
+                system_logs[num_logs].action);
+        fclose(master_f);
+    }
+
+    num_logs++;
+}
+
+// USAC12 - Export logs by filtering the persistent master file
+void export_user_logs() {
+    char target_user[20];
+    char out_filename[60];
+    char line[256];
+
+    printf("\n[USAC12] Export logs for which username? ");
+    scanf("%19s", target_user);
+    getchar();
+
+    // Create a specific export file for this user
+    sprintf(out_filename, "logs/actions_%s.txt", target_user);
+
+    FILE* master_f = fopen("logs/master_audit.log", "r");
+    if (!master_f) {
+        printf("[ERROR] No audit history found.\n");
+        return;
+    }
+
+    FILE* export_f = fopen(out_filename, "w");
+    if (!export_f) {
+        fclose(master_f);
+        return;
+    }
+
+    fprintf(export_f, "=== HISTORICAL LOG SEQUENCE FOR USER: %s ===\n", target_user);
+
+    int found = 0;
+    // Scan every line in the master file for the target username
+    while (fgets(line, sizeof(line), master_f)) {
+        // Look for the string "User: username" in the log line
+        char search_pattern[30];
+        sprintf(search_pattern, "| User: %s |", target_user);
+
+        if (strstr(line, search_pattern) != NULL) {
+            fprintf(export_f, "%s", line);
+            found = 1;
+        }
+    }
+
+    if (!found) fprintf(export_f, "No historical actions found for this user.\n");
+
+    fclose(master_f);
+    fclose(export_f);
+    printf("[SUCCESS] Full history exported to %s\n", out_filename);
+    sleep(1);
 }
 
 // USAC16 - Assign Track to Arriving Train
@@ -60,6 +154,8 @@ void assign_track_to_train() {
         // Parâmetro struct obrigatório para US Sprint 3
         update_track_struct(&tracks[found_track], STATE_ASSIGNED, train_id);
 
+        //guardar no log
+        record_action(current_user, "ASSIGNED TRACK TO TRAIN", tracks[found_track].id);
         // Atualiza LightSigns (Amarelo = YE)
         send_track_command(found_track, "YE");
         printf("[SUCCESS] Train %d assigned to Track %d\n", train_id, tracks[found_track].id);
@@ -87,6 +183,9 @@ void free_track_operation() {
         // Atualiza struct via Assembly
         update_track_struct(&tracks[idx], STATE_FREE, -1);
 
+        // gaurdar no log
+        record_action(current_user, "FREED TRACK", track_id);
+
         // Atualiza LightSigns (Verde = GE)
         send_track_command(idx, "GE");
 
@@ -113,6 +212,9 @@ void set_track_inoperative() {
 
     if (idx != -1) {
         update_track_struct(&tracks[idx], STATE_INOP, -1);
+
+        // guardar no log
+        record_action(current_user, "SET INOPERATIVE", track_id);
 
         // Atualiza LightSigns (Vermelho a piscar = RB)
         send_track_command(idx, "RB");
@@ -142,6 +244,9 @@ void set_track_busy() {
         // Mantém o comboio atual, muda estado para BUSY (1)
         update_track_struct(&tracks[idx], STATE_BUSY, tracks[idx].train_id);
 
+        // guardar no log
+        record_action(current_user, "SET BUSY (STOP)", track_id);
+
         // Atualiza LightSigns (Vermelho = RE)
         send_track_command(idx, "RE");
 
@@ -162,7 +267,6 @@ void manager_main_loop() {
 
 
     // --- LOGIN PROMPT ---
-    User* current_user = NULL;
     char input_username[20];
     char input_password[20];
     char encrypted_input[20];
@@ -206,7 +310,7 @@ void manager_main_loop() {
 
         // 3. UI Menu with Quit Option
         printf("\nUSER: %s\n", current_user->username);
-        printf("COMMANDS: [1]Assign [2]Free [3]Inop [4]Stopped [0]Quit [ENTER]Refresh\n");
+        printf("COMMANDS: [1]Assign [2]Free [3]Inop [4]Stopped [5]ExportLogs [0]Quit [ENTER]Refresh\n");
         printf("Choice > ");
 
         if (!fgets(command_buffer, sizeof(command_buffer), stdin)) break;
@@ -222,9 +326,17 @@ void manager_main_loop() {
             set_track_inoperative();
         } else if (command_buffer[0] == '4') {
             set_track_busy();
+        } else if (command_buffer[0] == '5') {
+            // USAC12 Check: Only "admin" (System Administrator) is authorized
+            if (strcmp(current_user->username, "admin") == 0) {
+                export_user_logs();
+            } else {
+                printf("[ERROR] Access Denied: Administrator profile required.\n");
+                sleep(1);
+            }
+        }
         }
         // Se for ENTER (newline), apenas continua o loop e atualiza sensores/board
-    }
 
     // --- QUIT & DYNAMIC MEMORY CLEANUP ---
     printf("\n[INFO] Closing system and freeing memory...\n");
@@ -236,6 +348,12 @@ void manager_main_loop() {
         free(tracks);
         tracks = NULL;
     }
+
+    if(system_logs) {
+        free(system_logs);
+        system_logs = NULL;
+    }
+
     printf("[Info]: Memory cleared.\n");
 }
 

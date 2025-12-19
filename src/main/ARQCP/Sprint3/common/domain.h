@@ -34,4 +34,12 @@ typedef struct {
     int hum_win_len;
 } SystemConfig;
 
+// Estrutura para a USAC12, Log
+typedef struct {
+    int id;
+    char username[20];
+    char action[50];
+    char timestamp[30];
+} Log;
+
 #endif
