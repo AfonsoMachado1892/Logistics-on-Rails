@@ -10,6 +10,8 @@
 // Funções Assembly Externas
 extern int format_command(char* op, int n, char *cmd);
 extern void update_track_struct(Track* t, int state, int train_id);
+extern int encrypt_data(char* in, int key, char *out); // Added for login
+extern int enqueue_value(int* buffer, int length, int* nelem, int* tail, int* head, int value); // For sensor history
 
 // Variáveis Globais
 User* users = NULL;
@@ -59,8 +61,7 @@ void assign_track_to_train() {
         update_track_struct(&tracks[found_track], STATE_ASSIGNED, train_id);
 
         // Atualiza LightSigns (Amarelo = YE)
-        send_track_command(tracks[found_track].id, "YE");
-
+        send_track_command(found_track, "YE");
         printf("[SUCCESS] Train %d assigned to Track %d\n", train_id, tracks[found_track].id);
     } else {
         printf("\n[!!!] EMERGENCY STOP: NO TRACKS AVAILABLE [!!!]\n");
@@ -87,7 +88,7 @@ void free_track_operation() {
         update_track_struct(&tracks[idx], STATE_FREE, -1);
 
         // Atualiza LightSigns (Verde = GE)
-        send_track_command(track_id, "GE");
+        send_track_command(idx, "GE");
 
         printf("[SUCCESS] Track %d is now FREE.\n", track_id);
     } else {
@@ -114,7 +115,7 @@ void set_track_inoperative() {
         update_track_struct(&tracks[idx], STATE_INOP, -1);
 
         // Atualiza LightSigns (Vermelho a piscar = RB)
-        send_track_command(track_id, "RB");
+        send_track_command(idx, "RB");
 
         printf("[SUCCESS] Track %d set to INOPERATIVE.\n", track_id);
     } else {
@@ -142,7 +143,7 @@ void set_track_busy() {
         update_track_struct(&tracks[idx], STATE_BUSY, tracks[idx].train_id);
 
         // Atualiza LightSigns (Vermelho = RE)
-        send_track_command(track_id, "RE");
+        send_track_command(idx, "RE");
 
         printf("[SUCCESS] Track %d set to BUSY (Stopped).\n", track_id);
     } else {
@@ -154,29 +155,66 @@ void set_track_busy() {
 void manager_main_loop() {
     SensorData sensors;
     char command_buffer[10];
+    int running = 1;
 
-    // USAC11: Setup Inicial
+    // USAC11: Initial Setup
     load_initial_setup("config.txt");
 
-    while (1) {
-        // 1. Obter dados dos sensores (USAC13)
-        // Tentamos obter dados; se falhar (ex: cabo desligado), marca como inválido mas não crasha
+
+    // --- LOGIN PROMPT ---
+    User* current_user = NULL;
+    char input_username[20];
+    char input_password[20];
+    char encrypted_input[20];
+
+    printf("\n============== LOGIN ==============\n");
+    printf("Username: ");
+    scanf("%19s", input_username);
+    printf("Password: ");
+    scanf("%19s", input_password);
+    getchar(); // Clear newline from buffer
+
+    for (int i = 0; i < num_users; i++) {
+        if (strcmp(input_username, users[i].username) == 0) {
+            // Use assembly to encrypt input for comparison
+            encrypt_data(input_password, users[i].key, encrypted_input);
+
+            if (strcmp(encrypted_input, users[i].password) == 0) {
+                current_user = &users[i];
+                break;
+            }
+        }
+    }
+
+    if (!current_user) {
+        printf("[ERROR] Authentication failed. Exiting...\n");
+        running = 0;
+    } else {
+        printf("[SUCCESS] Welcome, %s!\n", current_user->name);
+        sleep(1);
+    }
+
+    // --- MAIN SYSTEM LOOP ---
+    while (running) {
+        // 1. Get sensor data (USAC13)
         if (!get_sensor_data(SERIAL_PORT, &sensors)) {
             sensors.valid = 0;
         }
 
-        // 2. Atualizar o Board (USAC15)
+        // 2. Update Dashboard (USAC15)
         update_board_view(tracks, num_tracks, &sensors);
 
-        // 3. Menu UI
-        printf("\nCOMMANDS: [1]Assign Train  [2]Depart/Free  [3]Set Inop  [4]Set Stopped  [ENTER]Refresh\n");
+        // 3. UI Menu with Quit Option
+        printf("\nUSER: %s\n", current_user->username);
+        printf("COMMANDS: [1]Assign [2]Free [3]Inop [4]Stopped [0]Quit [ENTER]Refresh\n");
         printf("Choice > ");
 
-        // Leitura de comando simples (bloqueante para permitir interação do user)
-        fgets(command_buffer, sizeof(command_buffer), stdin);
+        if (!fgets(command_buffer, sizeof(command_buffer), stdin)) break;
 
         // Parsing do comando
-        if (command_buffer[0] == '1') {
+        if (command_buffer[0] == '0') {
+            running = 0; // Quit
+        } else if (command_buffer[0] == '1') {
             assign_track_to_train();
         } else if (command_buffer[0] == '2') {
             free_track_operation();
@@ -188,8 +226,17 @@ void manager_main_loop() {
         // Se for ENTER (newline), apenas continua o loop e atualiza sensores/board
     }
 
-    if(users) free(users);
-    if(tracks) free(tracks);
+    // --- QUIT & DYNAMIC MEMORY CLEANUP ---
+    printf("\n[INFO] Closing system and freeing memory...\n");
+    if(users) {
+        free(users);
+        users = NULL;
+    }
+    if(tracks) {
+        free(tracks);
+        tracks = NULL;
+    }
+    printf("[Info]: Memory cleared.\n");
 }
 
 int main() {
