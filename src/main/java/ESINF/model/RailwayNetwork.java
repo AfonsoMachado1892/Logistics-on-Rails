@@ -169,7 +169,37 @@ public class RailwayNetwork{
         return matrix;
     }
 
+    /**
+     * Builds a cost matrix for shortest path algorithms
+     *
+     * @return 2D array where [i][j] is cost from station i to j
+     */
+    public double[][] buildCostMatrix() {
+        int n = stations.size();
+        double[][] matrix = new double[n][n];
+
+        // Initialize with infinity
+        for (int i = 0; i < n; i++) {
+            Arrays.fill(matrix[i], Double.POSITIVE_INFINITY);
+            matrix[i][i] = 0; // Distance to self is 0
+        }
+
+        // Create index mapping
+        Map<Integer, Integer> stationIdToIndex = new HashMap<>();
+        int index = 0;
+        for (Integer stationId : stations.keySet()) {
+            stationIdToIndex.put(stationId, index++);
+        }
+
+        // Fill matrix
+        for (Connection conn : connectionMap.values()) {
+            int fromIdx = stationIdToIndex.get(conn.getFrom().getStationId());
+            int toIdx = stationIdToIndex.get(conn.getTo().getStationId());
+            matrix[fromIdx][toIdx] = conn.getCost();
+        }
+
+        return matrix;
+    }
+
     
-
-
 }
