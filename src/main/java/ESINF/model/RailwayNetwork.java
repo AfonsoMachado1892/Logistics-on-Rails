@@ -86,6 +86,64 @@ public class RailwayNetwork{
         return stations.get(stationId);
     }
 
-   
+    /**
+     * Gets all outgoing connections from a station
+     *
+     * @param stationId the station ID
+     * @return list of connections, empty if station not found
+     */
+    public List<Connection> getConnections(int stationId) {
+        return adjacencyList.getOrDefault(stationId, Collections.emptyList());
+    }
+
+    /**
+     * Gets a specific connection between two stations
+     *
+     * @param fromId source station ID
+     * @param toId destination station ID
+     * @return the connection, or null if not found
+     */
+    public Connection getConnection(int fromId, int toId) {
+        return connectionMap.get(fromId + "-" + toId);
+    }
+
+    /**
+     * Gets all stations in the network
+     *
+     * @return collection of all stations
+     */
+    public Collection<RailwayStation> getAllStations() {
+        return stations.values();
+    }
+
+    /**
+     * Gets all connections in the network
+     *
+     * @return collection of all connections
+     */
+    public Collection<Connection> getAllConnections() {
+        return connectionMap.values();
+    }
+
+    /**
+     * Gets the number of stations in the network
+     *
+     * @return number of stations
+     */
+    public int getStationCount() {
+        return stations.size();
+    }
+
+    /**
+     * Gets the number of connections in the network
+     *
+     * @return number of connections
+     */
+    public int getConnectionCount() {
+        return connectionMap.size();
+    }
+
+    
+
 
 }
