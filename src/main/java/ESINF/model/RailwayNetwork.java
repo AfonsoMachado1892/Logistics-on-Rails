@@ -47,6 +47,36 @@ public class RailwayNetwork{
         return true;
     }
 
+    /**
+     * Adds a connection between two stations
+     *
+     * @param connection the connection to add
+     * @return true if added successfully
+     * @throws IllegalArgumentException if stations don't exist
+     */
+    public boolean addConnection(Connection connection) {
+        if (connection == null) {
+            return false;
+        }
+
+        int fromId = connection.getFrom().getStationId();
+        int toId = connection.getTo().getStationId();
+
+        if (!stations.containsKey(fromId) || !stations.containsKey(toId)) {
+            throw new IllegalArgumentException("Both stations must exist in the network");
+        }
+
+        String key = fromId + "-" + toId;
+        if (connectionMap.containsKey(key)) {
+            return false; // Already exists
+        }
+
+        adjacencyList.get(fromId).add(connection);
+        connectionMap.put(key, connection);
+        return true;
+    }
+
+    
 
 
 }
