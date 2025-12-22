@@ -22,6 +22,10 @@ public class Connection {
         public double getCapacity() { return capacity; }
         public double getCost() { return cost; }
 
-        
+        @Override
+        public String toString() {
+            return String.format("%s -> %s (%.2f km, capacity: %.0f, cost: %.2f)",
+                    from.getName(), to.getName(), distance, capacity, cost);
+        }
     }
 
