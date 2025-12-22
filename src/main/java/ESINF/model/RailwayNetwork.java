@@ -31,7 +31,22 @@ public class RailwayNetwork{
         this.connectionMap = new HashMap<>();
     }
 
-  
+    /**
+     * Adds a station to the network
+     *
+     * @param station the station to add
+     * @return true if added, false if already exists
+     */
+    public boolean addStation(RailwayStation station) {
+        if (station == null || stations.containsKey(station.getStationId())) {
+            return false;
+        }
+
+        stations.put(station.getStationId(), station);
+        adjacencyList.putIfAbsent(station.getStationId(), new ArrayList<>());
+        return true;
+    }
+
 
 
 }
