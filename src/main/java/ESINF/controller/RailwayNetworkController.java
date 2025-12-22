@@ -180,5 +180,77 @@ public class RailwayNetworkController {
         return count;
     }
 
-   
+    // ==================== USE CASE: USEI14 - Maximum Flow ====================
+
+    /**
+     * USEI14 - Calculates maximum throughput between two hubs
+     *
+     * @param sourceStationId ID of source station
+     * @param sinkStationId ID of sink station
+     * @return MaxFlowResult with detailed analysis
+     * @throws IllegalArgumentException if stations not found or invalid
+     */
+    public MaxFlowResult calculateMaximumThroughput(int sourceStationId, int sinkStationId) {
+
+        // Validation
+        RailwayStation source = network.getStation(sourceStationId);
+        RailwayStation sink = network.getStation(sinkStationId);
+
+        if (source == null) {
+            throw new IllegalArgumentException(
+                    "Source station not found: " + sourceStationId);
+        }
+
+        if (sink == null) {
+            throw new IllegalArgumentException(
+                    "Sink station not found: " + sinkStationId);
+        }
+
+        if (sourceStationId == sinkStationId) {
+            throw new IllegalArgumentException(
+                    "Source and sink must be different stations");
+        }
+
+        // Build matrices for algorithm
+        double[][] capacityMatrix = network.buildCapacityMatrix();
+        RailwayStation[] stationArray = network.buildStationArray();
+        Map<Integer, Integer> indexMap = network.getStationIndexMap();
+
+        int sourceIdx = indexMap.get(sourceStationId);
+        int sinkIdx = indexMap.get(sinkStationId);
+
+        // Calculate max flow using algorithm
+        return MaxFlowCalculator.calculateMaxFlow(
+                capacityMatrix, stationArray, sourceIdx, sinkIdx);
+    }
+
+    /**
+     * Calculates max flow and identifies bottlenecks
+     *
+     * @param sourceStationId source hub ID
+     * @param sinkStationId sink hub ID
+     * @return Map with result and bottlenecks
+     */
+    public Map<String, Object> analyzeMaximumThroughput(int sourceStationId, int sinkStationId) {
+
+        MaxFlowResult result = calculateMaximumThroughput(sourceStationId, sinkStationId);
+
+        // Find bottlenecks
+        double[][] capacityMatrix = network.buildCapacityMatrix();
+        RailwayStation[] stationArray = network.buildStationArray();
+
+        List<String> bottlenecks = MaxFlowCalculator.findBottlenecks(
+                result, capacityMatrix, stationArray);
+
+        // Package results
+        Map<String, Object> analysis = new HashMap<>();
+        analysis.put("result", result);
+        analysis.put("bottlenecks", bottlenecks);
+        analysis.put("summary", result.getSummary());
+        analysis.put("hasBottlenecks", !bottlenecks.isEmpty());
+
+        return analysis;
+    }
+
+  
 }
