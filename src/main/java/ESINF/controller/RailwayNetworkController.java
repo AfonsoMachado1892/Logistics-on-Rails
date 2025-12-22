@@ -45,5 +45,140 @@ public class RailwayNetworkController {
         this.network = network;
     }
 
-    
+    // ==================== USE CASE: Load Network Data ====================
+
+    /**
+     * Loads network data from CSV files
+     *
+     * @param stationsFile path to stations CSV file
+     * @param connectionsFile path to connections CSV file
+     * @return true if loaded successfully
+     * @throws IOException if file reading fails
+     */
+    public boolean loadNetworkFromCSV(String stationsFile, String connectionsFile)
+            throws IOException {
+
+        System.out.println("Loading railway network data...");
+
+        // Load stations
+        int stationsLoaded = loadStations(stationsFile);
+        System.out.println("✓ Loaded " + stationsLoaded + " stations");
+
+        // Load connections
+        int connectionsLoaded = loadConnections(connectionsFile);
+        System.out.println("✓ Loaded " + connectionsLoaded + " connections");
+
+        // Validate network
+        if (!network.isValid()) {
+            System.err.println("✗ Network validation failed!");
+            return false;
+        }
+
+        System.out.println("✓ Network validated successfully");
+        return true;
+    }
+
+    /**
+     * Loads stations from a CSV file
+     * Format: stationId,name,latitude,longitude,coordX,coordY
+     */
+    private int loadStations(String filename) throws IOException {
+        int count = 0;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+            String line;
+            boolean firstLine = true;
+
+            while ((line = br.readLine()) != null) {
+                // Skip header
+                if (firstLine) {
+                    firstLine = false;
+                    continue;
+                }
+
+                String[] parts = line.split(",");
+                if (parts.length < 6) {
+                    System.err.println("Warning: Invalid station line: " + line);
+                    continue;
+                }
+
+                try {
+                    int id = Integer.parseInt(parts[0].trim());
+                    String name = parts[1].trim();
+                    double lat = Double.parseDouble(parts[2].trim());
+                    double lon = Double.parseDouble(parts[3].trim());
+                    double x = Double.parseDouble(parts[4].trim());
+                    double y = Double.parseDouble(parts[5].trim());
+
+                    RailwayStation station = new RailwayStation(id, name, lat, lon, x, y);
+
+                    if (network.addStation(station)) {
+                        count++;
+                    }
+
+                } catch (NumberFormatException e) {
+                    System.err.println("Warning: Error parsing station: " + line);
+                }
+            }
+        }
+
+        return count;
+    }
+
+    /**
+     * Loads connections from a CSV file
+     * Format: fromId,toId,distance,capacity,cost
+     */
+    private int loadConnections(String filename) throws IOException {
+        int count = 0;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+            String line;
+            boolean firstLine = true;
+
+            while ((line = br.readLine()) != null) {
+                // Skip header
+                if (firstLine) {
+                    firstLine = false;
+                    continue;
+                }
+
+                String[] parts = line.split(",");
+                if (parts.length < 5) {
+                    System.err.println("Warning: Invalid connection line: " + line);
+                    continue;
+                }
+
+                try {
+                    int fromId = Integer.parseInt(parts[0].trim());
+                    int toId = Integer.parseInt(parts[1].trim());
+                    double distance = Double.parseDouble(parts[2].trim());
+                    double capacity = Double.parseDouble(parts[3].trim());
+                    double cost = Double.parseDouble(parts[4].trim());
+
+                    RailwayStation from = network.getStation(fromId);
+                    RailwayStation to = network.getStation(toId);
+
+                    if (from == null || to == null) {
+                        System.err.println("Warning: Station not found for connection: " + line);
+                        continue;
+                    }
+
+                    Connection conn =
+                            new Connection(from, to, distance, capacity, cost);
+
+                    if (network.addConnection(conn)) {
+                        count++;
+                    }
+
+                } catch (NumberFormatException e) {
+                    System.err.println("Warning: Error parsing connection: " + line);
+                }
+            }
+        }
+
+        return count;
+    }
+
+   
 }
