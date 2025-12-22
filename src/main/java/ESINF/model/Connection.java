@@ -16,6 +16,12 @@ public class Connection {
             this.capacity = capacity;
             this.cost = cost;
         }
-       
+        public RailwayStation getFrom() { return from; }
+        public RailwayStation getTo() { return to; }
+        public double getDistance() { return distance; }
+        public double getCapacity() { return capacity; }
+        public double getCost() { return cost; }
+
+        
     }
 
