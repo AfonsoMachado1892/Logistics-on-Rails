@@ -1,6 +1,11 @@
 -- Teste 1: Inserção bem-sucedida - Bitola Métrica
 SET SERVEROUTPUT ON;
 
+-- Limpar dados do teste anterior (garantir ambiente limpo)
+DELETE FROM Railway_Gauge WHERE gauge_value = 1000;
+DELETE FROM Railway_Gauge WHERE UPPER(description) = 'BITOLA MÉTRICA';
+COMMIT;
+
 DECLARE
 v_result NUMBER;
 BEGIN
@@ -16,4 +21,5 @@ END IF;
 END;
 /
 
+-- Verificar se foi inserida
 SELECT * FROM Railway_Gauge WHERE gauge_value = 1000;
