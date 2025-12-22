@@ -252,5 +252,80 @@ public class RailwayNetworkController {
         return analysis;
     }
 
-  
+    // ==================== USE CASE: Network Queries ====================
+
+    /**
+     * Gets all stations in the network
+     *
+     * @return list of all stations
+     */
+    public List<RailwayStation> getAllStations() {
+        return new ArrayList<>(network.getAllStations());
+    }
+
+    /**
+     * Finds a station by name (case-insensitive partial match)
+     *
+     * @param namePart part of the station name
+     * @return list of matching stations
+     */
+    public List<RailwayStation> findStationsByName(String namePart) {
+        if (namePart == null || namePart.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        String searchTerm = namePart.toLowerCase();
+        List<RailwayStation> matches = new ArrayList<>();
+
+        for (RailwayStation station : network.getAllStations()) {
+            if (station.getName().toLowerCase().contains(searchTerm)) {
+                matches.add(station);
+            }
+        }
+
+        return matches;
+    }
+
+    /**
+     * Gets all connections from a station
+     *
+     * @param stationId station ID
+     * @return list of connections
+     */
+    public List<Connection> getConnectionsFrom(int stationId) {
+        return network.getConnections(stationId);
+    }
+
+    /**
+     * Gets network statistics
+     *
+     * @return map with various statistics
+     */
+    public Map<String, Object> getNetworkStatistics() {
+        Map<String, Object> stats = new HashMap<>();
+
+        stats.put("totalStations", network.getStationCount());
+        stats.put("totalConnections", network.getConnectionCount());
+
+        // Calculate total capacity
+        double totalCapacity = network.getAllConnections().stream()
+                .mapToDouble(Connection::getCapacity)
+                .sum();
+        stats.put("totalCapacity", totalCapacity);
+
+        // Calculate average capacity
+        double avgCapacity = network.getConnectionCount() > 0
+                ? totalCapacity / network.getConnectionCount()
+                : 0;
+        stats.put("averageCapacity", avgCapacity);
+
+        // Find max capacity connection
+        Optional<Connection> maxConn = network.getAllConnections().stream()
+                .max(Comparator.comparingDouble(Connection::getCapacity));
+        maxConn.ifPresent(conn -> stats.put("maxCapacityConnection", conn.toString()));
+
+        return stats;
+    }
+
+   
 }
