@@ -143,6 +143,32 @@ public class RailwayNetwork{
         return connectionMap.size();
     }
 
+    /**
+     * Builds a capacity matrix for max flow algorithms
+     *
+     * @return 2D array where [i][j] is capacity from station i to j
+     */
+    public double[][] buildCapacityMatrix() {
+        int n = stations.size();
+        double[][] matrix = new double[n][n];
+
+        // Create index mapping
+        Map<Integer, Integer> stationIdToIndex = new HashMap<>();
+        int index = 0;
+        for (Integer stationId : stations.keySet()) {
+            stationIdToIndex.put(stationId, index++);
+        }
+
+        // Fill matrix
+        for (Connection conn : connectionMap.values()) {
+            int fromIdx = stationIdToIndex.get(conn.getFrom().getStationId());
+            int toIdx = stationIdToIndex.get(conn.getTo().getStationId());
+            matrix[fromIdx][toIdx] = conn.getCapacity();
+        }
+
+        return matrix;
+    }
+
     
 
 
