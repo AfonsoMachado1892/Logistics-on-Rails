@@ -229,7 +229,31 @@ public class RailwayNetwork{
         return indexMap;
     }
 
-    
+    /**
+     * Validates the network structure
+     *
+     * @return true if valid, false otherwise
+     */
+    public boolean isValid() {
+        // Check all connections reference existing stations
+        for (Connection conn : connectionMap.values()) {
+            if (!stations.containsKey(conn.getFrom().getStationId()) ||
+                    !stations.containsKey(conn.getTo().getStationId())) {
+                return false;
+            }
+        }
+
+        // Check for negative capacities
+        for (Connection conn : connectionMap.values()) {
+            if (conn.getCapacity() < 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+   
 
 
 }
