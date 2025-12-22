@@ -7,11 +7,17 @@ GAUGE_VALUE	DESCRIPTION
 1668	Bitola Ibérica
 1435	Bitola Standard Europeia
 
+Statement processed.
+✓ Bitolas necessárias encontradas
+
 INFO
 Line Owners:
 
 VAT_NUMBER	NAME	SHORT_NAME
 PT503933813	Infraestruturas de Portugal, SA	IP
+
+Statement processed.
+✓ Proprietário encontrado
 
 INFO
 Test Facilities:
@@ -23,3 +29,12 @@ ID	NAME
 15	São Frutuoso
 20	Nine
 30	Braga
+
+Statement processed.
+✓ Todas as estações necessárias encontradas
+
+Statement processed.
+Bitolas........: 2/2
+Proprietário...: 1/1
+Estações.......: 6/6
+✓ Ambiente pronto para testes USBD45
