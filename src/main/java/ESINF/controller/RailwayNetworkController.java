@@ -327,5 +327,81 @@ public class RailwayNetworkController {
         return stats;
     }
 
-   
+    // ==================== Utilities ====================
+
+    /**
+     * Gets the current network
+     *
+     * @return the railway network
+     */
+    public RailwayNetwork getNetwork() {
+        return network;
+    }
+
+    /**
+     * Validates if a path exists between two stations
+     *
+     * @param fromId source station ID
+     * @param toId destination station ID
+     * @return true if a path exists
+     */
+    public boolean hasPath(int fromId, int toId) {
+        // Simple BFS to check connectivity
+        if (!network.getStation(fromId).equals(network.getStation(fromId)) ||
+                network.getStation(toId) == null) {
+            return false;
+        }
+
+        Set<Integer> visited = new HashSet<>();
+        Queue<Integer> queue = new LinkedList<>();
+        queue.offer(fromId);
+        visited.add(fromId);
+
+        while (!queue.isEmpty()) {
+            int current = queue.poll();
+
+            if (current == toId) {
+                return true;
+            }
+
+            for (Connection conn : network.getConnections(current)) {
+                int next = conn.getTo().getStationId();
+                if (!visited.contains(next)) {
+                    visited.add(next);
+                    queue.offer(next);
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Exports network summary to file
+     *
+     * @param filename output file path
+     * @throws IOException if writing fails
+     */
+    public void exportNetworkSummary(String filename) throws IOException {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
+            writer.println("=== Railway Network Summary ===");
+            writer.println();
+
+            Map<String, Object> stats = getNetworkStatistics();
+            stats.forEach((key, value) ->
+                    writer.println(key + ": " + value));
+
+            writer.println();
+            writer.println("=== Stations ===");
+            for (RailwayStation station : network.getAllStations()) {
+                writer.println(station);
+            }
+
+            writer.println();
+            writer.println("=== Connections ===");
+            for (Connection conn : network.getAllConnections()) {
+                writer.println(conn);
+            }
+        }
+    }
 }
