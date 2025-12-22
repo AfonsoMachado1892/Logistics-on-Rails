@@ -201,5 +201,20 @@ public class RailwayNetwork{
         return matrix;
     }
 
+    /**
+     * Converts station IDs to array indices
+     *
+     * @return array where stations[index] corresponds to the station at that index
+     */
+    public RailwayStation[] buildStationArray() {
+        RailwayStation[] array = new RailwayStation[stations.size()];
+        int index = 0;
+        for (RailwayStation station : stations.values()) {
+            array[index++] = station;
+        }
+        return array;
+    }
+
     
+
 }
