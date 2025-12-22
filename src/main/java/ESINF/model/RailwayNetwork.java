@@ -253,7 +253,11 @@ public class RailwayNetwork{
         return true;
     }
 
-   
+    @Override
+    public String toString() {
+        return String.format("RailwayNetwork{stations=%d, connections=%d}",
+                stations.size(), connectionMap.size());
+    }
 
 
 }
