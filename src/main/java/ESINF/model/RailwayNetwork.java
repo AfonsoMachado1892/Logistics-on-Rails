@@ -76,7 +76,16 @@ public class RailwayNetwork{
         return true;
     }
 
-    
+    /**
+     * Gets a station by its ID
+     *
+     * @param stationId the station ID
+     * @return the station, or null if not found
+     */
+    public RailwayStation getStation(int stationId) {
+        return stations.get(stationId);
+    }
 
+   
 
 }
