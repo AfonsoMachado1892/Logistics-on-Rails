@@ -564,6 +564,13 @@ INSERT INTO Train_Path (train_id, sequence_order, facility_id) VALUES (5437, 11,
 INSERT INTO Train_Path (train_id, sequence_order, facility_id) VALUES (5437, 12, 50);
 
 
+-- 3.10. Inicializar localização dos vagões (Correção para USBD40)
+-- Como a coluna foi adicionada na USBD31 mas os inserts não a contemplam,
+-- forçamos a localização inicial de todos os vagões para Leixões (ID 50).
+UPDATE Wagon SET current_facility_id = 50;
+
+COMMIT;
+
 
 COMMIT;
 
