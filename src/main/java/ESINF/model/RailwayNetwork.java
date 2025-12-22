@@ -215,6 +215,21 @@ public class RailwayNetwork{
         return array;
     }
 
+    /**
+     * Gets the mapping from station ID to array index
+     *
+     * @return map of stationId -> array index
+     */
+    public Map<Integer, Integer> getStationIndexMap() {
+        Map<Integer, Integer> indexMap = new HashMap<>();
+        int index = 0;
+        for (Integer stationId : stations.keySet()) {
+            indexMap.put(stationId, index++);
+        }
+        return indexMap;
+    }
+
     
+
 
 }
