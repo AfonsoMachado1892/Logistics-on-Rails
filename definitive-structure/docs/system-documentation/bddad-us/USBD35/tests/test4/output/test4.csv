@@ -1,0 +1,5 @@
+
+Statement processed.
+--- TEST 4: Duplicate against USBD32 Seed Data ---
+Attempting to insert "  valença  " (duplicate of seed data)...
+RESULT: SUCCESS. Identified "Valença" as a duplicate.
