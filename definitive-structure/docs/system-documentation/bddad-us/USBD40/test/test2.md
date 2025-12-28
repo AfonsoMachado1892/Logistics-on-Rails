@@ -1,13 +1,15 @@
-**2. Teste de Stock Insuficiente (Regra de Negócio)**
+**2. Teste de Falha por Falta de Stock (Estação Vazia)**
 
-+ O que é testado: A tentativa de criar um *Freight* a partir de uma estação que não possui vagões do modelo solicitado.
++ O que é testado: O impedimento da criação de um *Freight* numa estação que não possui vagões do modelo solicitado.
 
-**Importância:** Implementa a regra de negócio crítica que impede o planeamento de transporte sem recursos (evita "falsos positivos" logísticos).
+**Importância:** Garante que não é possível iniciar transportes a partir de locais sem recursos físicos (Validação de Regra de Negócio).
 
 **Como funciona:**
 
-+ Tenta criar um transporte a partir da estação de São Romão (ID 1), sabendo que esta não possui vagões (stock = 0).
++ Tenta criar um Freight a partir da estação de Valença (ID 11), que não possui vagões deste modelo.
 
-+ Espera-se que o procedimento conte os vagões, encontre zero, e lance um erro.
++ Chama o procedimento *pr_register_freight*.
 
-+ No bloco EXCEPTION, verifica se o código é -20041 ("Quantidade insuficiente"). Se for, o teste é SUCESSO.
++ O procedimento deve verificar o stock, encontrar zero e lançar a exceção ORA-20012.
+
++ Para o teste passar, o erro -20012 deve ser capturado.

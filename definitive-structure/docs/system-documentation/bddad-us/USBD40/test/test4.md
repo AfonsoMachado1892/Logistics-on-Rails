@@ -1,15 +1,15 @@
-**4. Teste de Stock Insuficiente Parcial (Validação Matemática)**
+**4. Teste de Falha por ID Duplicado**
 
-+ O que é testado: A validação da quantidade disponível quando a estação possui *alguns* vagões do modelo, mas não em número suficiente para satisfazer o pedido total.
++ O que é testado: A validação da unicidade do ID do Freight fornecido manualmente pelo utilizador.
 
-**Importância:** Garante que a verificação de stock não é apenas booleana ("tem/não tem"), mas sim uma validação aritmética correta ($Stock < Pedido$).
+**Importância:** O sistema deve garantir robustamente que não são criados Freights com IDs repetidos.
 
 **Como funciona:**
 
-+ Identifica uma estação que possui vagões do modelo 1104 (Leixões).
++ Tenta registar um Freight usando o ID 2001, que já existe na base de dados.
 
-+ Chama o procedimento solicitando uma quantidade exagerada (ex: 1000), superior ao número real de vagões existentes.
++ Chama o procedimento *pr_register_freight*.
 
-+ Espera-se que o procedimento detete a insuficiência e lance um erro.
++ O procedimento deve validar a existência prévia do ID e lançar a exceção ORA-20011.
 
-+ No bloco EXCEPTION, verifica se o código é -20041 ("Quantidade insuficiente"). Se for, o teste é SUCESSO.
++ Para o teste passar, o erro de duplicidade deve ser capturado.
