@@ -1,31 +1,27 @@
+SET SERVEROUTPUT ON;
 DECLARE
-v_new_id NUMBER;
+v_freight_id NUMBER := 9002;
+    v_origin     NUMBER := 11;   -- Valença (Sem stock)
+    v_model      NUMBER := 1104;
 BEGIN
-    DBMS_OUTPUT.PUT_LINE('--- TESTE 2: Tentar Registar Freight sem Vagões na Estação ---');
+    DBMS_OUTPUT.PUT_LINE('--- USBD40: TESTE 2 (Falha - Sem Stock na Estação) ---');
 
-BEGIN
-        -- Tentar tirar vagões da estação 1 (São Romão).
-        -- Como o script inicial (DDL) meteu todos os vagões na estação 50, a estação 1 tem 0 vagões.
-        pr_register_freight(
-            p_origin_id => 1,   -- Origem: São Romão (Sem vagões)
-            p_dest_id   => 11,
-            p_date      => SYSDATE + 5,
-            p_model_id  => 1104,
-            p_qty       => 1,
-            p_new_id    => v_new_id
-        );
+    pr_register_freight(
+        p_freight_id => v_freight_id,
+        p_origin_id  => v_origin,
+        p_dest_id    => 50,
+        p_date       => SYSDATE + 2,
+        p_model_id   => v_model,
+        p_qty        => 1
+    );
 
-        -- Se chegar aqui, falhou
-        DBMS_OUTPUT.PUT_LINE('RESULTADO: FALHA. O sistema permitiu criar freight sem vagões disponíveis.');
-
+    DBMS_OUTPUT.PUT_LINE('RESULTADO: FALHA. O sistema permitiu criar sem vagões.');
 EXCEPTION
-        WHEN OTHERS THEN
-            -- Espera-se o erro -20041 (Stock insuficiente)
-            IF SQLCODE = -20041 THEN
-                DBMS_OUTPUT.PUT_LINE('RESULTADO: SUCESSO. O sistema detetou falta de vagões na origem (Erro -20041).');
+    WHEN OTHERS THEN
+        IF SQLCODE = -20012 THEN
+            DBMS_OUTPUT.PUT_LINE('RESULTADO: SUCESSO. Erro de falta de vagões detetado.');
 ELSE
-                DBMS_OUTPUT.PUT_LINE('RESULTADO: FALHA. Erro incorreto: ' || SQLERRM);
+            DBMS_OUTPUT.PUT_LINE('RESULTADO: FALHA. Erro inesperado: ' || SQLERRM);
 END IF;
-END;
 END;
 /
