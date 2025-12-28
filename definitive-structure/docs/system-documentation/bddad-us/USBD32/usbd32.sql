@@ -571,6 +571,21 @@ UPDATE Wagon SET current_facility_id = 50;
 
 COMMIT;
 
+-- ===============================================================
+-- CORREÇÕES DE INTEGRIDADE E REQUISITOS (USBD31/37/33)
+-- ===============================================================
+
+-- 1. Povoar Wagon_Model_Gauge (Crítico para USBD37)
+-- Como os modelos foram inseridos neste script, a tabela de associação estava vazia.
+INSERT INTO Wagon_Model_Gauge (wagon_model_id, gauge_value)
+SELECT id, gauge FROM Wagon_Model
+WHERE NOT EXISTS (SELECT 1 FROM Wagon_Model_Gauge WHERE wagon_model_id = Wagon_Model.id);
+
+-- 2. Garantir que não há campos nulos em colunas obrigatórias de negócio (Train Length)
+UPDATE Train SET max_length_m = 400 WHERE max_length_m IS NULL;
+
+-- 3. Atualização da localização dos vagões (já tinhas, mas reforço a importância)
+UPDATE Wagon SET current_facility_id = 50 WHERE current_facility_id IS NULL;
 
 COMMIT;
 
