@@ -10,6 +10,7 @@ CREATE OR REPLACE FUNCTION insert_gauge (
 RETURN NUMBER
 IS
     v_count NUMBER;
+    v_normalized_input VARCHAR2(200);
 BEGIN
     -- 1. Validação: Campos obrigatórios
     IF p_gauge_name IS NULL OR p_width_mm IS NULL THEN
@@ -21,19 +22,22 @@ END IF;
         RETURN -2;
 END IF;
 
-    -- 3. Regra de Negócio: Verificar se o nome da bitola já existe (case-insensitive)
+    -- 3. NORMALIZAÇÃO (Evitar a rejeição")
+    -- Remove espaços no início/fim e transforma múltiplos espaços internos num só
+    v_normalized_input := UPPER(TRIM(REGEXP_REPLACE(p_gauge_name, ' +', ' ')));
+
+    -- 4. Regra de Negócio: Verificar se o nome já existe (com normalização rigorosa)
 SELECT COUNT(*) INTO v_count
 FROM Railway_Gauge
-WHERE UPPER(description) = UPPER(p_gauge_name);
+WHERE UPPER(TRIM(REGEXP_REPLACE(description, ' +', ' '))) = v_normalized_input;
 
 IF v_count > 0 THEN
-        -- Retorna -3 para nome duplicado (conforme esperado no Teste 3b)
-        RETURN -3;
+        RETURN -3; -- Nome duplicado
 END IF;
 
-    -- 4. Inserir a nova bitola
+    -- 5. Inserir a nova bitola
 INSERT INTO Railway_Gauge (gauge_value, description)
-VALUES (p_width_mm, p_gauge_name);
+VALUES (p_width_mm, TRIM(p_gauge_name));
 
 COMMIT;
 RETURN 1;
@@ -41,8 +45,7 @@ RETURN 1;
 EXCEPTION
     WHEN DUP_VAL_ON_INDEX THEN
         ROLLBACK;
-        -- Retorna -1 para valor de bitola (gauge_value/PK) duplicado
-RETURN -1;
+RETURN -1; -- Valor de bitola (PK) duplicado
 WHEN OTHERS THEN
         ROLLBACK;
 RETURN 0;
