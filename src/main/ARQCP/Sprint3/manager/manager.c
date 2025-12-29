@@ -421,6 +421,9 @@ void manager_main_loop() {
                 sleep(1);
             }
         }
+        else if (command_buffer[0] == '6') {
+                    control_track_light(); 
+                }
         }
         // Se for ENTER (newline), apenas continua o loop e atualiza sensores/board
 
