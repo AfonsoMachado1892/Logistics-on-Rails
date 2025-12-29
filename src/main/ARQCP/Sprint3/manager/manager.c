@@ -396,7 +396,7 @@ void manager_main_loop() {
 
         // 3. UI Menu with Quit Option
         printf("\nUSER: %s\n", current_user->username);
-        printf("COMMANDS: [1]Assign [2]Free [3]Inop [4]Stopped [5]ExportLogs [0]Quit [ENTER]Refresh\n");
+        printf("COMMANDS: [1]Assign [2]Free [3]Inop [4]Stopped [5]ExportLogs [6]ControlLight [0]Quit [ENTER]Refresh\n");
         printf("Choice > ");
 
         if (!fgets(command_buffer, sizeof(command_buffer), stdin)) break;
