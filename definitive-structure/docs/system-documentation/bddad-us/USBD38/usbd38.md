@@ -1,9 +1,10 @@
-# USBD38: Adicionar uma nova bitola (Gauge) - Sprint 3
+# USBD38: Add a new gauge (bitola) - Sprint 3
 
-Este documento descreve a implementação, configuração de dados e testes realizados para a **User Story USBD38**.
+Este documento descreve a implementação, configuração de dados e testes realizados para a **USBD38**.
 
 ## 1. Descrição da User Story
-**Como** Planner, pretendo adicionar uma nova bitola (gauge) ao sistema.
+
+- As a Planner, I want to add a new gauge (bitola)
 
 **Critérios de Aceitação e Regras de Negócio:**
 * A bitola é identificada por um valor de largura (em mm) e uma descrição.
@@ -14,60 +15,7 @@ Este documento descreve a implementação, configuração de dados e testes real
 
 ---
 
-## 2. Explicação do Data Setup
-
-O script de *data setup* prepara o ambiente para a execução segura dos testes. Como os testes dependem da inserção de valores específicos (ex: 1000mm, 1520mm), é necessário garantir que estes registos não existem previamente na base de dados para evitar erros de chave primária duplicada antes da validação da função.
-
-**Ações realizadas pelo script:**
-1. Remove registos com as larguras (IDs) que serão usadas nos testes.
-2. Remove registos com as descrições que serão usadas nos testes.
-3. Mostra o estado atual da tabela `Railway_Gauge` antes de iniciar os testes.
-
-### Código: `usbd38-data-setup.sql`
-
-```sql
--- usbd38-data-setup.sql
--- -----------------------------------------------------------
--- USBD38: Data Setup - Preparação de dados para testes
--- IMPORTANTE: Este script NÃO insere dados, apenas prepara o ambiente
--- -----------------------------------------------------------
-
--- Limpar dados de teste anteriores (se existirem)
--- Estas bitolas serão usadas apenas para testes da função
-DELETE FROM Railway_Gauge WHERE gauge_value IN (1000, 1520, 600, 1676);
-
--- Também limpar por nome (case-insensitive) para garantir ambiente limpo
-DELETE FROM Railway_Gauge
-WHERE UPPER(description) IN (
-                             'BITOLA MÉTRICA',
-                             'BITOLA RUSSA',
-                             'BITOLA ESTREITA',
-                             'OUTRA MÉTRICA',
-                             'BITOLA INVÁLIDA',
-                             'BITOLA ZERO'
-    );
-
-COMMIT;
-
--- Verificar bitolas existentes
-PROMPT ========================================
-PROMPT Bitolas existentes antes dos testes:
-PROMPT ========================================
-SELECT gauge_value AS "Largura (mm)",
-       description AS "Descrição"
-FROM Railway_Gauge
-ORDER BY gauge_value;
-
-PROMPT
-PROMPT ========================================
-PROMPT Ambiente preparado para testes
-PROMPT Bitolas a testar: 1000mm, 1520mm, 600mm, 1676mm
-PROMPT Bitolas existentes (não alterar): 1668mm, 1435mm
-PROMPT ========================================
-PROMPT
-```
-
-## 3. Explicação do Script (Função PL/SQL)
+## 2. Explicação do Script (Função PL/SQL)
 
 A lógica central da **USBD38** foi encapsulada na função PL/SQL `insert_gauge`. Esta abordagem permite centralizar as regras de negócio e garantir a integridade dos dados, independentemente de onde a inserção é solicitada.
 
@@ -142,13 +90,13 @@ END insert_gauge;
 /
 ```
 
-## 4. Explicação de Cada Teste
+## 3. Explicação de Cada Teste
 
 Para validar a User Story USBD38, foram desenvolvidos 5 cenários de teste que cobrem inserções válidas, violações de integridade e regras de normalização de dados.
 
 ### Teste 1: Inserção Bem-Sucedida
 **Objetivo:** Verificar se é possível inserir uma nova bitola válida que ainda não existe no sistema.
-**Descrição:** O teste garante primeiro que o registo não existe (limpeza) e depois tenta inserir a "Bitola Métrica" com 1000mm.
+**Descrição:** O teste garante primeiro que o registo não existe e depois tenta inserir a "Bitola Métrica" com 1000mm.
 **Resultado Esperado:** A função deve retornar `1` e o registo deve ficar persistido na tabela.
 
 ```sql
@@ -186,7 +134,7 @@ END;
 SELECT * FROM Railway_Gauge WHERE gauge_value = 1000;
 ```
 
-### Teste 2: Validações de Erro (Regras de Negócio)
+### Teste 2: Validações de Erros
 **Objetivo:** Verificar se a função impede a inserção de dados inválidos ou que violem as regras de negócio.
 **Cenários:**
 1.  **Largura Duplicada:** Tentar inserir uma bitola com uma largura que já existe (ex: 1668mm).
