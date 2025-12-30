@@ -1,205 +1,91 @@
 package LAPR3.model;
 
-import java.util.Objects;
-
 /**
- * Represents a railway freight wagon.
- * Part of USLP07 - Train Composition Model
+ * Wagon model with complete technical specifications
  */
 public class Wagon {
-    private final String wagonId;
-    private final WagonType type;
-    private final String operator;
-    private final int gauge;
-    private final double tareWeightTons;
-    private final double maxPayloadTons;
-    private final double lengthMeters;
-    private final double volumeM3;
+    private String wagonNumber;
+    private String operatorVat;
+    private String modelName;
+    private String maker;
+    private String typeDesc;
+    private int numBogies;
+    private String bogiesType;
+    private double weightTons;
+    private double payloadTons;
+    private double maxSpeedKmh;
+    private double lengthMm;
+    private double widthMm;
+    private double heightMm;
+    private double volumeM3;
+    private double gauge;
 
-    /**
-     * Types of freight wagons according to cargo
-     */
-    public enum WagonType {
-        BOXCAR,                 // General goods
-        FLATCAR,                // Containers, vehicles, machinery
-        HOPPER,                 // Coal, grains, minerals
-        TANKER_CHEMICAL,        // Chemicals with varying densities
-        TANKER_MINERAL_OIL,     // Petrochemicals and mineral oils
-        TANKER_PRESSURE_GAS,    // Liquefied gases under pressure
-        REFRIGERATED            // Perishable goods
-    }
-
-    /**
-     * Creates a new Wagon
-     *
-     * @param wagonId unique wagon identifier
-     * @param type wagon type
-     * @param operator operating company
-     * @param gauge track gauge in millimeters
-     * @param tareWeightTons empty weight in tons
-     * @param maxPayloadTons maximum cargo capacity in tons
-     * @param lengthMeters wagon length in meters
-     * @param volumeM3 internal volume in cubic meters (0 for flatcars)
-     * @throws IllegalArgumentException if any parameter is invalid
-     */
-    public Wagon(String wagonId, WagonType type, String operator, int gauge,
-                 double tareWeightTons, double maxPayloadTons,
-                 double lengthMeters, double volumeM3) {
-        if (wagonId == null || wagonId.trim().isEmpty()) {
-            throw new IllegalArgumentException("Wagon ID cannot be null or empty");
-        }
-        if (type == null) {
-            throw new IllegalArgumentException("Wagon type cannot be null");
-        }
-        if (operator == null || operator.trim().isEmpty()) {
-            throw new IllegalArgumentException("Operator cannot be null or empty");
-        }
-        if (gauge <= 0) {
-            throw new IllegalArgumentException("Gauge must be positive");
-        }
-        if (tareWeightTons <= 0) {
-            throw new IllegalArgumentException("Tare weight must be positive");
-        }
-        if (maxPayloadTons <= 0) {
-            throw new IllegalArgumentException("Max payload must be positive");
-        }
-        if (lengthMeters <= 0) {
-            throw new IllegalArgumentException("Length must be positive");
-        }
-        if (volumeM3 < 0) {
-            throw new IllegalArgumentException("Volume cannot be negative");
-        }
-
-        this.wagonId = wagonId.trim();
-        this.type = type;
-        this.operator = operator.trim();
-        this.gauge = gauge;
-        this.tareWeightTons = tareWeightTons;
-        this.maxPayloadTons = maxPayloadTons;
-        this.lengthMeters = lengthMeters;
+    // Full constructor
+    public Wagon(String wagonNumber, String operatorVat, String modelName, String maker,
+                 String typeDesc, int numBogies, String bogiesType, double weightTons,
+                 double payloadTons, double maxSpeedKmh, double lengthMm, double widthMm,
+                 double heightMm, double volumeM3, double gauge) {
+        this.wagonNumber = wagonNumber;
+        this.operatorVat = operatorVat;
+        this.modelName = modelName;
+        this.maker = maker;
+        this.typeDesc = typeDesc;
+        this.numBogies = numBogies;
+        this.bogiesType = bogiesType;
+        this.weightTons = weightTons;
+        this.payloadTons = payloadTons;
+        this.maxSpeedKmh = maxSpeedKmh;
+        this.lengthMm = lengthMm;
+        this.widthMm = widthMm;
+        this.heightMm = heightMm;
         this.volumeM3 = volumeM3;
+        this.gauge = gauge;
     }
+
+    // Getters
+    public String getWagonNumber() { return wagonNumber; }
+    public String getOperatorVat() { return operatorVat; }
+    public String getModelName() { return modelName; }
+    public String getMaker() { return maker; }
+    public String getTypeDesc() { return typeDesc; }
+    public int getNumBogies() { return numBogies; }
+    public String getBogiesType() { return bogiesType; }
+    public double getWeightTons() { return weightTons; }
+    public double getPayloadTons() { return payloadTons; }
+    public double getMaxSpeedKmh() { return maxSpeedKmh; }
+    public double getLengthMm() { return lengthMm; }
+    public double getWidthMm() { return widthMm; }
+    public double getHeightMm() { return heightMm; }
+    public double getVolumeM3() { return volumeM3; }
+    public double getGauge() { return gauge; }
+
+    // Setters
+    public void setWagonNumber(String wagonNumber) { this.wagonNumber = wagonNumber; }
+    public void setOperatorVat(String operatorVat) { this.operatorVat = operatorVat; }
+    public void setModelName(String modelName) { this.modelName = modelName; }
+    public void setMaker(String maker) { this.maker = maker; }
+    public void setTypeDesc(String typeDesc) { this.typeDesc = typeDesc; }
+    public void setNumBogies(int numBogies) { this.numBogies = numBogies; }
+    public void setBogiesType(String bogiesType) { this.bogiesType = bogiesType; }
+    public void setWeightTons(double weightTons) { this.weightTons = weightTons; }
+    public void setPayloadTons(double payloadTons) { this.payloadTons = payloadTons; }
+    public void setMaxSpeedKmh(double maxSpeedKmh) { this.maxSpeedKmh = maxSpeedKmh; }
+    public void setLengthMm(double lengthMm) { this.lengthMm = lengthMm; }
+    public void setWidthMm(double widthMm) { this.widthMm = widthMm; }
+    public void setHeightMm(double heightMm) { this.heightMm = heightMm; }
+    public void setVolumeM3(double volumeM3) { this.volumeM3 = volumeM3; }
+    public void setGauge(double gauge) { this.gauge = gauge; }
 
     /**
-     * Gets the wagon identifier
-     * @return wagon ID
+     * Get total weight including payload
      */
-    public String getWagonId() {
-        return wagonId;
-    }
-
-    /**
-     * Gets the wagon type
-     * @return wagon type
-     */
-    public WagonType getType() {
-        return type;
-    }
-
-    /**
-     * Gets the operator
-     * @return operator name
-     */
-    public String getOperator() {
-        return operator;
-    }
-
-    /**
-     * Gets the track gauge in millimeters
-     * @return gauge in mm
-     */
-    public int getGauge() {
-        return gauge;
-    }
-
-    /**
-     * Gets the tare (empty) weight in tons
-     * @return tare weight in tons
-     */
-    public double getTareWeightTons() {
-        return tareWeightTons;
-    }
-
-    /**
-     * Gets the maximum payload capacity in tons
-     * @return max payload in tons
-     */
-    public double getMaxPayloadTons() {
-        return maxPayloadTons;
-    }
-
-    /**
-     * Gets the wagon length in meters
-     * @return length in meters
-     */
-    public double getLengthMeters() {
-        return lengthMeters;
-    }
-
-    /**
-     * Gets the internal volume in cubic meters
-     * @return volume in m³ (0 for flatcars)
-     */
-    public double getVolumeM3() {
-        return volumeM3;
-    }
-
-    /**
-     * Calculates total weight when loaded with specific payload
-     *
-     * @param loadedPayloadTons actual cargo weight in tons
-     * @return total weight (tare + payload) in tons
-     * @throws IllegalArgumentException if payload exceeds maximum
-     */
-    public double getTotalWeightTons(double loadedPayloadTons) {
-        if (loadedPayloadTons < 0) {
-            throw new IllegalArgumentException("Payload cannot be negative");
-        }
-        if (loadedPayloadTons > maxPayloadTons) {
-            throw new IllegalArgumentException(
-                    String.format("Payload %.2ft exceeds maximum capacity %.2ft",
-                            loadedPayloadTons, maxPayloadTons)
-            );
-        }
-        return tareWeightTons + loadedPayloadTons;
-    }
-
-    /**
-     * Checks if wagon is compatible with a given track gauge
-     *
-     * @param trackGauge track gauge in millimeters
-     * @return true if compatible
-     */
-    public boolean isCompatibleWithGauge(int trackGauge) {
-        return this.gauge == trackGauge;
-    }
-
-    /**
-     * Checks if wagon is currently empty (no payload)
-     * Used for weight calculations when payload is unknown
-     *
-     * @return true if considering tare weight only
-     */
-    public boolean isEmpty() {
-        return true; // Default assumption unless specified otherwise
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Wagon wagon = (Wagon) o;
-        return wagonId.equals(wagon.wagonId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(wagonId);
+    public double getTotalWeightTons() {
+        return weightTons + payloadTons;
     }
 
     @Override
     public String toString() {
-        return String.format("Wagon{id='%s', type=%s, gauge=%dmm, tare=%.1ft, maxLoad=%.1ft, length=%.2fm}",
-                wagonId, type, gauge, tareWeightTons, maxPayloadTons, lengthMeters);
+        return String.format("Wagon[%s, %s, %.1ft, %dmm]",
+                wagonNumber, typeDesc, getTotalWeightTons(), (int)gauge);
     }
 }
