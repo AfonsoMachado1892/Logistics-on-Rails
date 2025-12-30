@@ -1,136 +1,100 @@
 package LAPR3.repository;
 
-import LAPR3.IO.CSVReader;
+import LAPR3.database.DatabaseConnection;
 import LAPR3.model.Line;
 
-import java.io.IOException;
-import java.util.*;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
-/**
- * Repository for managing line entities.
- * Provides access to lines and their connections between facilities.
- */
 public class LineRepository {
-    private final Map<Integer, Line> lines;
 
-    /**
-     * Constructs a new line repository
-     */
+    private final List<Line> lines;
+
     public LineRepository() {
-        this.lines = new HashMap<>();
+        this.lines = new ArrayList<>();
     }
 
-    /**
-     * Load lines from CSV file
-     * Expected format: ID, Name, Owner, Start ID, Start, End ID, End, Gauge
-     * @param filePath path to lines.csv
-     * @throws IOException if file cannot be read
-     */
-    public void loadFromCSV(String filePath) throws IOException {
-        List<String[]> records = CSVReader.readCSV(filePath);
+    public void loadFromDatabase() {
+        this.lines.clear();
+        // JOIN para obter os nomes das estações imediatamente
+        String query =
+                "SELECT l.id, l.name, l.owner_vat, l.gauge, " +
+                        "       l.start_facility_id, f1.name AS start_name, " +
+                        "       l.end_facility_id, f2.name AS end_name " +
+                        "FROM Line l " +
+                        "JOIN Facility f1 ON l.start_facility_id = f1.id " +
+                        "JOIN Facility f2 ON l.end_facility_id = f2.id";
 
-        for (String[] record : records) {
-            try {
-                if (record.length < 8) {
-                    System.err.println("Invalid line record: insufficient columns");
-                    continue;
-                }
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
 
-                int id = CSVReader.parseInt(record[0], -1);
-                String name = record[1];
-                String owner = record[2];
-                int startId = CSVReader.parseInt(record[3], -1);
-                String startName = record[4];
-                int endId = CSVReader.parseInt(record[5], -1);
-                String endName = record[6];
-                int gauge = CSVReader.parseInt(record[7], -1);
-
-                if (id < 0 || startId < 0 || endId < 0 || gauge < 0) {
-                    System.err.println("Invalid line data: negative values");
-                    continue;
-                }
-
-                Line line = new Line(id, name, owner, startId, startName,
-                        endId, endName, gauge);
-                lines.put(id, line);
-
-            } catch (IllegalArgumentException e) {
-                System.err.println("Error loading line: " + e.getMessage());
+            while (rs.next()) {
+                Line l = new Line(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("owner_vat"),
+                        rs.getInt("start_facility_id"),
+                        rs.getString("start_name"), // Nome vindo da BD
+                        rs.getInt("end_facility_id"),
+                        rs.getString("end_name"),   // Nome vindo da BD
+                        rs.getDouble("gauge")
+                );
+                this.lines.add(l);
             }
+            System.out.println("[DB Load] Lines carregadas com Nomes de Estação: " + lines.size());
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-
-        System.out.println("Loaded " + lines.size() + " lines");
     }
 
-    /**
-     * Find line by ID
-     */
+    public List<Line> findAll() { return new ArrayList<>(this.lines); }
+
     public Optional<Line> findById(int id) {
-        return Optional.ofNullable(lines.get(id));
+        return lines.stream().filter(l -> l.getId() == id).findFirst();
     }
 
     /**
-     * Find line that directly connects two facilities
+     * Finds a line connecting two facilities (in either direction)
+     * @param originId origin facility ID
+     * @param destinationId destination facility ID
+     * @return Optional containing the line if found
      */
-    public Optional<Line> findLineConnecting(int facilityId1, int facilityId2) {
-        return lines.values().stream()
-                .filter(line -> line.connectsFacilities(facilityId1, facilityId2))
+    public Optional<Line> findLineConnecting(int originId, int destinationId) {
+        return lines.stream()
+                .filter(l -> (l.getStartFacilityId() == originId && l.getEndFacilityId() == destinationId) ||
+                        (l.getStartFacilityId() == destinationId && l.getEndFacilityId() == originId))
                 .findFirst();
     }
 
     /**
-     * Find all lines starting from a facility
-     */
-    public List<Line> findLinesFromFacility(int facilityId) {
-        return lines.values().stream()
-                .filter(line -> line.getStartFacilityId() == facilityId)
-                .toList();
-    }
-
-    /**
-     * Find all lines ending at a facility
-     */
-    public List<Line> findLinesToFacility(int facilityId) {
-        return lines.values().stream()
-                .filter(line -> line.getEndFacilityId() == facilityId)
-                .toList();
-    }
-
-    /**
-     * Get all lines
-     */
-    public List<Line> findAll() {
-        return new ArrayList<>(lines.values());
-    }
-
-    /**
-     * Check if line exists
-     */
-    public boolean exists(int id) {
-        return lines.containsKey(id);
-    }
-
-    /**
-     * Get total count
-     */
-    public int count() {
-        return lines.size();
-    }
-
-    /**
-     * Find all facilities directly connected to a given facility
-     * @param facilityId the facility ID
-     * @return map of connected facility ID to the connecting line
+     * Finds all facilities directly connected to a given facility
+     * Returns a map of facility_id -> Line that connects them
      */
     public Map<Integer, Line> findDirectlyConnectedFacilities(int facilityId) {
         Map<Integer, Line> connected = new HashMap<>();
-        for (Line line : lines.values()) {
+
+        for (Line line : lines) {
             if (line.getStartFacilityId() == facilityId) {
                 connected.put(line.getEndFacilityId(), line);
             } else if (line.getEndFacilityId() == facilityId) {
                 connected.put(line.getStartFacilityId(), line);
             }
         }
+
         return connected;
     }
+
+    /**
+     * Returns count of lines (needed by UI menus)
+     */
+    public int count() {
+        return lines.size();
+    }
+
+
 }
