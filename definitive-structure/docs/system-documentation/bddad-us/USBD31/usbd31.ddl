@@ -1,54 +1,230 @@
-CREATE TABLE locomotive (id_locomotive number(10) GENERATED AS IDENTITY, name varchar2(255) NOT NULL, make varchar2(255) NOT NULL, service number(10) NOT NULL, number_bogies number(10) NOT NULL, bogies varchar2(255) NOT NULL, power number(10) NOT NULL, length number(10) NOT NULL, width number(10) NOT NULL, height number(10) NOT NULL, weight number(10) NOT NULL, max_speed number(10) NOT NULL, operational_speed number(10) NOT NULL, traction number(10) NOT NULL, type varchar2(255) NOT NULL, voltage number(10), frequency number(10), operator varchar2(255) NOT NULL, bitola number(10) NOT NULL, combustivel number(10), PRIMARY KEY (id_locomotive));
-CREATE TABLE station (id_station number(10) GENERATED AS IDENTITY, name_station varchar2(255) NOT NULL, positionx number(10) NOT NULL, positiony number(10) NOT NULL, PRIMARY KEY (id_station));
-CREATE TABLE line (id_line number(10) GENERATED AS IDENTITY, name_line varchar2(255) NOT NULL, owner varchar2(255) NOT NULL, gauge number(10) NOT NULL, start_id number(10) NOT NULL, start_name varchar2(255) NOT NULL, end_id number(10) NOT NULL, end_name varchar2(255) NOT NULL, owner_id number(10) NOT NULL, PRIMARY KEY (id_line));
-CREATE TABLE facility (id_facility number(10) GENERATED AS IDENTITY, name varchar2(255) NOT NULL, PRIMARY KEY (id_facility));
-CREATE TABLE segment (id_segment number(10) GENERATED AS IDENTITY, line_id number(10) NOT NULL, "order" number(10) NOT NULL, eletrified raw(2000) NOT NULL, weight number(10) NOT NULL, length number(10) NOT NULL, number_tracks varchar2(255) NOT NULL, siding_position number(10), siding_lenght number(10), PRIMARY KEY (id_segment));
-CREATE TABLE owner (id_owner number(10) GENERATED AS IDENTITY, short_name varchar2(255) NOT NULL, vatnumber varchar2(255) NOT NULL, PRIMARY KEY (id_owner));
-CREATE TABLE operator (Id_operator number(10) GENERATED AS IDENTITY, short_name_operator varchar2(255) NOT NULL, vatnumber_operator varchar2(255) NOT NULL, PRIMARY KEY (Id_operator));
-CREATE TABLE locomotive_operator (operator_id number(10) NOT NULL, locomotive_id number(10) NOT NULL, short_name_operator number(10) NOT NULL, PRIMARY KEY (operator_id, locomotive_id));
-CREATE TABLE wagon (number number(10) GENERATED AS IDENTITY, model varchar2(255) NOT NULL, operator varchar2(255) NOT NULL, service_year number(10) NOT NULL, model_id number(10) NOT NULL, Operator_id number(10) NOT NULL, service_start number(10) NOT NULL, start_facility_id number(10) NOT NULL, start_facility number(10) NOT NULL, current_facility_id number(10) NOT NULL, PRIMARY KEY (number));
-CREATE TABLE Building (id_building number(10) GENERATED AS IDENTITY, facility_id number(10) NOT NULL, name varchar2(255) NOT NULL, building_type_id number(10) NOT NULL, PRIMARY KEY (id_building));
-CREATE TABLE building_type (id_building_type number(10) GENERATED AS IDENTITY, type varchar2(255) NOT NULL, PRIMARY KEY (id_building_type));
-CREATE TABLE Gauge (id_gauge number(10) GENERATED AS IDENTITY, width number(10) NOT NULL, PRIMARY KEY (id_gauge));
-CREATE TABLE locomotive_Gauge (locomotive_id number(10) NOT NULL, Gauge_id number(10) NOT NULL, PRIMARY KEY (locomotive_id, Gauge_id));
-CREATE TABLE Gauge_line (gauge_id number(10) NOT NULL, line_id number(10) NOT NULL, PRIMARY KEY (gauge_id, line_id));
-CREATE TABLE train (id_train number(10) GENERATED AS IDENTITY, operator number(10) NOT NULL, time timestamp(0) NOT NULL, "date" date NOT NULL, start_id number(10) NOT NULL, end_id number(10) NOT NULL, freight_id number(10) NOT NULL, locomotive varchar2(255) NOT NULL, path_id number(10) NOT NULL, operator_id number(10) NOT NULL, max_lenght number(10), PRIMARY KEY (id_train));
-CREATE TABLE train_composition (id_train_composition number(10) NOT NULL, trainid_train number(10) NOT NULL, wagonnumber number(10) NOT NULL, position_in_train number(10) NOT NULL, loaded raw(1000) NOT NULL, load_weight number(10) NOT NULL, wagonservice_start number(10) NOT NULL, PRIMARY KEY (id_train_composition, trainid_train, wagonnumber, wagonservice_start));
-CREATE TABLE wagon_model (id_model number(10) GENERATED AS IDENTITY, model_wagon varchar2(255) NOT NULL, maker varchar2(255) NOT NULL, number_bogies number(10) NOT NULL, bogies varchar2(255) NOT NULL, lenght number(10) NOT NULL, width number(10) NOT NULL, height number(10) NOT NULL, weight number(10) NOT NULL, max_speed number(10) NOT NULL, payload number(10) NOT NULL, volume number(10) NOT NULL, type varchar2(255) NOT NULL, bitola number(10) NOT NULL, PRIMARY KEY (id_model));
-CREATE TABLE freights (id_freights number(10) GENERATED AS IDENTITY, "date" date NOT NULL, origin number(10) NOT NULL, facility_origin varchar2(255) NOT NULL, destination number(10) NOT NULL, facility_final varchar2(255) NOT NULL, PRIMARY KEY (id_freights));
-CREATE TABLE wagon_Gauge (wagonnumber number(10) NOT NULL, Gaugeid_gauge number(10) NOT NULL, wagonservice_start number(10) NOT NULL, PRIMARY KEY (wagonnumber, Gaugeid_gauge, wagonservice_start));
-CREATE TABLE Path (id_path number(10) NOT NULL, facility_id number(10) NOT NULL, PRIMARY KEY (id_path, facility_id));
-CREATE TABLE freights_wagon (freightsid_freights number(10) NOT NULL, wagonnumber number(10) NOT NULL, PRIMARY KEY (freightsid_freights, wagonnumber));
-CREATE TABLE train_freights (trainid_train number(10) NOT NULL, freightsid_freights number(10) NOT NULL, PRIMARY KEY (trainid_train, freightsid_freights));
+/* ==========================================================================
+   1. ELIMINAÇÃO DE TABELAS (CLEANUP)
+   ========================================================================== */
+BEGIN
+FOR t IN (SELECT table_name FROM user_tables) LOOP
+        EXECUTE IMMEDIATE 'DROP TABLE ' || t.table_name || ' CASCADE CONSTRAINTS';
+END LOOP;
+EXCEPTION
+    WHEN OTHERS THEN NULL;
+END;
+/
 
-ALTER TABLE locomotive_operator ADD CONSTRAINT FKlocomotive506643 FOREIGN KEY (locomotive_id) REFERENCES locomotive (id_locomotive);
-ALTER TABLE locomotive_operator ADD CONSTRAINT FKlocomotive16944 FOREIGN KEY (operator_id) REFERENCES operator (Id_operator);
-ALTER TABLE segment ADD CONSTRAINT FKsegment444131 FOREIGN KEY (line_id) REFERENCES line (id_line);
-ALTER TABLE Building ADD CONSTRAINT FKBuilding683407 FOREIGN KEY (facility_id) REFERENCES facility (id_facility);
-ALTER TABLE Building ADD CONSTRAINT FKBuilding808218 FOREIGN KEY (building_type_id) REFERENCES building_type (id_building_type);
-ALTER TABLE locomotive_Gauge ADD CONSTRAINT FKlocomotive211237 FOREIGN KEY (locomotive_id) REFERENCES locomotive (id_locomotive);
-ALTER TABLE locomotive_Gauge ADD CONSTRAINT FKlocomotive815639 FOREIGN KEY (Gauge_id) REFERENCES Gauge (id_gauge);
-ALTER TABLE Gauge_line ADD CONSTRAINT FKGauge_line197336 FOREIGN KEY (gauge_id) REFERENCES Gauge (id_gauge);
-ALTER TABLE Gauge_line ADD CONSTRAINT FKGauge_line602619 FOREIGN KEY (line_id) REFERENCES line (id_line);
-ALTER TABLE wagon ADD CONSTRAINT FKwagon548018 FOREIGN KEY (Operator_id) REFERENCES operator (Id_operator);
-ALTER TABLE line ADD CONSTRAINT FKline116375 FOREIGN KEY (owner_id) REFERENCES owner (id_owner);
-ALTER TABLE line ADD CONSTRAINT FKline57062 FOREIGN KEY (start_id) REFERENCES facility (id_facility);
-ALTER TABLE line ADD CONSTRAINT FKline467100 FOREIGN KEY (end_id) REFERENCES facility (id_facility);
-ALTER TABLE train ADD CONSTRAINT FKtrain592359 FOREIGN KEY (operator_id) REFERENCES operator (Id_operator);
-ALTER TABLE wagon ADD CONSTRAINT FKwagon351226 FOREIGN KEY (model_id) REFERENCES wagon_model (id_model);
-ALTER TABLE freights ADD CONSTRAINT FKfreights204608 FOREIGN KEY (origin) REFERENCES facility (id_facility);
-ALTER TABLE freights ADD CONSTRAINT FKfreights976898 FOREIGN KEY (destination) REFERENCES facility (id_facility);
-ALTER TABLE train ADD CONSTRAINT FKtrain356517 FOREIGN KEY (start_id) REFERENCES facility (id_facility);
-ALTER TABLE train ADD CONSTRAINT FKtrain766555 FOREIGN KEY (end_id) REFERENCES facility (id_facility);
-ALTER TABLE train_composition ADD CONSTRAINT FKtrain_comp345896 FOREIGN KEY (trainid_train) REFERENCES train (id_train);
-ALTER TABLE wagon_Gauge ADD CONSTRAINT FKwagon_Gaug381999 FOREIGN KEY (wagonnumber) REFERENCES wagon (number);
-ALTER TABLE wagon_Gauge ADD CONSTRAINT FKwagon_Gaug517054 FOREIGN KEY (Gaugeid_gauge) REFERENCES Gauge (id_gauge);
-ALTER TABLE train_composition ADD CONSTRAINT FKtrain_comp488792 FOREIGN KEY (wagonnumber) REFERENCES wagon (number);
-ALTER TABLE wagon ADD CONSTRAINT FKwagon548362 FOREIGN KEY (start_facility_id) REFERENCES facility (id_facility);
-ALTER TABLE train ADD CONSTRAINT FKtrain337625 FOREIGN KEY (path_id) REFERENCES Path (id_path);
-ALTER TABLE Path ADD CONSTRAINT FKPath804653 FOREIGN KEY (facility_id) REFERENCES facility (id_facility);
-ALTER TABLE freights_wagon ADD CONSTRAINT FKfreights_w92309 FOREIGN KEY (freightsid_freights) REFERENCES freights (id_freights);
-ALTER TABLE freights_wagon ADD CONSTRAINT FKfreights_w427203 FOREIGN KEY (wagonnumber) REFERENCES wagon (number);
-ALTER TABLE train_freights ADD CONSTRAINT FKtrain_frei40253 FOREIGN KEY (trainid_train) REFERENCES train (id_train);
-ALTER TABLE train_freights ADD CONSTRAINT FKtrain_frei268929 FOREIGN KEY (freightsid_freights) REFERENCES freights (id_freights);
-ALTER TABLE wagon ADD CONSTRAINT FKwagon999445 FOREIGN KEY (current_facility_id) REFERENCES facility (id_facility);
+/* ==========================================================================
+   2. CRIAÇÃO DE TABELAS (DDL)
+   ========================================================================== */
+
+-- Tabela de Instalações/Estações
+CREATE TABLE Facility (
+                          id NUMBER PRIMARY KEY,
+                          name VARCHAR2(100) NOT NULL
+);
+
+-- Tabela de Proprietários de Linhas (Owner)
+CREATE TABLE Line_Owner (
+                            vat_number VARCHAR2(20) PRIMARY KEY,
+                            name VARCHAR2(100) NOT NULL,
+                            short_name VARCHAR2(20)
+);
+
+-- Tabela de Operadores de Comboios (Operator)
+CREATE TABLE Operator (
+                          vat_number VARCHAR2(20) PRIMARY KEY,
+                          name VARCHAR2(100) NOT NULL,
+                          short_name VARCHAR2(20)
+);
+
+-- Tabela de Linhas Ferroviárias
+CREATE TABLE Line (
+                      id NUMBER PRIMARY KEY,
+                      name VARCHAR2(100),
+                      owner_vat VARCHAR2(20),
+                      start_facility_id NUMBER,
+                      end_facility_id NUMBER,
+                      gauge NUMBER,
+                      CONSTRAINT fk_line_owner FOREIGN KEY (owner_vat) REFERENCES Line_Owner(vat_number),
+                      CONSTRAINT fk_line_start FOREIGN KEY (start_facility_id) REFERENCES Facility(id),
+                      CONSTRAINT fk_line_end FOREIGN KEY (end_facility_id) REFERENCES Facility(id)
+);
+
+-- Tabela de Segmentos de Linha
+CREATE TABLE Segment (
+                         id NUMBER PRIMARY KEY,
+                         line_id NUMBER NOT NULL,
+                         sequence_order NUMBER NOT NULL,
+                         electrified CHAR(3) CHECK (electrified IN ('Yes', 'No')),
+                         max_weight_kg_m NUMBER,
+                         length_m NUMBER,
+                         number_tracks NUMBER,
+                         siding_position NUMBER, -- Pode ser NULL
+                         siding_length NUMBER,   -- Pode ser NULL
+                         CONSTRAINT fk_segment_line FOREIGN KEY (line_id) REFERENCES Line(id)
+);
+
+-- Tabela de Modelos de Vagões
+CREATE TABLE Wagon_Model (
+                             id NUMBER PRIMARY KEY,
+                             model_name VARCHAR2(50),
+                             maker VARCHAR2(50),
+                             num_bogies NUMBER,
+                             bogies_type VARCHAR2(50),
+                             length_mm NUMBER,
+                             width_mm NUMBER,
+                             height_mm NUMBER,
+                             weight_tons NUMBER,
+                             max_speed_kmh NUMBER,
+                             payload_tons NUMBER,
+                             volume_m3 NUMBER,
+                             type_desc VARCHAR2(100),
+                             gauge NUMBER
+);
+
+-- Tabela de Vagões Físicos
+CREATE TABLE Wagon (
+                       wagon_number VARCHAR2(50) PRIMARY KEY, -- Mantém-se VARCHAR devido aos espaços (ex: "356 3 077")
+                       model_id NUMBER NOT NULL,
+                       operator_vat VARCHAR2(20),
+                       service_start_date DATE,
+                       CONSTRAINT fk_wagon_model FOREIGN KEY (model_id) REFERENCES Wagon_Model(id),
+                       CONSTRAINT fk_wagon_op FOREIGN KEY (operator_vat) REFERENCES Operator(vat_number)
+);
+
+-- Tabela de Locomotivas
+CREATE TABLE Locomotive (
+                            loco_number VARCHAR2(50) PRIMARY KEY, -- Pode conter pontos (ex: "335.001")
+                            name VARCHAR2(50),
+                            make VARCHAR2(50),
+                            model VARCHAR2(50),
+                            service_start_date DATE,
+                            num_bogies NUMBER,
+                            bogies_type VARCHAR2(50),
+                            power_kw NUMBER,
+                            length_m NUMBER,
+                            width_m NUMBER,
+                            height_m NUMBER,
+                            weight_tons NUMBER,
+                            max_speed_kmh NUMBER,
+                            operational_speed_kmh NUMBER,
+                            traction_kn NUMBER,
+                            engine_type VARCHAR2(20), -- Electric, Diesel
+                            voltage VARCHAR2(20),
+                            frequency VARCHAR2(20),
+                            operator_vat VARCHAR2(20),
+                            gauge NUMBER,
+                            fuel_capacity_l NUMBER,
+                            CONSTRAINT fk_loco_op FOREIGN KEY (operator_vat) REFERENCES Operator(vat_number)
+);
+
+-- Tabela de Freights (Serviços de Transporte de Carga)
+CREATE TABLE Freight (
+                         id NUMBER PRIMARY KEY,
+                         freight_date DATE,
+                         origin_facility_id NUMBER,
+                         dest_facility_id NUMBER,
+                         CONSTRAINT fk_freight_orig FOREIGN KEY (origin_facility_id) REFERENCES Facility(id),
+                         CONSTRAINT fk_freight_dest FOREIGN KEY (dest_facility_id) REFERENCES Facility(id)
+);
+
+-- Tabela de Associação: Freight <-> Vagões (Normalização da lista de vagões)
+CREATE TABLE Freight_Wagon (
+                               freight_id NUMBER,
+                               wagon_number VARCHAR2(50),
+                               CONSTRAINT pk_freight_wagon PRIMARY KEY (freight_id, wagon_number),
+                               CONSTRAINT fk_fw_freight FOREIGN KEY (freight_id) REFERENCES Freight(id),
+                               CONSTRAINT fk_fw_wagon FOREIGN KEY (wagon_number) REFERENCES Wagon(wagon_number)
+);
+
+-- Tabela de Comboios (Trains)
+CREATE TABLE Train (
+                       id NUMBER PRIMARY KEY,
+                       operator_vat VARCHAR2(20),
+                       departure_date DATE,
+                       departure_time VARCHAR2(8), -- Formato HH:MM:SS ou usar TIMESTAMP combinado
+                       start_facility_id NUMBER,
+                       end_facility_id NUMBER,
+                       CONSTRAINT fk_train_op FOREIGN KEY (operator_vat) REFERENCES Operator(vat_number),
+                       CONSTRAINT fk_train_start FOREIGN KEY (start_facility_id) REFERENCES Facility(id),
+                       CONSTRAINT fk_train_end FOREIGN KEY (end_facility_id) REFERENCES Facility(id)
+);
+
+-- Tabela de Associação: Comboio <-> Freights (Normalização da lista de Freights)
+CREATE TABLE Train_Freight (
+                               train_id NUMBER,
+                               freight_id NUMBER,
+                               CONSTRAINT pk_train_freight PRIMARY KEY (train_id, freight_id),
+                               CONSTRAINT fk_tf_train FOREIGN KEY (train_id) REFERENCES Train(id),
+                               CONSTRAINT fk_tf_freight FOREIGN KEY (freight_id) REFERENCES Freight(id)
+);
+
+-- Tabela de Associação: Comboio <-> Locomotivas (Normalização da lista de Locomotivas)
+CREATE TABLE Train_Locomotive (
+                                  train_id NUMBER,
+                                  loco_number VARCHAR2(50),
+                                  CONSTRAINT pk_train_loco PRIMARY KEY (train_id, loco_number),
+                                  CONSTRAINT fk_tl_train FOREIGN KEY (train_id) REFERENCES Train(id),
+                                  CONSTRAINT fk_tl_loco FOREIGN KEY (loco_number) REFERENCES Locomotive(loco_number)
+);
+
+-- Tabela de Associação: Percurso do Comboio (Normalização da lista Path)
+CREATE TABLE Train_Path (
+                            train_id NUMBER,
+                            sequence_order NUMBER,
+                            facility_id NUMBER,
+                            arrival_time TIMESTAMP, -- Opcional, para uso futuro
+                            departure_time TIMESTAMP, -- Opcional, para uso futuro
+                            CONSTRAINT pk_train_path PRIMARY KEY (train_id, sequence_order),
+                            CONSTRAINT fk_tp_train FOREIGN KEY (train_id) REFERENCES Train(id),
+                            CONSTRAINT fk_tp_facility FOREIGN KEY (facility_id) REFERENCES Facility(id)
+);
+
+-- 1. Para USBD33: Adicionar limite de comprimento ao comboio
+ALTER TABLE Train ADD max_length_m NUMBER;
+
+-- 2. Para USBD38: Tabela de Bitolas (Normalização)
+CREATE TABLE Railway_Gauge (
+                               gauge_value NUMBER PRIMARY KEY,
+                               description VARCHAR2(50)
+);
+-- Inserir as bitolas padrão do sistema (DML)
+INSERT INTO Railway_Gauge (gauge_value, description) VALUES (1668, 'Bitola Ibérica');
+INSERT INTO Railway_Gauge (gauge_value, description) VALUES (1435, 'Bitola Standard Europeia');
+
+-- Atualizar FK nas tabelas existentes (Opcional, mas recomendado para integridade)
+ALTER TABLE Line ADD CONSTRAINT fk_line_gauge FOREIGN KEY (gauge) REFERENCES Railway_Gauge(gauge_value);
+ALTER TABLE Wagon_Model ADD CONSTRAINT fk_model_gauge FOREIGN KEY (gauge) REFERENCES Railway_Gauge(gauge_value);
+ALTER TABLE Locomotive ADD CONSTRAINT fk_loco_gauge FOREIGN KEY (gauge) REFERENCES Railway_Gauge(gauge_value);
+
+-- 3. Para USBD37: Suporte a múltiplas bitolas por vagão
+CREATE TABLE Wagon_Model_Gauge (
+                                   wagon_model_id NUMBER,
+                                   gauge_value NUMBER,
+                                   CONSTRAINT pk_wmg PRIMARY KEY (wagon_model_id, gauge_value),
+                                   CONSTRAINT fk_wmg_model FOREIGN KEY (wagon_model_id) REFERENCES Wagon_Model(id),
+                                   CONSTRAINT fk_wmg_gauge FOREIGN KEY (gauge_value) REFERENCES Railway_Gauge(gauge_value)
+);
+-- Migrar dados atuais para a nova estrutura
+INSERT INTO Wagon_Model_Gauge (wagon_model_id, gauge_value)
+SELECT id, gauge FROM Wagon_Model;
+
+-- 4. Para USBD36: Tabela de Edifícios
+CREATE TABLE Building (
+                          id NUMBER GENERATED BY DEFAULT ON NULL AS IDENTITY PRIMARY KEY,
+                          facility_id NUMBER NOT NULL,
+                          name VARCHAR2(50),
+                          type VARCHAR2(50), -- ex: 'Warehouse', 'Terminal', 'Silo'
+                          CONSTRAINT fk_building_facility FOREIGN KEY (facility_id) REFERENCES Facility(id)
+);
+
+-- 5. Para USBD40: Saber onde o vagão está estacionado
+ALTER TABLE Wagon ADD current_facility_id NUMBER;
+ALTER TABLE Wagon ADD CONSTRAINT fk_wagon_curr_fac FOREIGN KEY (current_facility_id) REFERENCES Facility(id);
+
+-- (DML) Inicializar localização dos vagões (assumir Leixões ou NULL para começar)
+UPDATE Wagon SET current_facility_id = 50;
+
+-- 6. SEQUÊNCIAS: Essenciais para criar novos registos via PL/SQL (USBD35, USBD40)
+CREATE SEQUENCE seq_freight_id START WITH 3000 INCREMENT BY 1;
+CREATE SEQUENCE seq_facility_id START WITH 100 INCREMENT BY 1;
+CREATE SEQUENCE seq_train_id START WITH 6000 INCREMENT BY 1;
+
+COMMIT;
