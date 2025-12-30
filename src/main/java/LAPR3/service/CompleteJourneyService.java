@@ -145,7 +145,7 @@ public class CompleteJourneyService {
         sb.append("\n");
 
         // Train info
-        sb.append(String.format("Train: %s (%s)\n", train.getTrainId(), train.getOperator()));
+        sb.append(String.format("Train: %s (%s)\n", train.getId(), train.getOperatorVat()));
         sb.append(String.format("  Locomotives: %d × %.0fkW = %.0fkW total\n",
                 train.getLocomotiveCount(),
                 train.getLocomotives().get(0).getPowerKw(),

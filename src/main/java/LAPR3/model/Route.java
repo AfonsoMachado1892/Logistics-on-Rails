@@ -1,181 +1,104 @@
 package LAPR3.model;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 /**
- * Represents a railway route - an ordered sequence of facilities.
- * Part of USLP07 - Route Management
+ * Route model - represents a planned route through multiple facilities
  */
 public class Route {
-    private final String routeId;
-    private final String name;
-    private final List<Integer> facilityIds;
-    private final RouteType type;
+    private String routeId;
+    private String name;
+    private RouteType type;
+    private List<Integer> facilityIds;
 
     /**
-     * Route type according to freight complexity
+     * Route types
      */
     public enum RouteType {
-        SIMPLE,     // Single freight from origin to destination
-        COMPLEX     // Multiple freights with intermediate loading/unloading
+        SIMPLE,   // Direct A->B with single freight
+        COMPLEX   // Multi-stop with multiple freights
     }
 
-    /**
-     * Creates a new Route
-     *
-     * @param routeId unique route identifier
-     * @param name descriptive route name
-     * @param facilityIds ordered list of facility IDs (A → B → C → D)
-     * @param type route type (SIMPLE or COMPLEX)
-     * @throws IllegalArgumentException if parameters are invalid
-     */
-    public Route(String routeId, String name, List<Integer> facilityIds, RouteType type) {
-        if (routeId == null || routeId.trim().isEmpty()) {
-            throw new IllegalArgumentException("Route ID cannot be null or empty");
-        }
-        if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("Route name cannot be null or empty");
-        }
-        if (facilityIds == null || facilityIds.size() < 2) {
-            throw new IllegalArgumentException("Route must have at least 2 facilities");
-        }
-        if (type == null) {
-            throw new IllegalArgumentException("Route type cannot be null");
-        }
-
-        // Check for duplicate facilities
-        if (facilityIds.stream().distinct().count() != facilityIds.size()) {
-            throw new IllegalArgumentException("Route cannot have duplicate facilities");
-        }
-
-        this.routeId = routeId.trim();
-        this.name = name.trim();
-        this.facilityIds = new ArrayList<>(facilityIds);
+    // Constructor used by database loading
+    public Route(String routeId, String name, RouteType type, List<Integer> facilityIds) {
+        this.routeId = routeId;
+        this.name = name;
         this.type = type;
+        this.facilityIds = facilityIds != null ? new ArrayList<>(facilityIds) : new ArrayList<>();
     }
 
-    /**
-     * Gets the route identifier
-     * @return route ID
-     */
+    // Constructor used by FreightManagerMenu.buildRoute()
+    public Route(String routeId, String name, List<Integer> facilityIds, RouteType type) {
+        this(routeId, name, type, facilityIds);
+    }
+
+    // Getters
     public String getRouteId() {
         return routeId;
     }
 
-    /**
-     * Gets the route name
-     * @return route name
-     */
     public String getName() {
         return name;
     }
 
-    /**
-     * Gets the ordered list of facility IDs
-     * @return unmodifiable list of facility IDs
-     */
-    public List<Integer> getFacilityIds() {
-        return Collections.unmodifiableList(facilityIds);
-    }
-
-    /**
-     * Gets the route type
-     * @return route type (SIMPLE or COMPLEX)
-     */
     public RouteType getType() {
         return type;
     }
 
+    public List<Integer> getFacilityIds() {
+        return new ArrayList<>(facilityIds);
+    }
+
+    // Setters
+    public void setRouteId(String routeId) {
+        this.routeId = routeId;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setType(RouteType type) {
+        this.type = type;
+    }
+
+    public void setFacilityIds(List<Integer> facilityIds) {
+        this.facilityIds = facilityIds != null ? new ArrayList<>(facilityIds) : new ArrayList<>();
+    }
+
     /**
-     * Gets the origin (first) facility ID
-     * @return origin facility ID
+     * Get origin facility ID
      */
     public int getOriginFacilityId() {
-        return facilityIds.get(0);
+        return facilityIds.isEmpty() ? -1 : facilityIds.get(0);
     }
 
     /**
-     * Gets the destination (last) facility ID
-     * @return destination facility ID
+     * Get destination facility ID
      */
     public int getDestinationFacilityId() {
-        return facilityIds.get(facilityIds.size() - 1);
+        return facilityIds.isEmpty() ? -1 : facilityIds.get(facilityIds.size() - 1);
     }
 
     /**
-     * Gets all intermediate facilities (excluding origin and destination)
-     * @return list of intermediate facility IDs (empty if direct route)
-     */
-    public List<Integer> getIntermediateFacilities() {
-        if (facilityIds.size() <= 2) {
-            return Collections.emptyList();
-        }
-        return facilityIds.subList(1, facilityIds.size() - 1);
-    }
-
-    /**
-     * Gets the number of facilities in the route
-     * @return facility count
+     * Get number of facilities in route
      */
     public int getFacilityCount() {
         return facilityIds.size();
     }
 
     /**
-     * Gets the number of segments (legs) in the route
-     * For n facilities, there are (n-1) segments
-     * @return segment count
+     * Check if route contains a facility
      */
-    public int getSegmentCount() {
-        return facilityIds.size() - 1;
-    }
-
-    /**
-     * Gets a pair of consecutive facilities for a given leg
-     *
-     * @param legIndex leg index (0 = first leg from origin)
-     * @return array with [fromFacilityId, toFacilityId]
-     * @throws IndexOutOfBoundsException if legIndex is invalid
-     */
-    public int[] getLeg(int legIndex) {
-        if (legIndex < 0 || legIndex >= getSegmentCount()) {
-            throw new IndexOutOfBoundsException(
-                    String.format("Leg index %d out of bounds [0, %d)",
-                            legIndex, getSegmentCount())
-            );
-        }
-        return new int[] { facilityIds.get(legIndex), facilityIds.get(legIndex + 1) };
-    }
-
-    /**
-     * Checks if route passes through a specific facility
-     *
-     * @param facilityId facility ID to check
-     * @return true if route includes this facility
-     */
-    public boolean passesThrough(int facilityId) {
+    public boolean containsFacility(int facilityId) {
         return facilityIds.contains(facilityId);
     }
 
-    /**
-     * Gets the position of a facility in the route
-     *
-     * @param facilityId facility ID
-     * @return position index (0-based), or -1 if not in route
-     */
-    public int getFacilityPosition(int facilityId) {
-        return facilityIds.indexOf(facilityId);
-    }
-
-    /**
-     * Checks if this is a direct route (no intermediate stops)
-     * @return true if route has only origin and destination
-     */
-    public boolean isDirect() {
-        return facilityIds.size() == 2;
+    @Override
+    public String toString() {
+        return String.format("Route[id=%s, name=%s, type=%s, facilities=%d]",
+                routeId, name, type, facilityIds.size());
     }
 
     @Override
@@ -183,17 +106,11 @@ public class Route {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Route route = (Route) o;
-        return routeId.equals(route.routeId);
+        return routeId != null && routeId.equals(route.routeId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(routeId);
-    }
-
-    @Override
-    public String toString() {
-        return String.format("Route{id='%s', name='%s', type=%s, facilities=%d}",
-                routeId, name, type, facilityIds.size());
+        return routeId != null ? routeId.hashCode() : 0;
     }
 }

@@ -1,237 +1,113 @@
 package LAPR3.repository;
 
+import LAPR3.database.DatabaseConnection;
 import LAPR3.model.Route;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.*;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Repository for managing Route data
- * Loads from CSV and provides query methods
- * Part of USLP07 - Subtask #62
+ * Repository for Route entities
+ * Clean version - loads from database, no automatic ID generation
  */
 public class RouteRepository {
-    private final Map<String, Route> routes;
+
+    private final List<Route> routes;
 
     public RouteRepository() {
-        this.routes = new HashMap<>();
+        this.routes = new ArrayList<>();
     }
 
     /**
-     * Loads routes from CSV file
-     *
-     * @param filePath path to routes.csv
-     * @throws IOException if file cannot be read
+     * Loads routes from the database
      */
-    public void loadFromCSV(String filePath) throws IOException {
-        routes.clear();
+    public void loadFromDatabase() {
+        this.routes.clear();
 
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line = br.readLine(); // Skip header
+        String query = "SELECT route_id, name, route_type FROM ROUTE_DEF ORDER BY route_id";
 
-            while ((line = br.readLine()) != null) {
-                line = line.trim();
-                if (line.isEmpty()) continue;
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
 
-                try {
-                    Route route = parseRouteFromCSV(line);
-                    routes.put(route.getRouteId(), route);
-                } catch (Exception e) {
-                    System.err.println("Error parsing route line: " + line);
-                    System.err.println("Error: " + e.getMessage());
+            while (rs.next()) {
+                String routeId = rs.getString("route_id");
+                String name = rs.getString("name");
+                String routeTypeStr = rs.getString("route_type");
+
+                Route.RouteType routeType = "SIMPLE".equals(routeTypeStr) ?
+                        Route.RouteType.SIMPLE : Route.RouteType.COMPLEX;
+
+                List<Integer> facilityIds = loadRouteFacilities(routeId, conn);
+                Route route = new Route(routeId, name, routeType, facilityIds);
+                routes.add(route);
+            }
+
+            System.out.println("[DB Load] Routes carregadas: " + routes.size());
+
+        } catch (SQLException e) {
+            System.err.println("Erro ao carregar Routes: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private List<Integer> loadRouteFacilities(String routeId, Connection conn) throws SQLException {
+        List<Integer> facilityIds = new ArrayList<>();
+
+        String query = "SELECT facility_id FROM ROUTE_DEF_FACILITY " +
+                "WHERE route_id = ? ORDER BY sequence_order ASC";
+
+        try (PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setString(1, routeId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    facilityIds.add(rs.getInt("facility_id"));
                 }
             }
         }
-
-        System.out.println("Loaded " + routes.size() + " routes");
+        return facilityIds;
     }
 
-    /**
-     * Parses a route from CSV line
-     * Format: routeId,name,facilities,type
-     * facilities: "1,5,18" (comma-separated facility IDs)
-     */
-    private Route parseRouteFromCSV(String line) {
-        // Use regex to handle quoted fields
-        String[] parts = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
-
-        if (parts.length != 4) {
-            throw new IllegalArgumentException("Invalid CSV format: expected 4 fields");
-        }
-
-        String routeId = parts[0].trim();
-        String name = parts[1].trim();
-        String facilitiesStr = parts[2].trim().replace("\"", "");
-        Route.RouteType type = Route.RouteType.valueOf(parts[3].trim());
-
-        // Parse facility IDs
-        List<Integer> facilityIds = Arrays.stream(facilitiesStr.split(","))
-                .map(String::trim)
-                .map(Integer::parseInt)
-                .collect(Collectors.toList());
-
-        return new Route(routeId, name, facilityIds, type);
-    }
-
-    /**
-     * Saves a route to the repository
-     *
-     * @param route route to save
-     * @throws IllegalArgumentException if route ID already exists
-     */
-    public void save(Route route) {
-        if (route == null) {
-            throw new IllegalArgumentException("Route cannot be null");
-        }
-
-        if (routes.containsKey(route.getRouteId())) {
-            throw new IllegalArgumentException("Route with ID " + route.getRouteId() + " already exists");
-        }
-
-        routes.put(route.getRouteId(), route);
-    }
-
-    /**
-     * Updates an existing route
-     *
-     * @param route route to update
-     * @throws IllegalArgumentException if route doesn't exist
-     */
-    public void update(Route route) {
-        if (route == null) {
-            throw new IllegalArgumentException("Route cannot be null");
-        }
-
-        if (!routes.containsKey(route.getRouteId())) {
-            throw new IllegalArgumentException("Route with ID " + route.getRouteId() + " does not exist");
-        }
-
-        routes.put(route.getRouteId(), route);
-    }
-
-    /**
-     * Deletes a route from the repository
-     *
-     * @param routeId route ID to delete
-     * @return true if deleted, false if not found
-     */
-    public boolean delete(String routeId) {
-        return routes.remove(routeId) != null;
-    }
-
-    /**
-     * Finds a route by ID
-     */
     public Optional<Route> findById(String routeId) {
-        return Optional.ofNullable(routes.get(routeId));
+        return routes.stream()
+                .filter(r -> r.getRouteId().equals(routeId))
+                .findFirst();
     }
 
-    /**
-     * Gets all routes
-     */
-    public List<Route> findAll() {
-        return new ArrayList<>(routes.values());
-    }
-
-    /**
-     * Finds routes by type
-     */
-    public List<Route> findByType(Route.RouteType type) {
-        List<Route> result = new ArrayList<>();
-        for (Route route : routes.values()) {
-            if (route.getType() == type) {
-                result.add(route);
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Finds routes that start at a specific facility
-     */
-    public List<Route> findByOrigin(int facilityId) {
-        List<Route> result = new ArrayList<>();
-        for (Route route : routes.values()) {
-            if (route.getOriginFacilityId() == facilityId) {
-                result.add(route);
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Finds routes that end at a specific facility
-     */
-    public List<Route> findByDestination(int facilityId) {
-        List<Route> result = new ArrayList<>();
-        for (Route route : routes.values()) {
-            if (route.getDestinationFacilityId() == facilityId) {
-                result.add(route);
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Finds routes that pass through a specific facility
-     */
-    public List<Route> findPassingThrough(int facilityId) {
-        List<Route> result = new ArrayList<>();
-        for (Route route : routes.values()) {
-            if (route.passesThrough(facilityId)) {
-                result.add(route);
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Finds direct routes (only origin and destination)
-     */
-    public List<Route> findDirectRoutes() {
-        List<Route> result = new ArrayList<>();
-        for (Route route : routes.values()) {
-            if (route.isDirect()) {
-                result.add(route);
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Finds routes connecting two facilities (directly or with intermediate stops)
-     */
     public List<Route> findConnecting(int originId, int destinationId) {
-        List<Route> result = new ArrayList<>();
-        for (Route route : routes.values()) {
-            if (route.getOriginFacilityId() == originId &&
-                    route.getDestinationFacilityId() == destinationId) {
-                result.add(route);
-            }
-        }
-        return result;
+        return routes.stream()
+                .filter(r -> {
+                    List<Integer> facilityIds = r.getFacilityIds();
+                    return !facilityIds.isEmpty() &&
+                            facilityIds.get(0) == originId &&
+                            facilityIds.get(facilityIds.size() - 1) == destinationId;
+                })
+                .collect(Collectors.toList());
+    }
+
+    public List<Route> findAll() {
+        return new ArrayList<>(routes);
     }
 
     /**
-     * Gets the number of routes in the repository
+     * Returns count of routes (needed by UI menus)
      */
     public int count() {
         return routes.size();
     }
 
     /**
-     * Checks if repository contains a route with given ID
+     * Save route (needed by UI menu)
      */
-    public boolean exists(String routeId) {
-        return routes.containsKey(routeId);
+    public void save(Route route) {
+        if (!exists(route.getRouteId())) {
+            routes.add(route);
+        }
     }
-
-    /**
-     * Clears all routes from the repository
-     */
-    public void clear() {
-        routes.clear();
+    private boolean exists(String routeId) {
+        return routes.stream().anyMatch(r -> r.getRouteId().equals(routeId));
     }
 }

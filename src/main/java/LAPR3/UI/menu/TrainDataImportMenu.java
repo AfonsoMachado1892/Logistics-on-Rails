@@ -3,9 +3,12 @@ package LAPR3.UI.menu;
 import LAPR3.UI.utils.InputValidator;
 import LAPR3.repository.*;
 
-import java.io.File;
 import java.util.Scanner;
 
+/**
+ * Train Data Import Menu - Database Version
+ * Loads all data from Oracle database instead of CSV files
+ */
 public class TrainDataImportMenu {
     private final Scanner scanner;
     private final InputValidator validator;
@@ -17,9 +20,6 @@ public class TrainDataImportMenu {
     private final TrainRepository trainRepo;
     private final RouteRepository routeRepo;
     private final ScheduleRepository scheduleRepo;
-
-    // ⚡ ATUALIZAÇÃO: Caminho da pasta alterado conforme pedido
-    private static final String DATA_DIR = "Dataset/";
 
     public TrainDataImportMenu(Scanner scanner, InputValidator validator,
                                FacilityRepository facilityRepo,
@@ -50,7 +50,7 @@ public class TrainDataImportMenu {
             int choice = validator.readInt("Enter your choice: ", 0, 10);
 
             switch (choice) {
-                case 1 -> importAllData(); // Esta é a opção que será usada no workflow
+                case 1 -> importAllData();
                 case 2 -> importFacilities();
                 case 3 -> importLines();
                 case 4 -> importSegments();
@@ -71,190 +71,224 @@ public class TrainDataImportMenu {
 
     private void displayMenu() {
         System.out.println("\n┌────────────────────────────────────────────────┐");
-        System.out.println("│  TRAIN DATA IMPORT (" + DATA_DIR + ")                  │");
+        System.out.println("│  TRAIN DATA IMPORT (Database)                  │");
         System.out.println("└────────────────────────────────────────────────┘");
         System.out.println();
 
         showDataStatus();
 
-        System.out.println("\n  1. Import ALL Data              ");
-        System.out.println("  ─────────────────────────────────────");
-        System.out.println("  2. Import Facilities");
-        System.out.println("  3. Import Lines");
-        System.out.println("  4. Import Segments");
-        System.out.println("  5. Import Locomotives");
-        System.out.println("  6. Import Wagons");
-        System.out.println("  7. Import Trains");
-        System.out.println("  8. Import Routes");
-        System.out.println("  9. Import Schedules");
-        System.out.println("  ─────────────────────────────────────");
+        System.out.println("\n  1. Load ALL Data from Database      ");
+        System.out.println("  ────────────────────────────────────────────");
+        System.out.println("  2. Load Facilities");
+        System.out.println("  3. Load Lines");
+        System.out.println("  4. Load Segments");
+        System.out.println("  5. Load Locomotives");
+        System.out.println("  6. Load Wagons");
+        System.out.println("  7. Load Trains");
+        System.out.println("  8. Load Routes");
+        System.out.println("  9. Load Schedules");
+        System.out.println("  ────────────────────────────────────────────");
         System.out.println("  10. Show Data Status");
         System.out.println("  0. Back to Freight Manager Menu");
         System.out.println();
     }
 
     /**
-     * Imports all data in correct order using a user-specified path
+     * Imports all data from database in correct order
      */
     private void importAllData() {
-        System.out.println("\n╔══ IMPORT ALL DATA ══╗");
-
-        // TODO: Suggestion path to be filled here
-        System.out.println("Suggested path: [\\sem3-pi-25-26-g092-repo\\sem3-pi-25-26-g092-repo\\Dataset]");
-
-        System.out.print("Enter data folder path (default: " + DATA_DIR + "): ");
-        String dataPath = scanner.nextLine().trim();
-
-        // Use default if empty, otherwise ensure path ends with /
-        if (dataPath.isEmpty()) {
-            dataPath = DATA_DIR;
-        } else if (!dataPath.endsWith("/") && !dataPath.endsWith("\\")) {
-            dataPath += "/";
-        }
-
-        System.out.println("Using folder: " + dataPath);
-        System.out.println("Warning: This will clear existing data and reload from CSVs.");
+        System.out.println("\n╔══ LOAD ALL DATA FROM DATABASE ══╗");
+        System.out.println("Warning: This will clear existing data in memory and reload from database.");
 
         System.out.print("\nContinue? (y/n): ");
         String confirm = scanner.nextLine().trim().toLowerCase();
 
         if (!confirm.equals("y") && !confirm.equals("yes")) {
-            System.out.println("Import cancelled.");
+            System.out.println("Load cancelled.");
             return;
         }
 
-        System.out.println("\n Starting data import...\n");
+        System.out.println("\n⏳ Starting data load from database...\n");
 
         boolean success = true;
         int totalLoaded = 0;
 
-        // Ordem estrita de importação devido às dependências (foreign keys logicas)
+        // Load in dependency order
 
-        // 1. Infraestrutura
-        if (loadFile("facilities.csv", this::importFacilitiesFromFile, dataPath)) totalLoaded += facilityRepo.count();
-        else success = false;
-
-        if (loadFile("lines.csv", this::importLinesFromFile, dataPath)) totalLoaded += lineRepo.count();
-        else success = false;
-
-        if (loadFile("segments.csv", this::importSegmentsFromFile, dataPath)) totalLoaded += segmentRepo.count();
-        else success = false;
-
-        // 2. Material Circulante
-        if (loadFile("locomotives.csv", this::importLocomotivesFromFile, dataPath)) totalLoaded += locomotiveRepo.count();
-        else success = false;
-
-        if (loadFile("wagons.csv", this::importWagonsFromFile, dataPath)) totalLoaded += wagonRepo.count();
-        else success = false;
-
-        // 3. Comboios (Depende de Loco + Wagon)
-        if (loadFile("trains.csv", this::importTrainsFromFile, dataPath)) totalLoaded += trainRepo.count();
-        else success = false;
-
-        // 4. Rotas (Depende de Facilities)
-        if (loadFile("routes.csv", this::importRoutesFromFile, dataPath)) totalLoaded += routeRepo.count();
-        else success = false;
-
-        // 5. Horários (Depende de Train + Route)
-        if (loadFile("schedules.csv", this::importSchedulesFromFile, dataPath)) totalLoaded += scheduleRepo.count();
-        else success = false;
-
-        System.out.println("\n═══════════════════════════════════════");
-        if (success) {
-            System.out.println("ALL DATA IMPORTED SUCCESSFULLY!");
-            System.out.println("Total records loaded: " + totalLoaded);
+        // 1. Infrastructure
+        if (loadFromDatabase("Facilities", facilityRepo::loadFromDatabase)) {
+            totalLoaded += facilityRepo.count();
         } else {
-            System.out.println("  IMPORT COMPLETED WITH WARNINGS");
-            System.out.println("Ensure files exist in: " + dataPath);
+            success = false;
         }
-        System.out.println("═══════════════════════════════════════");
-    }
 
-    // Helper para carregar ficheiros usando o caminho especificado
-    private boolean loadFile(String filename, FileImporter importer, String basePath) {
-        String filepath = basePath + filename;
-        File file = new File(filepath);
-
-        if (!file.exists()) {
-            System.out.println(" File not found: " + filepath);
-            return false;
+        if (loadFromDatabase("Lines", lineRepo::loadFromDatabase)) {
+            totalLoaded += lineRepo.count();
+        } else {
+            success = false;
         }
-        return importer.importFile(filepath);
+
+        if (loadFromDatabase("Segments", segmentRepo::loadFromDatabase)) {
+            totalLoaded += segmentRepo.count();
+        } else {
+            success = false;
+        }
+
+        // 2. Rolling Stock
+        if (loadFromDatabase("Locomotives", locomotiveRepo::loadFromDatabase)) {
+            totalLoaded += locomotiveRepo.count();
+        } else {
+            success = false;
+        }
+
+        if (loadFromDatabase("Wagons", wagonRepo::loadFromDatabase)) {
+            totalLoaded += wagonRepo.count();
+        } else {
+            success = false;
+        }
+
+        // 3. Trains (depends on Locomotives + Wagons)
+        if (loadFromDatabase("Trains", trainRepo::loadFromDatabase)) {
+            totalLoaded += trainRepo.count();
+        } else {
+            success = false;
+        }
+
+        // 4. Routes (depends on Facilities)
+        if (loadFromDatabase("Routes", routeRepo::loadFromDatabase)) {
+            totalLoaded += routeRepo.count();
+        } else {
+            success = false;
+        }
+
+        // 5. Schedules (depends on Trains + Routes)
+        if (loadFromDatabase("Schedules", scheduleRepo::loadFromDatabase)) {
+            totalLoaded += scheduleRepo.count();
+        } else {
+            success = false;
+        }
+
+        System.out.println("\n╔════════════════════════════════════╗");
+        if (success) {
+            System.out.println("║ ✓ ALL DATA LOADED SUCCESSFULLY!   ║");
+            System.out.println("║   Total records: " + String.format("%-17d", totalLoaded) + "║");
+        } else {
+            System.out.println("║ ⚠ LOAD COMPLETED WITH WARNINGS    ║");
+            System.out.println("║   Check database connection        ║");
+        }
+        System.out.println("╚════════════════════════════════════╝");
     }
 
-    @FunctionalInterface
-    private interface FileImporter {
-        boolean importFile(String filepath);
-    }
-
-    // --- Métodos individuais de importação (wrappers) ---
-
-    private void importFacilities() {
-        String filepath = getFilePath("facilities.csv");
-        importFacilitiesFromFile(filepath);
-    }
-
-    private boolean importFacilitiesFromFile(String filepath) {
+    /**
+     * Helper to load data from database with error handling
+     */
+    private boolean loadFromDatabase(String entityName, Runnable loader) {
         try {
-            facilityRepo.loadFromCSV(filepath);
-            System.out.println("Facilities: " + facilityRepo.count());
+            System.out.print("⏳ Loading " + entityName + "...");
+            loader.run();
+            System.out.println(" ✓");
             return true;
         } catch (Exception e) {
-            System.err.println(" Error (Facilities): " + e.getMessage());
+            System.out.println(" ✗ Error: " + e.getMessage());
             return false;
         }
     }
 
-    // ... Repete o padrão para os outros métodos, mas certifique-se de que
-    // o loadFile() usa o importXFromFile correto.
-    // Vou incluir apenas os métodos auxiliares essenciais para compilar o importAllData:
+    // --- Individual load methods ---
 
-    private boolean importLinesFromFile(String filepath) {
-        try { lineRepo.loadFromCSV(filepath); System.out.println(" Lines: " + lineRepo.count()); return true; }
-        catch (Exception e) { System.err.println(" Error (Lines): " + e.getMessage()); return false; }
-    }
-    private boolean importSegmentsFromFile(String filepath) {
-        try { segmentRepo.loadFromCSV(filepath); System.out.println(" Segments: " + segmentRepo.count()); return true; }
-        catch (Exception e) { System.err.println(" Error (Segments): " + e.getMessage()); return false; }
-    }
-    private boolean importLocomotivesFromFile(String filepath) {
-        try { locomotiveRepo.loadFromCSV(filepath); System.out.println(" Locomotives: " + locomotiveRepo.count()); return true; }
-        catch (Exception e) { System.err.println(" Error (Locomotives): " + e.getMessage()); return false; }
-    }
-    private boolean importWagonsFromFile(String filepath) {
-        try { wagonRepo.loadFromCSV(filepath); System.out.println(" Wagons: " + wagonRepo.count()); return true; }
-        catch (Exception e) { System.err.println(" Error (Wagons): " + e.getMessage()); return false; }
-    }
-    private boolean importTrainsFromFile(String filepath) {
-        try { trainRepo.loadFromCSV(filepath); System.out.println(" Trains: " + trainRepo.count()); return true; }
-        catch (Exception e) { System.err.println(" Error (Trains): " + e.getMessage()); return false; }
-    }
-    private boolean importRoutesFromFile(String filepath) {
-        try { routeRepo.loadFromCSV(filepath); System.out.println(" Routes: " + routeRepo.count()); return true; }
-        catch (Exception e) { System.err.println(" Error (Routes): " + e.getMessage()); return false; }
-    }
-    private boolean importSchedulesFromFile(String filepath) {
-        try { scheduleRepo.loadFromCSV(filepath); System.out.println(" Schedules: " + scheduleRepo.count()); return true; }
-        catch (Exception e) { System.err.println(" Error (Schedules): " + e.getMessage()); return false; }
+    private void importFacilities() {
+        System.out.println("\n⏳ Loading Facilities from database...");
+        try {
+            facilityRepo.loadFromDatabase();
+            System.out.println("✓ Facilities loaded: " + facilityRepo.count());
+        } catch (Exception e) {
+            System.err.println("✗ Error loading Facilities: " + e.getMessage());
+        }
     }
 
-    // Métodos "dummy" para o menu individual (opções 2-9) funcionarem se o utilizador quiser usar outro path
-    private void importLines() { importLinesFromFile(getFilePath("lines.csv")); }
-    private void importSegments() { importSegmentsFromFile(getFilePath("segments.csv")); }
-    private void importLocomotives() { importLocomotivesFromFile(getFilePath("locomotives.csv")); }
-    private void importWagons() { importWagonsFromFile(getFilePath("wagons.csv")); }
-    private void importTrains() { importTrainsFromFile(getFilePath("trains.csv")); }
-    private void importRoutes() { importRoutesFromFile(getFilePath("routes.csv")); }
-    private void importSchedules() { importSchedulesFromFile(getFilePath("schedules.csv")); }
+    private void importLines() {
+        System.out.println("\n⏳ Loading Lines from database...");
+        try {
+            lineRepo.loadFromDatabase();
+            System.out.println("✓ Lines loaded: " + lineRepo.count());
+        } catch (Exception e) {
+            System.err.println("✗ Error loading Lines: " + e.getMessage());
+        }
+    }
+
+    private void importSegments() {
+        System.out.println("\n⏳ Loading Segments from database...");
+        try {
+            segmentRepo.loadFromDatabase();
+            System.out.println("✓ Segments loaded: " + segmentRepo.count());
+        } catch (Exception e) {
+            System.err.println("✗ Error loading Segments: " + e.getMessage());
+        }
+    }
+
+    private void importLocomotives() {
+        System.out.println("\n⏳ Loading Locomotives from database...");
+        try {
+            locomotiveRepo.loadFromDatabase();
+            System.out.println("✓ Locomotives loaded: " + locomotiveRepo.count());
+        } catch (Exception e) {
+            System.err.println("✗ Error loading Locomotives: " + e.getMessage());
+        }
+    }
+
+    private void importWagons() {
+        System.out.println("\n⏳ Loading Wagons from database...");
+        try {
+            wagonRepo.loadFromDatabase();
+            System.out.println("✓ Wagons loaded: " + wagonRepo.count());
+        } catch (Exception e) {
+            System.err.println("✗ Error loading Wagons: " + e.getMessage());
+        }
+    }
+
+    private void importTrains() {
+        System.out.println("\n⏳ Loading Trains from database...");
+        try {
+            trainRepo.loadFromDatabase();
+            System.out.println("✓ Trains loaded: " + trainRepo.count());
+        } catch (Exception e) {
+            System.err.println("✗ Error loading Trains: " + e.getMessage());
+        }
+    }
+
+    private void importRoutes() {
+        System.out.println("\n⏳ Loading Routes from database...");
+        try {
+            routeRepo.loadFromDatabase();
+            System.out.println("✓ Routes loaded: " + routeRepo.count());
+        } catch (Exception e) {
+            System.err.println("✗ Error loading Routes: " + e.getMessage());
+        }
+    }
+
+    private void importSchedules() {
+        System.out.println("\n⏳ Loading Schedules from database...");
+        try {
+            scheduleRepo.loadFromDatabase();
+            System.out.println("✓ Schedules loaded: " + scheduleRepo.count());
+        } catch (Exception e) {
+            System.err.println("✗ Error loading Schedules: " + e.getMessage());
+        }
+    }
 
     private void showDataStatus() {
-        System.out.println("Status: F:" + facilityRepo.count() + " | L:" + lineRepo.count() + " | S:" + segmentRepo.count() + " | T:" + trainRepo.count());
-    }
-
-    private String getFilePath(String defaultFilename) {
-        System.out.print("Enter file path (default: " + DATA_DIR + defaultFilename + "): ");
-        String input = scanner.nextLine().trim();
-        return input.isEmpty() ? DATA_DIR + defaultFilename : input;
+        System.out.println("┌─────────────────────────────────────────────┐");
+        System.out.println("│ DATA STATUS (In Memory)                     │");
+        System.out.println("├─────────────────────────────────────────────┤");
+        System.out.printf("│ Facilities:  %-6d  Lines:      %-6d  │%n",
+                facilityRepo.count(), lineRepo.count());
+        System.out.printf("│ Segments:    %-6d  Locomotives: %-6d  │%n",
+                segmentRepo.count(), locomotiveRepo.count());
+        System.out.printf("│ Wagons:      %-6d  Trains:      %-6d  │%n",
+                wagonRepo.count(), trainRepo.count());
+        System.out.printf("│ Routes:      %-6d  Schedules:   %-6d  │%n",
+                routeRepo.count(), scheduleRepo.count());
+        System.out.println("└─────────────────────────────────────────────┘");
     }
 
     private void pauseForUser() {

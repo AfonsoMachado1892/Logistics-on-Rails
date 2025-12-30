@@ -1,111 +1,117 @@
 package LAPR3.model;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 /**
- * Represents a freight train composition with locomotives and wagons.
- * Part of USLP07 - Train Composition Model
+ * Train model - represents a complete train with locomotives and wagons
  */
 public class Train {
-    private final String trainId;
-    private final String operator;
-    private final List<Locomotive> locomotives;
-    private final List<Wagon> wagons;
-    private final double totalPayloadTons;
+    private int id;
+    private String operatorVat;
+    private LocalDate departureDate;
+    private LocalTime departureTime;
+    private int startFacilityId;
+    private int endFacilityId;
+    private List<Locomotive> locomotives;
+    private List<Wagon> wagons;
+    private List<Integer> path;
+
+    // Constructors
+    public Train() {
+        this.locomotives = new ArrayList<>();
+        this.wagons = new ArrayList<>();
+        this.path = new ArrayList<>();
+    }
+
+    public Train(int id, String operatorVat, LocalDate departureDate, LocalTime departureTime,
+                 int startFacilityId, int endFacilityId,
+                 List<Locomotive> locomotives, List<Wagon> wagons, List<Integer> path) {
+        this.id = id;
+        this.operatorVat = operatorVat;
+        this.departureDate = departureDate;
+        this.departureTime = departureTime;
+        this.startFacilityId = startFacilityId;
+        this.endFacilityId = endFacilityId;
+        this.locomotives = locomotives != null ? locomotives : new ArrayList<>();
+        this.wagons = wagons != null ? wagons : new ArrayList<>();
+        this.path = path != null ? path : new ArrayList<>();
+    }
+
+    public Train(int id, String opVat, String opName, LocalDate date, LocalTime time, int startId, int endId) {
+    }
+
+    // Basic Getters/Setters
+    public int getId() { return id; }
+    public String getTrainId() { return String.valueOf(id); } // Alias for compatibility
+    public void setId(int id) { this.id = id; }
+
+    public String getOperatorVat() { return operatorVat; }
+    public String getOperator() { return operatorVat; } // Alias for compatibility
+    public void setOperatorVat(String operatorVat) { this.operatorVat = operatorVat; }
+
+    public LocalDate getDepartureDate() { return departureDate; }
+    public void setDepartureDate(LocalDate departureDate) { this.departureDate = departureDate; }
+
+    public LocalTime getDepartureTime() { return departureTime; }
+    public void setDepartureTime(LocalTime departureTime) { this.departureTime = departureTime; }
+
+    public int getStartFacilityId() { return startFacilityId; }
+    public void setStartFacilityId(int startFacilityId) { this.startFacilityId = startFacilityId; }
+
+    public int getEndFacilityId() { return endFacilityId; }
+    public void setEndFacilityId(int endFacilityId) { this.endFacilityId = endFacilityId; }
+
+    public List<Locomotive> getLocomotives() { return locomotives; }
+    public void setLocomotives(List<Locomotive> locomotives) { this.locomotives = locomotives; }
+
+    public List<Wagon> getWagons() { return wagons; }
+    public void setWagons(List<Wagon> wagons) { this.wagons = wagons; }
+
+    public List<Integer> getPath() { return path; }
+    public void setPath(List<Integer> path) { this.path = path; }
+
+    // ========== CALCULATED METHODS (needed by Services) ==========
 
     /**
-     * Creates a new Train
-     *
-     * @param trainId unique train identifier
-     * @param operator operating company
-     * @param locomotives list of locomotives (must have at least one)
-     * @param wagons list of wagons (can be empty for locomotive-only movements)
-     * @param totalPayloadTons total cargo weight in tons
-     * @throws IllegalArgumentException if parameters are invalid
+     * Returns total weight in tons (locomotives + wagons)
      */
-    public Train(String trainId, String operator, List<Locomotive> locomotives,
-                 List<Wagon> wagons, double totalPayloadTons) {
-        if (trainId == null || trainId.trim().isEmpty()) {
-            throw new IllegalArgumentException("Train ID cannot be null or empty");
-        }
-        if (operator == null || operator.trim().isEmpty()) {
-            throw new IllegalArgumentException("Operator cannot be null or empty");
-        }
-        if (locomotives == null || locomotives.isEmpty()) {
-            throw new IllegalArgumentException("Train must have at least one locomotive");
-        }
-        if (wagons == null) {
-            throw new IllegalArgumentException("Wagons list cannot be null");
-        }
-        if (totalPayloadTons < 0) {
-            throw new IllegalArgumentException("Total payload cannot be negative");
-        }
-
-        // Validate that payload doesn't exceed wagon capacity
-        double maxCapacity = wagons.stream()
-                .mapToDouble(Wagon::getMaxPayloadTons)
+    public double getTotalWeightTons() {
+        double locoWeight = locomotives.stream()
+                .mapToDouble(Locomotive::getWeightTons)
                 .sum();
-
-        if (totalPayloadTons > maxCapacity) {
-            throw new IllegalArgumentException(
-                    String.format("Payload %.2ft exceeds total wagon capacity %.2ft",
-                            totalPayloadTons, maxCapacity)
-            );
-        }
-
-        this.trainId = trainId.trim();
-        this.operator = operator.trim();
-        this.locomotives = new ArrayList<>(locomotives);
-        this.wagons = new ArrayList<>(wagons);
-        this.totalPayloadTons = totalPayloadTons;
+        double wagonWeight = wagons.stream()
+                .mapToDouble(w -> w.getWeightTons() + w.getPayloadTons()) // Empty + payload
+                .sum();
+        return locoWeight + wagonWeight;
     }
 
     /**
-     * Gets the train identifier
-     * @return train ID
-     */
-    public String getTrainId() {
-        return trainId;
-    }
-
-    /**
-     * Gets the operator
-     * @return operator name
-     */
-    public String getOperator() {
-        return operator;
-    }
-
-    /**
-     * Gets the list of locomotives
-     * @return unmodifiable list of locomotives
-     */
-    public List<Locomotive> getLocomotives() {
-        return Collections.unmodifiableList(locomotives);
-    }
-
-    /**
-     * Gets the list of wagons
-     * @return unmodifiable list of wagons
-     */
-    public List<Wagon> getWagons() {
-        return Collections.unmodifiableList(wagons);
-    }
-
-    /**
-     * Gets the total payload being transported
-     * @return total payload in tons
+     * Returns total payload capacity in tons (only wagons payload)
      */
     public double getTotalPayloadTons() {
-        return totalPayloadTons;
+        return wagons.stream()
+                .mapToDouble(Wagon::getPayloadTons)
+                .sum();
     }
 
     /**
-     * Calculates the combined power of all locomotives
-     * @return total power in kilowatts
+     * Returns total length in meters
+     */
+    public double getTotalLengthMeters() {
+        double locoLength = locomotives.stream()
+                .mapToDouble(Locomotive::getLengthM)
+                .sum();
+        double wagonLength = wagons.stream()
+                .mapToDouble(w -> w.getLengthMm() / 1000.0) // Convert mm to m
+                .sum();
+        return locoLength + wagonLength;
+    }
+
+    /**
+     * Returns total power in kW (sum of all locomotives)
      */
     public double getTotalPowerKw() {
         return locomotives.stream()
@@ -114,157 +120,85 @@ public class Train {
     }
 
     /**
-     * Calculates total train weight (locomotives + wagons + payload)
-     * @return total weight in tons
-     */
-    public double getTotalWeightTons() {
-        double locomotiveWeight = locomotives.stream()
-                .mapToDouble(Locomotive::getWeightTons)
-                .sum();
-
-        double wagonTareWeight = wagons.stream()
-                .mapToDouble(Wagon::getTareWeightTons)
-                .sum();
-
-        return locomotiveWeight + wagonTareWeight + totalPayloadTons;
-    }
-
-    /**
-     * Calculates total train length
-     * @return total length in meters
-     */
-    public double getTotalLengthMeters() {
-        double locomotiveLength = locomotives.stream()
-                .mapToDouble(Locomotive::getLengthMeters)
-                .sum();
-
-        double wagonLength = wagons.stream()
-                .mapToDouble(Wagon::getLengthMeters)
-                .sum();
-
-        return locomotiveLength + wagonLength;
-    }
-
-    /**
-     * Calculates weight per meter (for track weight limit validation)
-     * @return weight per meter in kg/m
-     */
-    public double getWeightPerMeterKg() {
-        double totalWeightKg = getTotalWeightTons() * 1000.0;
-        double totalLength = getTotalLengthMeters();
-
-        if (totalLength == 0) {
-            throw new IllegalStateException("Train has zero length");
-        }
-
-        return totalWeightKg / totalLength;
-    }
-
-    /**
-     * Gets the minimum operational speed among all locomotives
-     * This is the effective maximum speed for the train
-     * @return minimum operational speed in km/h
-     */
-    public double getOperationalSpeedKmh() {
-        return locomotives.stream()
-                .mapToDouble(Locomotive::getOperationalSpeedKmh)
-                .min()
-                .orElse(0.0);
-    }
-
-    /**
-     * Calculates power-to-weight ratio (indicator of train performance)
-     * @return power-to-weight ratio in kW/ton
+     * Returns power-to-weight ratio (kW/ton)
      */
     public double getPowerToWeightRatio() {
         double totalWeight = getTotalWeightTons();
-        if (totalWeight == 0) {
-            throw new IllegalStateException("Train has zero weight");
-        }
+        if (totalWeight == 0) return 0;
         return getTotalPowerKw() / totalWeight;
     }
 
     /**
-     * Checks if all locomotives are compatible with a given track gauge
-     * @param trackGauge track gauge in millimeters
-     * @return true if all locomotives are compatible
+     * Returns weight per meter (kg/m)
      */
-    public boolean isCompatibleWithGauge(int trackGauge) {
+    public double getWeightPerMeterKg() {
+        double totalLength = getTotalLengthMeters();
+        if (totalLength == 0) return 0;
+        return (getTotalWeightTons() * 1000) / totalLength; // Convert tons to kg
+    }
+
+    /**
+     * Returns operational speed (minimum of all locomotives' operational speeds)
+     */
+    public double getOperationalSpeedKmh() {
+        if (locomotives.isEmpty()) return 0;
         return locomotives.stream()
-                .allMatch(loco -> loco.isCompatibleWithGauge(trackGauge));
+                .mapToDouble(Locomotive::getOperationalSpeedKmh)
+                .min()
+                .orElse(0);
     }
 
     /**
-     * Checks if any locomotive requires electrification
-     * @return true if at least one locomotive is electric
+     * Returns gauge of the train (assumes all locomotives have same gauge)
      */
-    public boolean requiresElectrification() {
-        return locomotives.stream()
-                .anyMatch(Locomotive::requiresElectrification);
+    public double getGauge() {
+        if (locomotives.isEmpty()) return 0;
+        return locomotives.get(0).getGauge();
     }
 
     /**
-     * Validates if train composition is physically valid
-     * @return error message if invalid, empty string if valid
+     * Checks if train is compatible with a given gauge
      */
-    public String validate() {
-        // Check gauge consistency
-        if (!locomotives.isEmpty()) {
-            int firstGauge = locomotives.get(0).getGauge();
-            boolean allSameGauge = locomotives.stream()
-                    .allMatch(loco -> loco.getGauge() == firstGauge);
+    public boolean isCompatibleWithGauge(double gauge) {
+        // Check locomotives
+        boolean locosCompatible = locomotives.stream()
+                .allMatch(l -> Math.abs(l.getGauge() - gauge) < 0.01);
 
-            if (!allSameGauge) {
-                return "All locomotives must have the same gauge";
-            }
+        // Check wagons
+        boolean wagonsCompatible = wagons.stream()
+                .allMatch(w -> Math.abs(w.getGauge() - gauge) < 0.01);
 
-            if (!wagons.isEmpty()) {
-                boolean wagonsCompatible = wagons.stream()
-                        .allMatch(wagon -> wagon.isCompatibleWithGauge(firstGauge));
-
-                if (!wagonsCompatible) {
-                    return "All wagons must be compatible with locomotive gauge";
-                }
-            }
-        }
-
-        return ""; // Valid
+        return locosCompatible && wagonsCompatible;
     }
 
     /**
-     * Gets number of locomotives in the train
-     * @return locomotive count
+     * Returns number of locomotives
      */
     public int getLocomotiveCount() {
         return locomotives.size();
     }
 
     /**
-     * Gets number of wagons in the train
-     * @return wagon count
+     * Returns number of wagons
      */
     public int getWagonCount() {
         return wagons.size();
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Train train = (Train) o;
-        return trainId.equals(train.trainId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(trainId);
+    /**
+     * Checks if train requires electrification (any electric locomotive)
+     */
+    public boolean requiresElectrification() {
+        return locomotives.stream()
+                .anyMatch(l -> "Electric".equalsIgnoreCase(l.getEngineType()));
     }
 
     @Override
     public String toString() {
-        return String.format("Train{id='%s', operator='%s', locos=%d, wagons=%d, weight=%.1ft, power=%.0fkW}",
-                trainId, operator, locomotives.size(), wagons.size(),
-                getTotalWeightTons(), getTotalPowerKw());
+        return String.format("Train[id=%d, operator=%s, locos=%d, wagons=%d, power=%.0fkW, weight=%.1ft]",
+                id, operatorVat, locomotives.size(), wagons.size(), getTotalPowerKw(), getTotalWeightTons());
     }
-
+    public void setPathFacilityIds(List<Integer> facilityIds) {
+        this.path = facilityIds;
+    }
 }

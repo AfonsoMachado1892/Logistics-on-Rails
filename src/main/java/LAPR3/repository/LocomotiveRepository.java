@@ -1,157 +1,113 @@
 package LAPR3.repository;
 
-import LAPR3.IO.CSVReader;
+import LAPR3.database.DatabaseConnection;
 import LAPR3.model.Locomotive;
 
-import java.io.IOException;
-import java.util.*;
+import java.sql.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
-/**
- * Repository for managing locomotive entities.
- * Provides access to locomotives and filtering by various criteria.
- */
 public class LocomotiveRepository {
-    private final Map<Integer, Locomotive> locomotives;
 
-    /**
-     * Constructs a new locomotive repository
-     */
+    private final List<Locomotive> locomotives;
+
     public LocomotiveRepository() {
-        this.locomotives = new HashMap<>();
+        this.locomotives = new ArrayList<>();
     }
 
-    /**
-     * Load locomotives from CSV file
-     * Expected format: Number, Name, Make, Model, Service, Number Bogies, Bogies,
-     *                  Power, Length, Width, Height, Weight (t), Max Speed,
-     *                  Operational Speed, Traction (KN), Type, Voltage, Frequency,
-     *                  Operator, Bitola, Combustível (l)
-     * @param filePath path to locomotives.csv
-     * @throws IOException if file cannot be read
-     */
-    public void loadFromCSV(String filePath) throws IOException {
-        List<String[]> records = CSVReader.readCSV(filePath);
+    public void loadFromDatabase() {
+        this.locomotives.clear();
+        String query = "SELECT * FROM Locomotive";
 
-        for (String[] record : records) {
-            try {
-                if (record.length < 20) {
-                    System.err.println("Invalid locomotive record: insufficient columns");
-                    continue;
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Date sqlDate = rs.getDate("service_start_date");
+                LocalDate serviceStart = sqlDate != null ? sqlDate.toLocalDate() : null;
+
+                // Tratamento de Fuel (pode ser null na BD) - CORRIGIDO para BigDecimal
+                Double fuel = null;
+                Object fuelObj = rs.getObject("fuel_capacity_l");
+                if (fuelObj != null) {
+                    if (fuelObj instanceof java.math.BigDecimal) {
+                        fuel = ((java.math.BigDecimal) fuelObj).doubleValue();
+                    } else if (fuelObj instanceof Number) {
+                        fuel = ((Number) fuelObj).doubleValue();
+                    }
                 }
 
-                int number = CSVReader.parseInt(record[0], -1);
-                String name = record[1];
-                String make = record[2];
-                String model = record[3];
-                int serviceYear = CSVReader.parseInt(record[4], 0);
-                int numberBogies = CSVReader.parseInt(record[5], -1);
-                String bogiesType = record[6];
-                double power = CSVReader.parseDouble(record[7], -1);
-                double length = CSVReader.parseDouble(record[8], -1);
-                double width = CSVReader.parseDouble(record[9], -1);
-                double height = CSVReader.parseDouble(record[10], -1);
-                double weight = CSVReader.parseDouble(record[11], -1);
-                double maxSpeed = CSVReader.parseDouble(record[12], -1);
-                double operationalSpeed = CSVReader.parseDouble(record[13], -1);
-                double traction = CSVReader.parseDouble(record[14], -1);
-                String typeStr = record[15];
-                String voltage = record[16];
-                String frequency = record[17];
-                String operator = record[18];
-                int gauge = CSVReader.parseInt(record[19], -1);
-                String fuelStr = record.length > 20 ? record[20] : "";
-
-                if (number < 0 || operationalSpeed <= 0 || gauge < 0) {
-                    System.err.println("Invalid locomotive data: " + number);
-                    continue;
-                }
-
-                // Parse type
-                Locomotive.LocomotiveType type;
-                if (typeStr.equalsIgnoreCase("Electric")) {
-                    type = Locomotive.LocomotiveType.ELECTRIC;
-                } else if (typeStr.equalsIgnoreCase("Diesel")) {
-                    type = Locomotive.LocomotiveType.DIESEL;
-                } else {
-                    System.err.println("Unknown locomotive type: " + typeStr);
-                    continue;
-                }
-
-                // Parse fuel capacity (only for diesel)
-                Double fuelCapacity = null;
-                if (type == Locomotive.LocomotiveType.DIESEL && !fuelStr.isEmpty()) {
-                    fuelCapacity = CSVReader.parseDouble(fuelStr, 0);
-                }
-
-                Locomotive locomotive = new Locomotive(
-                        number, name, make, model, serviceYear, numberBogies,
-                        bogiesType, power, length, width, height, weight,
-                        maxSpeed, operationalSpeed, traction, type, voltage,
-                        frequency, operator, gauge, fuelCapacity
+                Locomotive loc = new Locomotive(
+                        rs.getString("loco_number"),
+                        rs.getString("name"),
+                        rs.getString("make"),
+                        rs.getString("model"),
+                        serviceStart,
+                        rs.getString("engine_type"),
+                        rs.getDouble("power_kw"),
+                        rs.getDouble("weight_tons"),
+                        rs.getDouble("max_speed_kmh"),
+                        rs.getDouble("traction_kn"),
+                        rs.getDouble("length_m"),
+                        rs.getDouble("width_m"),
+                        rs.getDouble("height_m"),
+                        rs.getInt("num_bogies"),
+                        rs.getString("bogies_type"),
+                        rs.getString("voltage"),
+                        rs.getString("frequency"),
+                        fuel,
+                        rs.getDouble("gauge")
                 );
-
-                locomotives.put(number, locomotive);
-
-            } catch (IllegalArgumentException e) {
-                System.err.println("Error loading locomotive: " + e.getMessage());
+                locomotives.add(loc);
             }
+            System.out.println("[DB Load] Locomotivas carregadas (Full Data): " + locomotives.size());
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+    }
 
-        System.out.println("Loaded " + locomotives.size() + " locomotives");
+    public List<Locomotive> findAll() {
+        return new ArrayList<>(locomotives);
     }
 
     /**
-     * Find locomotive by number
+     * Finds a locomotive by its number (String)
+     * @param number locomotive number
+     * @return Optional containing the locomotive if found
+     */
+    public Optional<Locomotive> findByNumber(String number) {
+        return locomotives.stream()
+                .filter(l -> l.getNumber().equals(number))
+                .findFirst();
+    }
+
+    /**
+     * Finds a locomotive by its number (int) - converts to String
+     * @param number locomotive number as integer
+     * @return Optional containing the locomotive if found
      */
     public Optional<Locomotive> findByNumber(int number) {
-        return Optional.ofNullable(locomotives.get(number));
+        return findByNumber(String.valueOf(number));
     }
 
     /**
-     * Find all locomotives of a specific type
-     */
-    public List<Locomotive> findByType(Locomotive.LocomotiveType type) {
-        return locomotives.values().stream()
-                .filter(loco -> loco.getType() == type)
-                .toList();
-    }
-
-    /**
-     * Find all locomotives compatible with a specific gauge
-     */
-    public List<Locomotive> findByGauge(int gauge) {
-        return locomotives.values().stream()
-                .filter(loco -> loco.getGauge() == gauge)
-                .toList();
-    }
-
-    /**
-     * Find all locomotives of a specific operator
-     */
-    public List<Locomotive> findByOperator(String operator) {
-        return locomotives.values().stream()
-                .filter(loco -> loco.getOperator().equalsIgnoreCase(operator))
-                .toList();
-    }
-
-    /**
-     * Get all locomotives
-     */
-    public List<Locomotive> findAll() {
-        return new ArrayList<>(locomotives.values());
-    }
-
-    /**
-     * Check if locomotive exists
-     */
-    public boolean exists(int number) {
-        return locomotives.containsKey(number);
-    }
-
-    /**
-     * Get total count
+     * Returns count of locomotives (needed by UI menus)
      */
     public int count() {
         return locomotives.size();
+    }
+
+    /**
+     * Finds locomotives by type (needed by UI menus)
+     */
+    public List<Locomotive> findByType(Locomotive.LocomotiveType type) {
+        // Assuming Locomotive has getEngineType() that returns a string
+        String typeStr = type.toString(); // "ELECTRIC" or "DIESEL"
+        return locomotives.stream()
+                .filter(l -> l.getEngineType() != null && l.getEngineType().equalsIgnoreCase(typeStr))
+                .collect(java.util.stream.Collectors.toList());
     }
 }

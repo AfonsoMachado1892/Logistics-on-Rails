@@ -1,95 +1,53 @@
 package LAPR3.repository;
 
-import LAPR3.IO.CSVReader;
+import LAPR3.database.DatabaseConnection;
 import LAPR3.model.Facility;
 
-import java.io.IOException;
-import java.util.*;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
-/**
- * Repository for managing facility entities.
- * Provides access to facilities loaded from CSV data.
- */
 public class FacilityRepository {
-    private final Map<Integer, Facility> facilities;
 
-    /**
-     * Constructs a new facility repository
-     */
+    private final List<Facility> facilities;
+
     public FacilityRepository() {
-        this.facilities = new HashMap<>();
+        this.facilities = new ArrayList<>();
     }
 
-    /**
-     * Load facilities from CSV file
-     * Expected format: ID, Name
-     * @param filePath path to facilities.csv
-     * @throws IOException if file cannot be read
-     */
-    public void loadFromCSV(String filePath) throws IOException {
-        List<String[]> records = CSVReader.readCSV(filePath);
+    public void loadFromDatabase() {
+        this.facilities.clear();
+        String query = "SELECT id, name FROM Facility ORDER BY id";
 
-        for (String[] record : records) {
-            try {
-                if (record.length < 2) {
-                    System.err.println("Invalid facility record: insufficient columns");
-                    continue;
-                }
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
 
-                int id = CSVReader.parseInt(record[0], -1);
-                String name = record[1];
-
-                if (id < 0) {
-                    System.err.println("Invalid facility ID: " + record[0]);
-                    continue;
-                }
-
-                Facility facility = new Facility(id, name);
-                facilities.put(id, facility);
-
-            } catch (IllegalArgumentException e) {
-                System.err.println("Error loading facility: " + e.getMessage());
+            while (rs.next()) {
+                Facility facility = new Facility(
+                        rs.getInt("id"),
+                        rs.getString("name")
+                );
+                facilities.add(facility);
             }
+            System.out.println("[DB Load] Facilities carregadas: " + facilities.size());
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-
-        System.out.println("Loaded " + facilities.size() + " facilities");
     }
 
-    /**
-     * Find facility by ID
-     */
+    public List<Facility> findAll() {
+        return new ArrayList<>(facilities);
+    }
+
     public Optional<Facility> findById(int id) {
-        return Optional.ofNullable(facilities.get(id));
-    }
-
-    /**
-     * Find facility by name (case insensitive)
-     */
-    public Optional<Facility> findByName(String name) {
-        return facilities.values().stream()
-                .filter(f -> f.getName().equalsIgnoreCase(name))
+        return facilities.stream()
+                .filter(f -> f.getId() == id)
                 .findFirst();
     }
 
-    /**
-     * Get all facilities
-     */
-    public List<Facility> findAll() {
-        return new ArrayList<>(facilities.values());
-    }
-
-    /**
-     * Check if facility exists
-     */
-    public boolean exists(int id) {
-        return facilities.containsKey(id);
-    }
-
-    /**
-     * Get total count
-     */
     public int count() {
         return facilities.size();
     }
-
 }

@@ -1,263 +1,152 @@
 package LAPR3.repository;
 
+import LAPR3.database.DatabaseConnection;
 import LAPR3.model.Schedule;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+
+import java.sql.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Repository for managing Schedule data
- * Loads from CSV and provides query methods
- * Part of USLP07 - Subtask #62
+ * Repository for Schedule entities
+ * Clean version - loads from database, no automatic ID generation
  */
 public class ScheduleRepository {
-    private final Map<String, Schedule> schedules;
-    private static final DateTimeFormatter DATE_FORMATTER =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+
+    private final List<Schedule> schedules;
 
     public ScheduleRepository() {
-        this.schedules = new HashMap<>();
+        this.schedules = new ArrayList<>();
     }
 
-    /**
-     * Loads schedules from CSV file
-     *
-     * @param filePath path to schedules.csv
-     * @throws IOException if file cannot be read
-     */
-    public void loadFromCSV(String filePath) throws IOException {
-        schedules.clear();
+    public void loadFromDatabase() {
+        this.schedules.clear();
 
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line = br.readLine(); // Skip header
+        String query = "SELECT schedule_id, train_id, route_id, departure_date, " +
+                "       departure_time, status " +
+                "FROM TRAIN_SCHEDULE " +
+                "ORDER BY departure_date, departure_time";
 
-            while ((line = br.readLine()) != null) {
-                line = line.trim();
-                if (line.isEmpty()) continue;
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
 
-                try {
-                    Schedule schedule = parseScheduleFromCSV(line);
-                    schedules.put(schedule.getScheduleId(), schedule);
-                } catch (Exception e) {
-                    System.err.println("Error parsing schedule line: " + line);
-                    System.err.println("Error: " + e.getMessage());
+            while (rs.next()) {
+                String scheduleId = rs.getString("schedule_id");
+                String trainId = String.valueOf(rs.getInt("train_id"));
+                String routeId = rs.getString("route_id");
+
+                Date sqlDate = rs.getDate("departure_date");
+                LocalDate departureDate = (sqlDate != null) ? sqlDate.toLocalDate() : null;
+
+                String timeStr = rs.getString("departure_time");
+                LocalTime departureTime = parseTime(timeStr);
+
+                LocalDateTime departureDateTime = null;
+                if (departureDate != null && departureTime != null) {
+                    departureDateTime = LocalDateTime.of(departureDate, departureTime);
                 }
+
+                String statusStr = rs.getString("status");
+                Schedule.ScheduleStatus status = parseStatus(statusStr);
+
+                Schedule schedule = new Schedule(
+                        scheduleId,
+                        trainId,
+                        routeId,
+                        departureDateTime,
+                        status
+                );
+
+                schedules.add(schedule);
             }
-        }
 
-        System.out.println("Loaded " + schedules.size() + " schedules");
+            System.out.println("[DB Load] Schedules carregadas: " + schedules.size());
+
+        } catch (SQLException e) {
+            System.err.println("Erro ao carregar Schedules: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
-    /**
-     * Parses a schedule from CSV line
-     * Format: scheduleId,trainId,routeId,departureDateTime,status
-     */
-    private Schedule parseScheduleFromCSV(String line) {
-        String[] parts = line.split(",");
-
-        if (parts.length != 5) {
-            throw new IllegalArgumentException("Invalid CSV format: expected 5 fields");
+    private LocalTime parseTime(String timeStr) {
+        if (timeStr == null || timeStr.trim().isEmpty()) {
+            return null;
         }
-
-        String scheduleId = parts[0].trim();
-        String trainId = parts[1].trim();
-        String routeId = parts[2].trim();
-        LocalDateTime departureDateTime = LocalDateTime.parse(parts[3].trim(), DATE_FORMATTER);
-        Schedule.ScheduleStatus status = Schedule.ScheduleStatus.valueOf(parts[4].trim());
-
-        return new Schedule(scheduleId, trainId, routeId, departureDateTime, status);
+        try {
+            if (timeStr.length() == 5) {
+                return LocalTime.parse(timeStr + ":00");
+            }
+            return LocalTime.parse(timeStr);
+        } catch (Exception e) {
+            System.err.println("Erro ao fazer parse de time: " + timeStr);
+            return null;
+        }
     }
 
-    /**
-     * Finds a schedule by ID
-     */
+    private Schedule.ScheduleStatus parseStatus(String statusStr) {
+        if (statusStr == null) {
+            return Schedule.ScheduleStatus.SCHEDULED;
+        }
+        try {
+            return Schedule.ScheduleStatus.valueOf(statusStr);
+        } catch (IllegalArgumentException e) {
+            return Schedule.ScheduleStatus.SCHEDULED;
+        }
+    }
+
     public Optional<Schedule> findById(String scheduleId) {
-        return Optional.ofNullable(schedules.get(scheduleId));
+        return schedules.stream()
+                .filter(s -> s.getScheduleId().equals(scheduleId))
+                .findFirst();
     }
 
-    /**
-     * Gets all schedules
-     */
-    public List<Schedule> findAll() {
-        return new ArrayList<>(schedules.values());
-    }
-
-    /**
-     * Finds schedules by train ID
-     */
-    public List<Schedule> findByTrainId(String trainId) {
-        List<Schedule> result = new ArrayList<>();
-        for (Schedule schedule : schedules.values()) {
-            if (schedule.getTrainId().equals(trainId)) {
-                result.add(schedule);
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Finds schedules by route ID
-     */
-    public List<Schedule> findByRouteId(String routeId) {
-        List<Schedule> result = new ArrayList<>();
-        for (Schedule schedule : schedules.values()) {
-            if (schedule.getRouteId().equals(routeId)) {
-                result.add(schedule);
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Finds schedules by status
-     */
-    public List<Schedule> findByStatus(Schedule.ScheduleStatus status) {
-        List<Schedule> result = new ArrayList<>();
-        for (Schedule schedule : schedules.values()) {
-            if (schedule.getStatus() == status) {
-                result.add(schedule);
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Finds active schedules (SCHEDULED or RUNNING)
-     */
-    public List<Schedule> findActiveSchedules() {
-        List<Schedule> result = new ArrayList<>();
-        for (Schedule schedule : schedules.values()) {
-            if (schedule.isActive()) {
-                result.add(schedule);
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Finds schedules within a date range
-     */
     public List<Schedule> findByDateRange(LocalDateTime start, LocalDateTime end) {
-        List<Schedule> result = new ArrayList<>();
-        for (Schedule schedule : schedules.values()) {
-            LocalDateTime departure = schedule.getDepartureDateTime();
-            if (!departure.isBefore(start) && !departure.isAfter(end)) {
-                result.add(schedule);
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Finds schedules departing on a specific date (ignoring time)
-     */
-    public List<Schedule> findByDate(LocalDateTime date) {
-        LocalDateTime startOfDay = date.toLocalDate().atStartOfDay();
-        LocalDateTime endOfDay = startOfDay.plusDays(1).minusSeconds(1);
-        return findByDateRange(startOfDay, endOfDay);
-    }
-
-    /**
-     * Finds schedules sorted by departure time
-     */
-    public List<Schedule> findAllSortedByDeparture() {
-        return schedules.values().stream()
-                .sorted(Comparator.comparing(Schedule::getDepartureDateTime))
+        return schedules.stream()
+                .filter(s -> {
+                    LocalDateTime departure = s.getDepartureDateTime();
+                    if (departure == null) return false;
+                    return !departure.isBefore(start) && !departure.isAfter(end);
+                })
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Finds upcoming schedules (after current time)
-     */
-    public List<Schedule> findUpcoming(LocalDateTime currentTime) {
-        List<Schedule> result = new ArrayList<>();
-        for (Schedule schedule : schedules.values()) {
-            if (schedule.isPending(currentTime) && schedule.isActive()) {
-                result.add(schedule);
-            }
-        }
-        // Sort by departure time
-        result.sort(Comparator.comparing(Schedule::getDepartureDateTime));
-        return result;
+    public List<Schedule> findByDate(LocalDate date) {
+        return schedules.stream()
+                .filter(s -> {
+                    LocalDateTime departure = s.getDepartureDateTime();
+                    return departure != null && departure.toLocalDate().equals(date);
+                })
+                .collect(Collectors.toList());
+    }
+
+    public boolean exists(String scheduleId) {
+        return schedules.stream()
+                .anyMatch(s -> s.getScheduleId().equals(scheduleId));
+    }
+
+    public List<Schedule> findAll() {
+        return new ArrayList<>(schedules);
     }
 
     /**
-     * Gets the number of schedules in the repository
+     * Returns count of schedules (needed by UI menus)
      */
     public int count() {
         return schedules.size();
     }
 
     /**
-     * Checks if repository contains a schedule with given ID
-     */
-    public boolean exists(String scheduleId) {
-        return schedules.containsKey(scheduleId);
-    }
-
-    /**
-     * Updates a schedule's status
-     */
-    public void updateStatus(String scheduleId, Schedule.ScheduleStatus newStatus) {
-        Schedule schedule = schedules.get(scheduleId);
-        if (schedule != null) {
-            schedule.setStatus(newStatus);
-        }
-    }
-    /**
-     * Saves a schedule to the repository
-     *
-     * @param schedule schedule to save
-     * @throws IllegalArgumentException if schedule ID already exists
+     * Save schedule (needed by UI menu)
      */
     public void save(Schedule schedule) {
-        if (schedule == null) {
-            throw new IllegalArgumentException("Schedule cannot be null");
+        if (!exists(schedule.getScheduleId())) {
+            schedules.add(schedule);
         }
-
-        if (schedules.containsKey(schedule.getScheduleId())) {
-            throw new IllegalArgumentException("Schedule with ID " + schedule.getScheduleId() + " already exists");
-        }
-
-        schedules.put(schedule.getScheduleId(), schedule);
-    }
-
-    /**
-     * Updates an existing schedule
-     *
-     * @param schedule schedule to update
-     * @throws IllegalArgumentException if schedule doesn't exist
-     */
-    public void update(Schedule schedule) {
-        if (schedule == null) {
-            throw new IllegalArgumentException("Schedule cannot be null");
-        }
-
-        if (!schedules.containsKey(schedule.getScheduleId())) {
-            throw new IllegalArgumentException("Schedule with ID " + schedule.getScheduleId() + " does not exist");
-        }
-
-        schedules.put(schedule.getScheduleId(), schedule);
-    }
-
-    /**
-     * Deletes a schedule from the repository
-     *
-     * @param scheduleId schedule ID to delete
-     * @return true if deleted, false if not found
-     */
-    public boolean delete(String scheduleId) {
-        return schedules.remove(scheduleId) != null;
-    }
-
-    /**
-     * Clears all schedules from the repository
-     */
-    public void clear() {
-        schedules.clear();
     }
 }
