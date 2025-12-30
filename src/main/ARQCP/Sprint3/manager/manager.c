@@ -134,6 +134,8 @@ void export_user_logs() {
     sleep(1);
 }
 
+
+
 // USAC16 - Assign Track to Arriving Train
 void assign_track_to_train() {
     int train_id;
@@ -256,6 +258,90 @@ void set_track_busy() {
     }
     sleep(1);
 }
+//USAC14 As a User, I want to control the track sign light.
+ void control_track_light() {
+     int track_id;
+     char light_choice;
+
+     printf("\n========== TRACK LIGHT CONTROL ==========\n");
+     printf("Enter Track ID: ");
+     if (scanf("%d", &track_id) != 1) {
+         getchar();
+         return;
+     }
+     getchar(); // Clear newline
+
+     // Validate track exists
+     int idx = -1;
+     for (int i = 0; i < num_tracks; i++) {
+         if (tracks[i].id == track_id) {
+             idx = i;
+             break;
+         }
+     }
+
+     if (idx == -1) {
+         printf("[ERROR] Track ID %d not found.\n", track_id);
+         sleep(1);
+         return;
+     }
+
+     printf("\nSelect Light Color:\n");
+     printf("  [G] GREEN   - Free/Departure\n");
+     printf("  [Y] YELLOW  - Assigned/Caution\n");
+     printf("  [R] RED     - Stopped/Occupied\n");
+     printf("  [B] BLINK   - Red Blinking (Inoperative)\n");
+     printf("\nChoice: ");
+
+     scanf("%c", &light_choice);
+     getchar(); // Clear newline
+
+     char* command_code = NULL;
+     char* log_action = NULL;
+     int new_state = tracks[idx].state; // Keep current state by default
+
+     switch(light_choice) {
+         case 'G':
+         case 'g':
+             command_code = "GE";
+             log_action = "SET LIGHT GREEN";
+             new_state = STATE_FREE;
+             break;
+         case 'Y':
+         case 'y':
+             command_code = "YE";
+             log_action = "SET LIGHT YELLOW";
+             new_state = STATE_ASSIGNED;
+             break;
+         case 'R':
+         case 'r':
+             command_code = "RE";
+             log_action = "SET LIGHT RED";
+             new_state = STATE_BUSY;
+             break;
+         case 'B':
+         case 'b':
+             command_code = "RB";
+             log_action = "SET LIGHT BLINKING";
+             new_state = STATE_INOP;
+             break;
+         default:
+             printf("[ERROR] Invalid choice.\n");
+             sleep(1);
+             return;
+     }
+
+     // Update track state and send command
+     update_track_struct(&tracks[idx], new_state, tracks[idx].train_id);
+     send_track_command(idx, command_code);
+     record_action(current_user, log_action, track_id);
+
+     printf("[SUCCESS] Track #%d light set to %s\n", track_id,
+            command_code[0] == 'G' ? "GREEN" :
+            command_code[0] == 'Y' ? "YELLOW" :
+            command_code[1] == 'B' ? "RED BLINKING" : "RED");
+     sleep(1);
+ }
 
 void manager_main_loop() {
     SensorData sensors;
@@ -310,7 +396,7 @@ void manager_main_loop() {
 
         // 3. UI Menu with Quit Option
         printf("\nUSER: %s\n", current_user->username);
-        printf("COMMANDS: [1]Assign [2]Free [3]Inop [4]Stopped [5]ExportLogs [0]Quit [ENTER]Refresh\n");
+        printf("COMMANDS: [1]Assign [2]Free [3]Inop [4]Stopped [5]ExportLogs [6]ControlLight [0]Quit [ENTER]Refresh\n");
         printf("Choice > ");
 
         if (!fgets(command_buffer, sizeof(command_buffer), stdin)) break;
@@ -335,6 +421,9 @@ void manager_main_loop() {
                 sleep(1);
             }
         }
+        else if (command_buffer[0] == '6') {
+                    control_track_light(); 
+                }
         }
         // Se for ENTER (newline), apenas continua o loop e atualiza sensores/board
 

@@ -1,15 +1,15 @@
-**1. Teste de Registo com Sucesso (Múltiplas Bitolas)**
+**1. Teste de Registo com Sucesso**
 
-+ O que é testado: O registo correto de um novo Modelo de Vagão e a inserção das suas bitolas (padrão e adicionais) nas tabelas respetivas.
++ O que é testado: O registo correto de um novo Modelo de Vagão com uma única bitola associada.
 
-**Importância:** Verificar se a funcionalidade principal cumpre o objetivo: inserir os dados na tabela *Wagon_Model* e povoar corretamente a tabela de associação *Wagon_Model_Gauge*.
+**Importância:** Verificar se a funcionalidade principal cumpre o objetivo: inserir os dados na tabela *Wagon_Model* e povoar corretamente a tabela de associação *Wagon_Model_Gauge* com apenas um registo de bitola.
 
 **Como funciona:**
 
-+ Define os dados de um novo modelo (ID 9001) com bitola padrão 1668 mm e uma bitola extra 1435 mm.
++ Define os dados de um novo modelo (ID 8001) e passa o ID da bitola (1668 mm) como parâmetro direto.
 
 + Chama o procedimento *pr_register_wagon_model*.
 
-+ Faz um SELECT COUNT(*) à tabela *Wagon_Model* (deve ser 1) e à tabela *Wagon_Model_Gauge* (deve ser 2, correspondendo às duas bitolas).
++ Verifica se o registo foi criado na tabela *Wagon_Model* e se existe exatamente 1 linha na tabela *Wagon_Model_Gauge* para este modelo.
 
-+ Para o teste passar, ambas as contagens têm de estar corretas.
++ Para o teste passar, a mensagem "SUCESSO" deve ser devolvida.

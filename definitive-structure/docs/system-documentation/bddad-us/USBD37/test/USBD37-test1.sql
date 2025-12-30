@@ -1,43 +1,44 @@
+SET SERVEROUTPUT ON;
 DECLARE
-v_count_model NUMBER;
-    v_count_gauges NUMBER;
+v_new_model_id NUMBER := 8001; -- ID Novo
+    v_gauge_id     NUMBER := 1668; -- Bitola Ibérica (Existe no USBD32)
+    v_count_m      NUMBER;
+    v_count_g      NUMBER;
 BEGIN
-    DBMS_OUTPUT.PUT_LINE('--- TESTE 1: Registar Novo Modelo de Vagão com Múltiplas Bitolas (Cenário de Sucesso) ---');
+    DBMS_OUTPUT.PUT_LINE('--- USBD37: TESTE 1 (Sucesso) ---');
 
-    -- 1. Executar a ação (Modelo 9001, Bitola base 1668, extra 1435)
-    pr_register_wagon_model(
-        p_model_id => 9001,
-        p_model_name => 'Vagão Teste X',
-        p_maker => 'Fabrica Teste',
-        p_num_bogies => 4,
-        p_bogies_type => 'Y25',
-        p_length_mm => 15000,
-        p_width_mm => 3000,
-        p_height_mm => 4000,
-        p_weight_tons => 25,
+    -- Limpeza preventiva
+DELETE FROM Wagon_Model_Gauge WHERE wagon_model_id = v_new_model_id;
+DELETE FROM Wagon_Model WHERE id = v_new_model_id;
+
+-- Executar Procedure
+pr_register_wagon_model(
+        p_model_id      => v_new_model_id,
+        p_model_name    => 'Modelo Teste 8001',
+        p_maker         => 'Fabrica Teste',
+        p_num_bogies    => 4,
+        p_bogies_type   => 'Y25',
+        p_length_mm     => 14000,
+        p_width_mm      => 3000,
+        p_height_mm     => 4000,
+        p_weight_tons   => 20,
         p_max_speed_kmh => 120,
-        p_payload_tons => 70,
-        p_volume_m3 => 90,
-        p_type_desc => 'Plataforma',
-        p_default_gauge => 1668,
-        p_gauge_list => '1435'
+        p_payload_tons  => 60,
+        p_volume_m3     => 80,
+        p_type_desc     => 'Contentor',
+        p_gauge_id      => v_gauge_id
     );
 
-    -- 2. Validar o resultado
-    -- Deve existir 1 registo na tabela de modelos
-SELECT COUNT(*) INTO v_count_model FROM Wagon_Model WHERE id = 9001;
+    -- Validação
+SELECT COUNT(*) INTO v_count_m FROM Wagon_Model WHERE id = v_new_model_id;
+SELECT COUNT(*) INTO v_count_g FROM Wagon_Model_Gauge WHERE wagon_model_id = v_new_model_id AND gauge_value = v_gauge_id;
 
--- Devem existir 2 registos na tabela de associação de bitolas (1668 e 1435)
-SELECT COUNT(*) INTO v_count_gauges FROM Wagon_Model_Gauge WHERE wagon_model_id = 9001;
-
-IF v_count_model = 1 AND v_count_gauges = 2 THEN
-        DBMS_OUTPUT.PUT_LINE('RESULTADO: SUCESSO. O modelo e as suas 2 bitolas foram registados.');
+IF v_count_m = 1 AND v_count_g = 1 THEN
+        DBMS_OUTPUT.PUT_LINE('RESULTADO: SUCESSO. Modelo criado e bitola associada.');
 ELSE
-        DBMS_OUTPUT.PUT_LINE('RESULTADO: FALHA. Dados não encontrados corretamente (Modelo: ' || v_count_model || ', Bitolas: ' || v_count_gauges || ').');
+        DBMS_OUTPUT.PUT_LINE('RESULTADO: FALHA. Dados não encontrados.');
 END IF;
 
-EXCEPTION
-    WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('RESULTADO: FALHA. Ocorreu um erro inesperado: ' || SQLERRM);
+ROLLBACK; -- Deixa a BD limpa
 END;
 /

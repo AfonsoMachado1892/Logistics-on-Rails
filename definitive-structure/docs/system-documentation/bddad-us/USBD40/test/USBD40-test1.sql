@@ -1,37 +1,40 @@
+SET SERVEROUTPUT ON;
 DECLARE
-v_new_id NUMBER;
-    v_check_freight NUMBER;
-    v_check_wagons NUMBER;
-BEGIN
-    DBMS_OUTPUT.PUT_LINE('--- TESTE 1: Registar Freight com Stock Suficiente (Cenário de Sucesso) ---');
+v_freight_id NUMBER := 9001; -- ID Novo manual
+    v_origin     NUMBER := 50;   -- Leixões (Tem stock)
+    v_dest       NUMBER := 11;   -- Valença
+    v_model      NUMBER := 1104; -- Modelo existente
+    v_qty        NUMBER := 1;    -- Pedir 1 vagão
 
-    -- 1. Executar a ação
-    -- Pede-se 2 vagões do modelo 1104 a partir da estação 50 (Leixões).
-    -- Sabe-se que existem lá vagões deste tipo (ex: 356 3 077, etc.)
-    pr_register_freight(
-        p_origin_id => 50,  -- Origem: Leixões
-        p_dest_id   => 11,  -- Destino: Valença
-        p_date      => SYSDATE + 5,
-        p_model_id  => 1104,
-        p_qty       => 2,   -- Quantidade: 2
-        p_new_id    => v_new_id
+    v_check_f    NUMBER;
+    v_check_w    NUMBER;
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('--- USBD40: TESTE 1 (Sucesso) ---');
+
+    -- Limpeza preventiva
+DELETE FROM Freight_Wagon WHERE freight_id = v_freight_id;
+DELETE FROM Freight WHERE id = v_freight_id;
+
+-- Executar Procedure
+pr_register_freight(
+        p_freight_id => v_freight_id,
+        p_origin_id  => v_origin,
+        p_dest_id    => v_dest,
+        p_date       => SYSDATE + 2,
+        p_model_id   => v_model,
+        p_qty        => v_qty
     );
 
-    -- 2. Validar o resultado
-    -- Verificar se o Freight foi criado
-SELECT COUNT(*) INTO v_check_freight FROM Freight WHERE id = v_new_id;
+    -- Validação
+SELECT COUNT(*) INTO v_check_f FROM Freight WHERE id = v_freight_id;
+SELECT COUNT(*) INTO v_check_w FROM Freight_Wagon WHERE freight_id = v_freight_id;
 
--- Verificar se foram associados 2 vagões na tabela Freight_Wagon
-SELECT COUNT(*) INTO v_check_wagons FROM Freight_Wagon WHERE freight_id = v_new_id;
-
-IF v_check_freight = 1 AND v_check_wagons = 2 THEN
-        DBMS_OUTPUT.PUT_LINE('RESULTADO: SUCESSO. Freight ' || v_new_id || ' criado com 2 vagões associados.');
+IF v_check_f = 1 AND v_check_w = v_qty THEN
+        DBMS_OUTPUT.PUT_LINE('RESULTADO: SUCESSO. Freight criado e vagões associados.');
 ELSE
-        DBMS_OUTPUT.PUT_LINE('RESULTADO: FALHA. Registo incorreto (Freight: ' || v_check_freight || ', Vagões: ' || v_check_wagons || ').');
+        DBMS_OUTPUT.PUT_LINE('RESULTADO: FALHA. Contagem incorreta.');
 END IF;
 
-EXCEPTION
-    WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('RESULTADO: FALHA. Ocorreu um erro inesperado: ' || SQLERRM);
+ROLLBACK;
 END;
 /

@@ -1,0 +1,5 @@
+
+Statement processed.
+--- TEST 2: Normalization (Case & Spaces) ---
+Step 1: Inserted "Porto Test Hub"
+RESULT: SUCCESS. Correctly blocked duplicate via normalization.

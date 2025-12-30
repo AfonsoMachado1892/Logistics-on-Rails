@@ -1,13 +1,15 @@
-**5. Teste de Integridade Referencial (Destino Inexistente)**
+**5. Teste de Falha por Parâmetros Inválidos**
 
-+ O que é testado: A robustez da base de dados e do procedimento ao lidar com identificadores de estações de destino que não existem no sistema.
++ O que é testado: A validação dos dados de entrada, especificamente quantidades negativas ou nulas.
 
-**Importância:** Verifica se as *Foreign Keys* estão ativas e se o procedimento propaga corretamente os erros de integridade do Oracle, impedindo dados inconsistentes (Freights para "lugar nenhum").
+**Importância:** Previne a corrupção de dados ou comportamentos inesperados nos loops de atribuição de vagões.
 
 **Como funciona:**
 
-+ Tenta registar um Freight enviando-o para uma estação de destino com ID 99999 (inexistente).
++ Tenta registar um Freight solicitando uma quantidade de "-5" vagões.
 
-+ Espera-se que o motor da base de dados (Oracle) dispare um erro de violação de chave estrangeira (*Integrity Constraint Violation*).
++ Chama o procedimento *pr_register_freight*.
 
-+ No bloco EXCEPTION, verifica se o código capturado corresponde ao erro de FK (ORA-02291) ou se a transação falhou como esperado. Se falhar, o teste é SUCESSO.
++ O procedimento deve validar se `p_qty > 0` e, caso contrário, lançar a exceção ORA-20010.
+
++ Para o teste passar, o erro de parâmetros inválidos deve ser capturado.

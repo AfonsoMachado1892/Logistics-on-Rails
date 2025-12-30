@@ -1,0 +1,5 @@
+
+Statement processed.
+--- TEST 1: Register Valid Facility ---
+Returned ID: 51
+RESULT: SUCCESS. Name matches input exactly.

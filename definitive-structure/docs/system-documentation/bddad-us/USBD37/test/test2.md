@@ -1,13 +1,15 @@
-**2. Teste de Duplicação de ID (Integridade)**
+**2. Teste de Validação de ID Duplicado**
 
-+ O que é testado: A tentativa de registar um Modelo de Vagão com um ID que já existe na base de dados.
++ O que é testado: A capacidade do sistema de rejeitar o registo de um modelo cujo ID já existe na base de dados.
 
-**Importância:** Garante a integridade da Chave Primária e impede a sobreposição acidental de dados de modelos já existentes.
+**Importância:** Garante a integridade dos dados, impedindo a violação da Chave Primária através de uma mensagem de erro controlada e informativa.
 
 **Como funciona:**
 
-+ Tenta registar um modelo usando o ID 1104 (que já existe nos dados de *setup* do sistema).
++ Tenta registar um modelo utilizando um ID que já existe no sistema (ID 1104).
 
-+ Espera-se que o procedimento detete a duplicidade antes de tentar o INSERT.
++ Chama o procedimento *pr_register_wagon_model*.
 
-+ No bloco EXCEPTION, verifica se o código de erro é -20031 ("Modelo já existe"). Se for, o teste é SUCESSO.
++ O procedimento deve detetar a existência do ID e lançar a exceção personalizada ORA-20031.
+
++ Para o teste passar, o bloco de exceção deve capturar o código -20031 e imprimir a mensagem de sucesso do teste.

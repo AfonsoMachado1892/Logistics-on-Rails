@@ -1,31 +1,25 @@
+SET SERVEROUTPUT ON;
 DECLARE
-v_new_id NUMBER;
+v_freight_id NUMBER := 9999;
 BEGIN
-    DBMS_OUTPUT.PUT_LINE('--- TESTE 5: Integridade Referencial (Estação de Destino Inexistente) ---');
+    DBMS_OUTPUT.PUT_LINE('--- USBD40: TESTE 5 (Falha - Quantidade Negativa) ---');
 
-BEGIN
-        -- Tentar enviar para a estação ID 99999 (que não existe)
-        pr_register_freight(
-            p_origin_id => 50,
-            p_dest_id   => 99999, -- ID Inválido
-            p_date      => SYSDATE + 5,
-            p_model_id  => 1104,
-            p_qty       => 1,
-            p_new_id    => v_new_id
-        );
+    pr_register_freight(
+        p_freight_id => v_freight_id,
+        p_origin_id  => 50,
+        p_dest_id    => 11,
+        p_date       => SYSDATE + 2,
+        p_model_id   => 1104,
+        p_qty        => -5 -- Inválido
+    );
 
-        DBMS_OUTPUT.PUT_LINE('RESULTADO: FALHA. O sistema aceitou uma estação de destino inexistente.');
-
+    DBMS_OUTPUT.PUT_LINE('RESULTADO: FALHA. O sistema aceitou quantidade negativa.');
 EXCEPTION
-        WHEN OTHERS THEN
-            -- O erro de Foreign Key no Oracle é geralmente ORA-02291.
-            -- o SQLCODE será o erro original do Oracle.
-            IF SQLCODE = -2291 THEN
-                DBMS_OUTPUT.PUT_LINE('RESULTADO: SUCESSO. O sistema detetou violação de chave estrangeira (ORA-02291).');
+    WHEN OTHERS THEN
+        IF SQLCODE = -20010 THEN
+            DBMS_OUTPUT.PUT_LINE('RESULTADO: SUCESSO. Erro de parâmetros detetado.');
 ELSE
-                -- Aceita-se qualquer erro que não seja sucesso, mas o ideal é o 2291.
-                DBMS_OUTPUT.PUT_LINE('RESULTADO: SUCESSO (Parcial). Erro detetado: ' || SQLERRM);
+            DBMS_OUTPUT.PUT_LINE('RESULTADO: FALHA. Erro inesperado: ' || SQLERRM);
 END IF;
-END;
 END;
 /
