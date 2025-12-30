@@ -1,120 +1,99 @@
 package LAPR3.repository;
 
-import LAPR3.IO.CSVReader;
+import LAPR3.database.DatabaseConnection;
 import LAPR3.model.Segment;
 
-import java.io.IOException;
-import java.util.*;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-/**
- * Repository for managing segment entities.
- * Provides access to segments and their properties for lines.
- */
 public class SegmentRepository {
-    private final Map<Integer, Segment> segments;
 
-    /**
-     * Constructs a new segment repository
-     */
+    private final List<Segment> segments;
+
     public SegmentRepository() {
-        this.segments = new HashMap<>();
+        this.segments = new ArrayList<>();
     }
 
-    /**
-     * Load segments from CSV file
-     * Expected format: ID, Line, Order, Electrified, Max Weight (kg/m), Length (m), NumberTracks
-     * @param filePath path to segments.csv
-     * @throws IOException if file cannot be read
-     */
-    public void loadFromCSV(String filePath) throws IOException {
-        List<String[]> records = CSVReader.readCSV(filePath);
+    public void loadFromDatabase() {
+        this.segments.clear();
+        // Mapeamento correto com tabela Segment e novos campos de Siding
+        String query = "SELECT id, line_id, sequence_order, electrified, max_weight_kg_m, " +
+                "length_m, number_tracks, siding_position, siding_length " +
+                "FROM Segment ORDER BY line_id, sequence_order";
 
-        for (String[] record : records) {
-            try {
-                if (record.length < 7) {
-                    System.err.println("Invalid segment record: insufficient columns");
-                    continue;
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                int lineId = rs.getInt("line_id");
+                int order = rs.getInt("sequence_order");
+
+                // Conversão 'Yes'/'No' (CHAR(3)) para boolean
+                String electStr = rs.getString("electrified");
+                boolean electrified = "Yes".equalsIgnoreCase(electStr);
+
+                double maxWeight = rs.getDouble("max_weight_kg_m");
+                double length = rs.getDouble("length_m");
+                int tracks = rs.getInt("number_tracks");
+
+                // Tratamento de Nulls para Siding - CORRIGIDO para BigDecimal
+                Double sPos = null;
+                Object sPosObj = rs.getObject("siding_position");
+                if (sPosObj != null) {
+                    if (sPosObj instanceof java.math.BigDecimal) {
+                        sPos = ((java.math.BigDecimal) sPosObj).doubleValue();
+                    } else if (sPosObj instanceof Number) {
+                        sPos = ((Number) sPosObj).doubleValue();
+                    }
                 }
 
-                int id = CSVReader.parseInt(record[0], -1);
-                int lineId = CSVReader.parseInt(record[1], -1);
-                int order = CSVReader.parseInt(record[2], -1);
-                boolean electrified = CSVReader.parseBoolean(record[3]);
-                double maxWeight = CSVReader.parseDouble(record[4], -1);
-                double length = CSVReader.parseDouble(record[5], -1);
-                int numberTracks = CSVReader.parseInt(record[6], -1);
-
-                if (id < 0 || lineId < 0 || order < 0 || maxWeight < 0 ||
-                        length < 0 || numberTracks < 0) {
-                    System.err.println("Invalid segment data: negative values");
-                    continue;
+                Double sLen = null;
+                Object sLenObj = rs.getObject("siding_length");
+                if (sLenObj != null) {
+                    if (sLenObj instanceof java.math.BigDecimal) {
+                        sLen = ((java.math.BigDecimal) sLenObj).doubleValue();
+                    } else if (sLenObj instanceof Number) {
+                        sLen = ((Number) sLenObj).doubleValue();
+                    }
                 }
 
-                Segment segment = new Segment(id, lineId, order, electrified,
-                        maxWeight, length, numberTracks);
-                segments.put(id, segment);
-
-            } catch (IllegalArgumentException e) {
-                System.err.println("Error loading segment: " + e.getMessage());
+                segments.add(new Segment(id, lineId, order, electrified, maxWeight, length, tracks, sPos, sLen));
             }
+            System.out.println("[DB Load] Segmentos carregados: " + segments.size());
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-
-        System.out.println("Loaded " + segments.size() + " segments");
     }
 
-    /**
-     * Find segment by ID
-     */
-    public Optional<Segment> findById(int id) {
-        return Optional.ofNullable(segments.get(id));
-    }
-
-    /**
-     * Find all segments of a line, ordered by segment order
-     */
     public List<Segment> findByLineId(int lineId) {
-        return segments.values().stream()
-                .filter(segment -> segment.getLineId() == lineId)
+        return segments.stream()
+                .filter(s -> s.getLineId() == lineId)
                 .sorted()
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Get total length of all segments in a line
-     */
-    public double getTotalLengthByLine(int lineId) {
-        return segments.values().stream()
-                .filter(segment -> segment.getLineId() == lineId)
-                .mapToDouble(Segment::getLengthMeters)
-                .sum();
-    }
-
-    /**
-     * Check if all segments of a line are electrified
-     */
-    public boolean isLineFullyElectrified(int lineId) {
-        return segments.values().stream()
-                .filter(segment -> segment.getLineId() == lineId)
-                .allMatch(Segment::isElectrified);
-    }
-
-    /**
-     * Get all segments
-     */
     public List<Segment> findAll() {
-        return new ArrayList<>(segments.values());
+        return new ArrayList<>(segments);
     }
 
     /**
-     * Check if segment exists
+     * Finds a segment by its ID
+     * @param id segment identifier
+     * @return Optional containing the segment if found
      */
-    public boolean exists(int id) {
-        return segments.containsKey(id);
+    public Optional<Segment> findById(int id) {
+        return segments.stream()
+                .filter(s -> s.getId() == id)
+                .findFirst();
     }
 
     /**
-     * Get total count
+     * Returns count of segments (needed by UI menus)
      */
     public int count() {
         return segments.size();
