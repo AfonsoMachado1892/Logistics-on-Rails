@@ -111,12 +111,21 @@ public class EnhancedTravelTimeService {
         }
 
         // 10. Build and return result
+        // Convert locomotive number from String to int for TravelTimeResult constructor
+        String locoNumber = train.getLocomotives().get(0).getNumber();
+        int locoNumberInt;
+        try {
+            locoNumberInt = Integer.parseInt(locoNumber);
+        } catch (NumberFormatException e) {
+            locoNumberInt = 0; // Default if not numeric
+        }
+
         return new TravelTimeResult(
                 origin.getName(),
                 destination.getName(),
                 line.getName(),
-                train.getLocomotives().get(0).getNumber(),
-                train.getTrainId(),
+                locoNumberInt,
+                train.getLocomotives().get(0).getName(),
                 segmentDetails
         );
     }

@@ -132,15 +132,54 @@ public class RoutePathService {
      * @return ordered list of all segments
      */
     public List<Segment> getAllSegments(String routeId) {
+        // First, try the full route resolution
         RoutePathResult result = resolveRoutePath(routeId);
 
         if (!result.isValid()) {
-            return List.of();
+            // Fallback: try direct segment counting
+            System.out.println("[DEBUG] Route resolution failed for " + routeId + ": " + result.getErrorMessage());
+            return getAllSegmentsDirect(routeId);
         }
 
         List<Segment> allSegments = new ArrayList<>();
         for (RouteLeg leg : result.getLegs()) {
             allSegments.addAll(leg.getSegments());
+        }
+
+        return allSegments;
+    }
+
+    /**
+     * Direct method to get segments without full route resolution
+     * Used as fallback when resolveRoutePath fails
+     */
+    private List<Segment> getAllSegmentsDirect(String routeId) {
+        Optional<Route> routeOpt = routeRepository.findById(routeId);
+        if (routeOpt.isEmpty()) {
+            return List.of();
+        }
+
+        Route route = routeOpt.get();
+        List<Integer> facilityIds = route.getFacilityIds();
+        List<Segment> allSegments = new ArrayList<>();
+
+        // For each consecutive pair of facilities
+        for (int i = 0; i < facilityIds.size() - 1; i++) {
+            int fromId = facilityIds.get(i);
+            int toId = facilityIds.get(i + 1);
+
+            try {
+                // Find line connecting these facilities
+                Optional<Line> lineOpt = lineRepository.findLineConnecting(fromId, toId);
+                if (lineOpt.isPresent()) {
+                    // Get all segments for this line
+                    List<Segment> lineSegments = segmentRepository.findByLineId(lineOpt.get().getId());
+                    allSegments.addAll(lineSegments);
+                }
+            } catch (Exception e) {
+                // Continue to next leg even if one fails
+                System.out.println("[DEBUG] Failed to get segments for leg " + fromId + "->" + toId + ": " + e.getMessage());
+            }
         }
 
         return allSegments;

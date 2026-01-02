@@ -160,5 +160,6 @@ int send_light_command(const char* port, const char* cmd) {
 }
 
 void display_sensor_data(const SensorData* data) {
+    (void)data; // This tells the compiler the parameter is intentionally unused
     // Helper function used in tests
 }
