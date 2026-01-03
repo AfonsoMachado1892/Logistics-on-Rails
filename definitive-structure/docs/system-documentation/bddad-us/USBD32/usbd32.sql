@@ -199,27 +199,51 @@ INSERT INTO Segment (ID, Line_ID, sequence_order, Electrified, Max_Weight_kg_m, 
 
 
 
--- 3.5. Inserir Locomotivas
+-- 3.5. Inserir Modelos de Locomotivas e Locomotivas (UPDATED for USBD31)
 
+-- Model 1: Siemens Eurosprinter (Electric)
+INSERT INTO Locomotive_Model (id, model_name, make, num_bogies, bogies_type, power_kw, length_m, width_m, height_m, weight_tons, max_speed_kmh, traction_kn, engine_type, voltage, frequency, gauge)
+VALUES (1, 'Eurosprinter', 'Siemens', 2, 'Bo-Bo', 5600, 19.2, 3, 4.375, 87, 220, 300, 'Electric', '25 KV', '50 Hz', 1668);
+
+-- Model 2: Sorefame - Alsthom CP 1900 (Diesel)
+INSERT INTO Locomotive_Model (id, model_name, make, num_bogies, bogies_type, power_kw, length_m, width_m, height_m, weight_tons, max_speed_kmh, traction_kn, engine_type, fuel_capacity_l, gauge)
+VALUES (2, 'CP 1900', 'Sorefame - Alsthom', 2, 'Co-Co', 1623, 19.084, 3.062, 4.31, 117, 100, 396, 'Diesel', 4882, 1668);
+
+-- Model 3: Stadler E4000 (Diesel)
+INSERT INTO Locomotive_Model (id, model_name, make, num_bogies, bogies_type, power_kw, length_m, width_m, height_m, weight_tons, max_speed_kmh, traction_kn, engine_type, fuel_capacity_l, gauge)
+VALUES (3, 'E4000', 'Stadler', 3, 'Co-Co', 3178, 23.02, 3, 4.264, 124, 120, 400, 'Diesel', 6700, 1668);
+
+
+-- Locomotives (Physical Units)
 -- Medway (PT509017800), Captrain (PT507832388)
 
-INSERT INTO Locomotive VALUES ('5621', 'Inês', 'Siemens', 'Eurosprinter', TO_DATE('1995-01-01','YYYY-MM-DD'), 2, 'Bo-Bo', 5600, 19.2, 3, 4.375, 87, 220, 70, 300, 'Electric', '25 KV', '50 Hz', 'PT509017800', 1668, NULL);
+-- Eurosprinters (Model ID 1)
+INSERT INTO Locomotive (loco_number, model_id, name, service_start_date, operational_speed_kmh, operator_vat)
+VALUES ('5621', 1, 'Inês', TO_DATE('1995-01-01','YYYY-MM-DD'), 70, 'PT509017800');
 
-INSERT INTO Locomotive VALUES ('5623', 'Paz', 'Siemens', 'Eurosprinter', TO_DATE('1995-04-01','YYYY-MM-DD'), 2, 'Bo-Bo', 5600, 19.2, 3, 4.375, 87, 220, 70, 300, 'Electric', '25 KV', '50 Hz', 'PT509017800', 1668, NULL);
+INSERT INTO Locomotive (loco_number, model_id, name, service_start_date, operational_speed_kmh, operator_vat)
+VALUES ('5623', 1, 'Paz', TO_DATE('1995-04-01','YYYY-MM-DD'), 70, 'PT509017800');
 
-INSERT INTO Locomotive VALUES ('5630', 'Helena', 'Siemens', 'Eurosprinter', TO_DATE('1996-01-02','YYYY-MM-DD'), 2, 'Bo-Bo', 5600, 19.2, 3, 4.375, 87, 220, 70, 300, 'Electric', '25 KV', '50 Hz', 'PT509017800', 1668, NULL);
+INSERT INTO Locomotive (loco_number, model_id, name, service_start_date, operational_speed_kmh, operator_vat)
+VALUES ('5630', 1, 'Helena', TO_DATE('1996-01-02','YYYY-MM-DD'), 70, 'PT509017800');
 
-INSERT INTO Locomotive VALUES ('1903', 'Eva', 'Sorefame - Alsthom', 'CP 1900', TO_DATE('1981-04-07','YYYY-MM-DD'), 2, 'Co-Co', 1623, 19.084, 3.062, 4.31, 117, 100, 42.5, 396, 'Diesel', NULL, NULL, 'PT509017800', 1668, 4882);
+-- CP 1900 (Model ID 2)
+INSERT INTO Locomotive (loco_number, model_id, name, service_start_date, operational_speed_kmh, operator_vat)
+VALUES ('1903', 2, 'Eva', TO_DATE('1981-04-07','YYYY-MM-DD'), 42.5, 'PT509017800');
 
-INSERT INTO Locomotive VALUES ('5034', 'Adriana', 'Stadler', 'E4000', TO_DATE('2017-02-15','YYYY-MM-DD'), 3, 'Co-Co', 3178, 23.02, 3, 4.264, 124, 120, 100, 400, 'Diesel', NULL, NULL, 'PT509017800', 1668, 6700);
+-- Stadler E4000 (Model ID 3)
+INSERT INTO Locomotive (loco_number, model_id, name, service_start_date, operational_speed_kmh, operator_vat)
+VALUES ('5034', 3, 'Adriana', TO_DATE('2017-02-15','YYYY-MM-DD'), 100, 'PT509017800');
 
-INSERT INTO Locomotive VALUES ('5036', 'Marina', 'Stadler', 'E4000', TO_DATE('2017-02-01','YYYY-MM-DD'), 3, 'Co-Co', 3178, 23.02, 3, 4.264, 124, 120, 100, 400, 'Diesel', NULL, NULL, 'PT509017800', 1668, 6700);
+INSERT INTO Locomotive (loco_number, model_id, name, service_start_date, operational_speed_kmh, operator_vat)
+VALUES ('5036', 3, 'Marina', TO_DATE('2017-02-01','YYYY-MM-DD'), 100, 'PT509017800');
 
--- Nota: O dataset tem uma entrada duplicada para 5036 com Gauge 1435. Como a PK é o número, isto falharia. Assumirei que é a mesma loco adaptada ou erro, mas inseri apenas a primeira (1668).
+-- Captrain E4000 (Model ID 3) - Names are NULL in original data
+INSERT INTO Locomotive (loco_number, model_id, name, service_start_date, operational_speed_kmh, operator_vat)
+VALUES ('335.001', 3, NULL, TO_DATE('2019-05-07','YYYY-MM-DD'), 100, 'PT507832388');
 
-INSERT INTO Locomotive VALUES ('335.001', NULL, 'Stadler', 'E4000', TO_DATE('2019-05-07','YYYY-MM-DD'), 3, 'Co-Co', 3178, 23.02, 3, 4.264, 124, 120, 100, 400, 'Diesel', NULL, NULL, 'PT507832388', 1668, 6700);
-
-INSERT INTO Locomotive VALUES ('335.003', NULL, 'Stadler', 'E4000', TO_DATE('2019-06-03','YYYY-MM-DD'), 3, 'Co-Co', 3178, 23.02, 3, 4.264, 124, 120, 100, 400, 'Diesel', NULL, NULL, 'PT507832388', 1668, 6700);
+INSERT INTO Locomotive (loco_number, model_id, name, service_start_date, operational_speed_kmh, operator_vat)
+VALUES ('335.003', 3, NULL, TO_DATE('2019-06-03','YYYY-MM-DD'), 100, 'PT507832388');
 
 
 
