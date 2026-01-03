@@ -6,6 +6,7 @@ import ESINF.controller.UpgradePlanController;
 import ESINF.controller.RiskAwareShortestPathController;
 import ESINF.repository.RailwayNetworkRepository;
 import LAPR3.UI.menu.MinimalBackboneMenu;
+import LAPR3.UI.menu.FreightAssignmentMenu;
 import LAPR3.controller.DataController;
 import LAPR3.UI.utils.InputValidator;
 import LAPR3.repository.*;
@@ -20,7 +21,7 @@ import java.util.Scanner;
  * Changes from previous version:
  * - FreightManagerMenu → TrafficManagerMenu
  * - Added AutomaticPathPlanningService support
- * - Menu option 15 now shows "Traffic Manager (USLP10) ⭐"
+ * - Menu option 15 now shows "Traffic Manager (USLP10) "
  *
  * @author LAPR3 Team
  * @version 3.0 (USLP10)
@@ -34,6 +35,7 @@ public class MainMenu {
     private final UpgradePlanController upgradePlanController;
     private final MinimalBackboneController minimalBackboneController;
     private final CentralityAnalysisMenu centralityAnalysisMenu;
+    private final RoutePlanningService routePlanningService;
 
     private final DataImportMenu dataImportMenu;
     private final WagonOperationsMenu wagonMenu;
@@ -48,7 +50,7 @@ public class MainMenu {
     private final ProximitySearchMenu proximitySearchMenu;
     private final RadiusSearchResultMenu radiusSearchResultMenu;
 
-    // ⭐ CHANGED FOR USLP10: FreightManagerMenu → TrafficManagerMenu
+    private final FreightAssignmentMenu freightsAssigmentMenu;
     private final TrafficManagerMenu trafficManagerMenu;
 
     private final UpgradePlanMenu upgradePlanMenu;
@@ -74,6 +76,7 @@ public class MainMenu {
         TrainRepository trainRepo = new TrainRepository();
         ScheduleRepository scheduleRepo = new ScheduleRepository();
         RouteRepository routeRepo = new RouteRepository();
+        FreightRepository freightRepo = new FreightRepository();
 
         // 2. Carregar Dados
         try {
@@ -83,6 +86,8 @@ public class MainMenu {
             locoRepo.loadFromDatabase();
             wagonRepo.loadFromDatabase();
             trainRepo.loadFromDatabase();
+            routeRepo.loadFromDatabase();
+            freightRepo.loadFromDatabase();
             // scheduleRepo e routeRepo podem ser carregados se tiverem implementação DB
 
             System.out.println("[System] LAPR3 Database Load Complete.\n");
@@ -123,7 +128,11 @@ public class MainMenu {
         this.proximitySearchMenu = new ProximitySearchMenu(scanner, validator, stationController);
         this.radiusSearchResultMenu = new RadiusSearchResultMenu(scanner, validator, stationController);
 
-        // ⭐ CHANGED FOR USLP10: Initialize TrafficManagerMenu (instead of FreightManagerMenu)
+        // USLP08: Initialize menu
+        this.routePlanningService = new RoutePlanningService();
+        this.freightsAssigmentMenu = new FreightAssignmentMenu(freightRepo, facilityRepo, lineRepo, routePlanningService);
+
+        //  CHANGED FOR USLP10: Initialize TrafficManagerMenu (instead of FreightManagerMenu)
         this.trafficManagerMenu = initializeTrafficManagerMenu(
                 facilityRepo, lineRepo, segmentRepo, routeRepo,
                 locoRepo, wagonRepo, trainRepo, scheduleRepo
@@ -137,7 +146,7 @@ public class MainMenu {
     }
 
     /**
-     * ⭐ CHANGED FOR USLP10: Initializes TrafficManagerMenu (replaces FreightManagerMenu)
+     * USLP10: Initializes TrafficManagerMenu (replaces FreightManagerMenu)
      * Now includes SegmentRepository for automatic path planning
      *
      * @return TrafficManagerMenu with all services configured
@@ -145,7 +154,7 @@ public class MainMenu {
     private TrafficManagerMenu initializeTrafficManagerMenu(
             FacilityRepository facilityRepo,
             LineRepository lineRepo,
-            SegmentRepository segmentRepo,  // ⭐ ADDED for USLP10
+            SegmentRepository segmentRepo,
             RouteRepository routeRepo,
             LocomotiveRepository locoRepo,
             WagonRepository wagonRepo,
@@ -177,11 +186,11 @@ public class MainMenu {
                 locoRepo, wagonRepo, trainRepo, routeRepo, scheduleRepo
         );
 
-        // ⭐ CHANGED FOR USLP10: Return TrafficManagerMenu (with SegmentRepository)
+        //  USLP10: Return TrafficManagerMenu (with SegmentRepository)
         return new TrafficManagerMenu(
                 scanner, validator, dispatcherService, routeRepo, facilityRepo,
                 trainRepo, scheduleRepo, routePathService, visualService,
-                trainImportMenu, lineRepo, segmentRepo  // ⭐ SegmentRepository added
+                trainImportMenu, lineRepo, segmentRepo
         );
     }
 
@@ -216,15 +225,16 @@ public class MainMenu {
         System.out.println("├────────────────────────────────────────────────────────────┤");
         System.out.println("│  RAILWAY NETWORK OPTIMIZATION (Sprint 3)                   │");
         System.out.println("├────────────────────────────────────────────────────────────┤");
-        System.out.println("│  16. Directed Line Upgrade Plan (USEI11)                   │");
-        System.out.println("│  17. Minimal Backbone Network (USEI12)                     │");
-        System.out.println("│  18. Rail Hub Centrality Analysis (USEI13)                 │");
-        System.out.println("│  19. Risk-Aware Shortest Paths (USEI15)                    │");
+        System.out.println("│  17. Directed Line Upgrade Plan (USEI11)                   │");
+        System.out.println("│  18. Minimal Backbone Network (USEI12)                     │");
+        System.out.println("│  19. Rail Hub Centrality Analysis (USEI13)                 │");
+        System.out.println("│  20. Risk-Aware Shortest Paths (USEI15)                    │");
         System.out.println("├────────────────────────────────────────────────────────────┤");
         System.out.println("│  RAILWAY OPERATIONS (LAPR3)                                │");
         System.out.println("├────────────────────────────────────────────────────────────┤");
         System.out.println("│  9. Travel Time Calculation (USLP03)                       │");
-        System.out.println("│  15. Traffic Manager (USLP10)                              │");  // ⭐ CHANGED
+        System.out.println("│  15. Freight Assignment (USLP08)                           │");
+        System.out.println("│  16. Traffic Manager (USLP10)                              │");
         System.out.println("├────────────────────────────────────────────────────────────┤");
         System.out.println("│  0. Exit                                                   │");
         System.out.println("└────────────────────────────────────────────────────────────┘");
@@ -246,11 +256,12 @@ public class MainMenu {
             case 12 -> geoSearchMenu.show();
             case 13 -> proximitySearchMenu.show();
             case 14 -> radiusSearchResultMenu.show();
-            case 15 -> trafficManagerMenu.show();  // ⭐ CHANGED from freightManagerMenu
-            case 16 -> upgradePlanMenu.show();
-            case 17 -> minimalBackboneMenu.show();
-            case 18 -> centralityAnalysisMenu.run();
-            case 19 -> riskAwareShortestPathMenu.show();
+            case 15 -> freightsAssigmentMenu.show();
+            case 16 -> trafficManagerMenu.show();
+            case 17 -> upgradePlanMenu.show();
+            case 18 -> minimalBackboneMenu.show();
+            case 19 -> centralityAnalysisMenu.run();
+            case 20 -> riskAwareShortestPathMenu.show();
             default -> System.out.println("Invalid option!");
         }
     }
