@@ -8,7 +8,6 @@ import java.util.function.Predicate;
 
 /**
  * MapGraph - Adjacency Map implementation of Graph interface
- * Based on theoretical material (Slide 24, 27)
  *
  * Uses a Map structure where:
  * - Key: vertex element (V)

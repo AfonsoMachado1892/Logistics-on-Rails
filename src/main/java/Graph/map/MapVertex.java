@@ -7,7 +7,6 @@ import java.util.Objects;
 
 /**
  * MapVertex - Vertex structure for Adjacency Map representation
- * Based on theoretical material (Slide 24)
  *
  * Each vertex stores:
  * - The vertex element (key)

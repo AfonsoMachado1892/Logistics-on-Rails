@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.function.Predicate;
 
 /**
- * Graph interface - Based on theoretical material (Slide 25-26)
+ * Graph interface
  * Generic interface for graph data structures
  *
  * @param <V> Vertex element type

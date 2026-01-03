@@ -4,7 +4,6 @@ import java.util.Objects;
 
 /**
  * Edge class - Represents an edge in a graph
- * Based on theoretical material (Slide 22)
  *
  * Stores:
  * - Weight of the edge
