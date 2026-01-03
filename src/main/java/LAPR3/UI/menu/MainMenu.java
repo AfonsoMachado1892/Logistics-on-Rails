@@ -57,6 +57,8 @@ public class MainMenu {
     private final MinimalBackboneMenu minimalBackboneMenu;
     private final RiskAwareShortestPathMenu riskAwareShortestPathMenu;
 
+    private final TrainAssignmentMenu trainAssignmentMenu;
+
     public MainMenu(Scanner scanner, DataController dataController, InputValidator validator) {
         this.scanner = scanner;
         this.dataController = dataController;
@@ -137,6 +139,9 @@ public class MainMenu {
                 facilityRepo, lineRepo, segmentRepo, routeRepo,
                 locoRepo, wagonRepo, trainRepo, scheduleRepo
         );
+
+        //uslp09
+        this.trainAssignmentMenu=new TrainAssignmentMenu(scanner,validator);
 
         // Initialize ESINF menus
         this.upgradePlanMenu = new UpgradePlanMenu(scanner, validator, upgradePlanController);
@@ -234,6 +239,7 @@ public class MainMenu {
         System.out.println("├────────────────────────────────────────────────────────────┤");
         System.out.println("│  9. Travel Time Calculation (USLP03)                       │");
         System.out.println("│  15. Freight Assignment (USLP08)                           │");
+        System.out.println("│  21. Train Assemble and route assignment (USLP09)          │");
         System.out.println("│  16. Traffic Manager (USLP10)                              │");
         System.out.println("├────────────────────────────────────────────────────────────┤");
         System.out.println("│  0. Exit                                                   │");
@@ -262,6 +268,7 @@ public class MainMenu {
             case 18 -> minimalBackboneMenu.show();
             case 19 -> centralityAnalysisMenu.run();
             case 20 -> riskAwareShortestPathMenu.show();
+            case 21 -> trainAssignmentMenu.show();
             default -> System.out.println("Invalid option!");
         }
     }
