@@ -1,22 +1,25 @@
 package ESINF.model;
 
-/**
- * Representa as medidas de centralidade calculadas e o HubScore para uma RailwayStation (USEI13).
- */
+import java.util.Locale;
+
 public class HubCentralityResult implements Comparable<HubCentralityResult> {
 
     private final RailwayStation station;
+
+    // Valores Brutos
     private double degree = 0;
     private double strength = 0.0;
     private double betweenness = 0.0;
     private double harmonicCloseness = 0.0;
 
+    // Valores Normalizados (Componentes do HubScore)
     private double strengthNorm = 0.0;
     private double betweennessNorm = 0.0;
     private double harmonicClosenessNorm = 0.0;
+
     private double hubScore = 0.0;
 
-    // Cáluclo do HubScore: 0.35 * betw + 0.35 * harmonic_closeness + 0.30 * strengthNorm
+    // Pesos definidos na US
     private static final double WEIGHT_BETWEENNESS = 0.35;
     private static final double WEIGHT_CLOSENESS = 0.35;
     private static final double WEIGHT_STRENGTH = 0.30;
@@ -25,13 +28,14 @@ public class HubCentralityResult implements Comparable<HubCentralityResult> {
         this.station = station;
     }
 
+    // --- Setters ---
     public void setDegree(double degree) { this.degree = degree; }
     public void setStrength(double strength) { this.strength = strength; }
     public void setBetweenness(double betweenness) { this.betweenness = betweenness; }
     public void setHarmonicCloseness(double harmonicCloseness) { this.harmonicCloseness = harmonicCloseness; }
 
     /**
-     * Normaliza as pontuações em relação aos valores máximos encontrados na rede.
+     * Normaliza as pontuações e calcula o score final.
      */
     public void normalizeScores(double maxStrength, double maxBetweenness, double maxCloseness) {
         this.strengthNorm = (maxStrength > 0) ? strength / maxStrength : 0.0;
@@ -39,38 +43,57 @@ public class HubCentralityResult implements Comparable<HubCentralityResult> {
         this.harmonicClosenessNorm = (maxCloseness > 0) ? harmonicCloseness / maxCloseness : 0.0;
     }
 
-    /**
-     * Calcula o HubScore composto usando as métricas normalizadas e os pesos definidos na US.
-     */
     public void calculateHubScore() {
-        this.hubScore = WEIGHT_BETWEENNESS * this.betweennessNorm
-                + WEIGHT_CLOSENESS * this.harmonicClosenessNorm
-                + WEIGHT_STRENGTH * this.strengthNorm;
+        this.hubScore = (WEIGHT_BETWEENNESS * this.betweennessNorm)
+                + (WEIGHT_CLOSENESS * this.harmonicClosenessNorm)
+                + (WEIGHT_STRENGTH * this.strengthNorm);
     }
 
-    // --- Getters solicitados na US ---
+    // --- Getters Brutos ---
     public int getStid() { return station.getStationId(); }
     public String getStname() { return station.getName(); }
     public double getDegree() { return degree; }
     public double getStrength() { return strength; }
     public double getBetweenness() { return betweenness; }
     public double getHarmonicCloseness() { return harmonicCloseness; }
+
+    // --- Getters Normalizados ---
+    public double getStrengthNorm() { return strengthNorm; }
+    public double getBetweennessNorm() { return betweennessNorm; }
+    public double getHarmonicClosenessNorm() { return harmonicClosenessNorm; }
+
     public double getHubScore() { return hubScore; }
 
     @Override
     public int compareTo(HubCentralityResult other) {
-        // Ordenar por HubScore descendente
         return Double.compare(other.hubScore, this.hubScore);
     }
 
     /**
-     * Formata o resultado para apresentação no formato solicitado pela US.
+     * Formata a linha da tabela com os valores NORMALIZADOS.
+     * Ajustado para alinhar com o cabeçalho que usas.
      */
     @Override
     public String toString() {
-        // stid, stname, degree, strength, betweenness, harmonic_closeness, hubscore
-        // Usa Locale root para garantir ponto decimal independente da locale do SO.
-        return String.format(java.util.Locale.ROOT, "%s, %s, %.0f, %.4f, %.4f, %.4f, %.4f",
-                station.getStationId(), station.getName(), degree, strength, betweenness, harmonicCloseness, hubScore);
+        // Formata usando Locale.ROOT para garantir ponto decimal (.) em vez de vírgula
+        // As colunas agora mostram NormStrength, NormBetw, etc.
+        return String.format(Locale.ROOT,
+                " %-4d | %-12s | %-6.0f | %-8.4f | %-11.4f | %-18.4f | %-8.4f ",
+                station.getStationId(),
+                truncate(station.getName(), 12), // Trunca nomes longos para não partir a tabela
+                degree,
+                strengthNorm,          // <--- AQUI: Valor Normalizado
+                betweennessNorm,       // <--- AQUI: Valor Normalizado
+                harmonicClosenessNorm, // <--- AQUI: Valor Normalizado
+                hubScore
+        );
+    }
+
+    // Auxiliar para cortar strings muito longas na tabela
+    private String truncate(String str, int width) {
+        if (str.length() > width) {
+            return str.substring(0, width);
+        }
+        return str;
     }
 }

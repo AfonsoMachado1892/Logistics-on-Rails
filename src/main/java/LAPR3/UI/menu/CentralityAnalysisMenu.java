@@ -105,18 +105,27 @@ public class CentralityAnalysisMenu implements Runnable {
 
             System.out.println("\n✓ Analysis completed!");
             System.out.printf("  • Computation time: %.2f seconds%n", (endTime - startTime) / 1000.0);
-            System.out.println("\nResultados da Análise de Centralidade (Ordenados por HubScore Descendente):");
+            System.out.println("\nResultados da Análise de Centralidade (Normalizados e Ordenados por HubScore Descendente):");
 
             // Preparar os resultados formatados
-            String[] headers = {"STID", "Station Name", "Degree", "Strength", "Betweenness", "Harmonic Closeness", "HubScore"};
+            String[] headers = {
+                    "STID",
+                    "Station Name",
+                    "Degree",
+                    "Strength",
+                    "Betweenness",
+                    "Harmonic Closeness",
+                    "HubScore"
+            };
+
             List<String[]> data = results.stream()
                     .map(r -> new String[]{
                             String.valueOf(r.getStid()),
                             r.getStname(),
                             String.format("%.0f", r.getDegree()),
-                            String.format("%.4f", r.getStrength()),
-                            String.format("%.4f", r.getBetweenness()),
-                            String.format("%.4f", r.getHarmonicCloseness()),
+                            String.format("%.4f", r.getStrengthNorm()),
+                            String.format("%.4f", r.getBetweennessNorm()),
+                            String.format("%.4f", r.getHarmonicClosenessNorm()),
                             String.format("%.4f", r.getHubScore())
                     }).collect(java.util.stream.Collectors.toList());
 
