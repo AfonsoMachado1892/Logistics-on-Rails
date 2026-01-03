@@ -1,4 +1,5 @@
+
 Statement processed.
 --- TEST 3: Null Input Validation ---
-RESULTADO: SUCESSO (Entrada NULL bloqueada corretamente).
-Mensagem: ORA-20001: Facility name cannot be null or empty.
+RESULT: SUCCESS (NULL input blocked correctly).
+Message: ORA-20002: Facility name cannot be null or empty.

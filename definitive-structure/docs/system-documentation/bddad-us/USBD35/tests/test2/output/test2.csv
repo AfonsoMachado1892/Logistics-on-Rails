@@ -1,5 +1,5 @@
 
 Statement processed.
 --- TEST 2: Normalization (Case & Spaces) ---
-Step 1: Inserted "Porto Test Hub"
+Step 1: Inserted "Porto Test Hub" with ID 902
 RESULT: SUCCESS. Correctly blocked duplicate via normalization.
