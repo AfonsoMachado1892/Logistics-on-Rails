@@ -7,10 +7,10 @@ Este documento descreve a implementação, configuração de dados e testes real
 - As a Planner, I want to add a new gauge (bitola)
 
 **Critérios de Aceitação e Regras de Negócio:**
-* A bitola é identificada por um valor de largura (em mm) e uma descrição.
+* A bitola é identificada por um valor de largura (em mm) e um nome.
 * O sistema deve validar se a largura é um valor positivo (> 0).
 * O sistema deve impedir a duplicação de bitolas (mesma largura).
-* O sistema deve impedir a duplicação de nomes/descrições, ignorando diferenças de maiúsculas/minúsculas e espaços extra (normalização).
+* O sistema deve impedir a duplicação de nomes, ignorando diferenças de maiúsculas/minúsculas e espaços extra (normalização).
 * A implementação deve ser feita através de uma função PL/SQL.
 
 ---
@@ -21,7 +21,7 @@ A lógica central da **USBD38** foi encapsulada na função PL/SQL `insert_gauge
 
 **Detalhes da Implementação:**
 
-1.  **Assinatura da Função:** A função aceita dois parâmetros: `p_gauge_name` (Descrição) e `p_width_mm` (Largura). Retorna um número (`NUMBER`) que representa o código de estado da operação.
+1.  **Assinatura da Função:** A função aceita dois parâmetros: `p_gauge_name` (Nome) e `p_width_mm` (Largura). Retorna um número (`NUMBER`) que representa o código de estado da operação.
 2.  **Validação de Dados Obrigatórios:** Verifica se algum dos parâmetros é `NULL`. Retorna `0` em caso afirmativo.
 3.  **Validação de Regra de Negócio (Largura):** Impede a criação de bitolas com largura negativa ou zero. Retorna `-2` se inválido.
 4.  **Normalização de Texto:** Para garantir que a verificação de duplicados é robusta, o nome de entrada é normalizado:
