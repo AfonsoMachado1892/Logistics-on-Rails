@@ -1,8 +1,10 @@
+SET SERVEROUTPUT ON;
 BEGIN
     DBMS_OUTPUT.PUT_LINE('--- TESTE 4: Tentar inserir com Nome NULL ---');
 
 BEGIN
-        pr_add_building_to_facility(50, NULL, 'Terminal');
+        -- Manual ID 1004
+        pr_add_building_to_facility(1004, 50, NULL, 'Terminal');
 
         DBMS_OUTPUT.PUT_LINE('RESULTADO: FALHA. O sistema aceitou um nome NULL.');
 
