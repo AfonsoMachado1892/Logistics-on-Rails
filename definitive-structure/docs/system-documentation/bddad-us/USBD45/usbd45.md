@@ -18,7 +18,7 @@ Este documento descreve a implementação, configuração de dados e testes real
 
 #### Validação de Topologia
 
-* A instalação de início e a de fim **não podem ser a mesma**.
+* A instalação de início e a de fim **não pode ser a mesma**.
 
 #### Validação de Domínio
 
