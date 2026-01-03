@@ -1,4 +1,8 @@
+
 Statement processed.
---- TEST 2: Duplicate Detection (Case & Spaces) ---
-Step 1: Inserted "Aveiro Test Node"
-RESULT: SUCCESS. Caught expected duplicate error.
+--- Test 2: Duplicate Detection (Independent) ---
+Step 1: Inserting Base Model (ID 200)...
+Step 2: Attempting to insert duplicate name (ID 201)...
+Success: Duplicate correctly detected.
+Error Message Received: ORA-20001: Error: Locomotive Model already exists:    INDEPENDENT    test    MODEL
+Cleanup: Transaction Rolled Back.

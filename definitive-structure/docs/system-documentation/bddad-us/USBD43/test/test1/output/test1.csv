@@ -1,4 +1,4 @@
+
 Statement processed.
---- TEST 1: Insert Valid Facility ---
-Returned ID: 100
-RESULT: SUCCESS. Name matches input exactly.
+--- Test 1: Happy Path ---
+Success! Created Electric Locomotive Model with ID: 100
