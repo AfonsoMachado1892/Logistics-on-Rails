@@ -107,7 +107,6 @@ public class CentralityAnalysisMenu implements Runnable {
             System.out.printf("  • Computation time: %.2f seconds%n", (endTime - startTime) / 1000.0);
             System.out.println("\nResultados da Análise de Centralidade (Normalizados e Ordenados por HubScore Descendente):");
 
-            // Preparar os resultados formatados
             String[] headers = {
                     "STID",
                     "Station Name",

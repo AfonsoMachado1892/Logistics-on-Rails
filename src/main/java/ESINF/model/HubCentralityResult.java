@@ -70,21 +70,19 @@ public class HubCentralityResult implements Comparable<HubCentralityResult> {
     }
 
     /**
-     * Formata a linha da tabela com os valores NORMALIZADOS.
-     * Ajustado para alinhar com o cabeçalho que usas.
+     * Formata a linha da tabela com os valores normalizados.
      */
     @Override
     public String toString() {
         // Formata usando Locale.ROOT para garantir ponto decimal (.) em vez de vírgula
-        // As colunas agora mostram NormStrength, NormBetw, etc.
         return String.format(Locale.ROOT,
                 " %-4d | %-12s | %-6.0f | %-8.4f | %-11.4f | %-18.4f | %-8.4f ",
                 station.getStationId(),
                 truncate(station.getName(), 12), // Trunca nomes longos para não partir a tabela
                 degree,
-                strengthNorm,          // <--- AQUI: Valor Normalizado
-                betweennessNorm,       // <--- AQUI: Valor Normalizado
-                harmonicClosenessNorm, // <--- AQUI: Valor Normalizado
+                strengthNorm,
+                betweennessNorm,
+                harmonicClosenessNorm,
                 hubScore
         );
     }
