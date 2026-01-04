@@ -26,14 +26,14 @@ public class FreightRepository {
                 "wm.NUM_BOGIES, wm.BOGIES_TYPE, wm.WEIGHT_TONS, wm.PAYLOAD_TONS, " +
                 "wm.MAX_SPEED_KMH, wm.LENGTH_MM, wm.WIDTH_MM, wm.HEIGHT_MM, " +
                 "wm.VOLUME_M3, wm.GAUGE " +
-                "FROM SYSTEM.FREIGHT f " +
-                "JOIN SYSTEM.FACILITY fo ON f.ORIGIN_FACILITY_ID = fo.ID " +
-                "JOIN SYSTEM.FACILITY fd ON f.DEST_FACILITY_ID = fd.ID " +
-                "LEFT JOIN SYSTEM.TRAIN_FREIGHT tf ON f.ID = tf.FREIGHT_ID " +
-                "LEFT JOIN SYSTEM.TRAIN_SCHEDULE ts ON tf.TRAIN_ID = ts.TRAIN_ID " +
-                "LEFT JOIN SYSTEM.FREIGHT_WAGON fw ON f.ID = fw.FREIGHT_ID " +
-                "LEFT JOIN SYSTEM.WAGON w ON fw.WAGON_NUMBER = w.WAGON_NUMBER " +
-                "LEFT JOIN SYSTEM.WAGON_MODEL wm ON w.MODEL_ID = wm.ID";
+                "FROM FREIGHT f " +
+                "JOIN FACILITY fo ON f.ORIGIN_FACILITY_ID = fo.ID " +
+                "JOIN FACILITY fd ON f.DEST_FACILITY_ID = fd.ID " +
+                "LEFT JOIN TRAIN_FREIGHT tf ON f.ID = tf.FREIGHT_ID " +
+                "LEFT JOIN TRAIN_SCHEDULE ts ON tf.TRAIN_ID = ts.TRAIN_ID " +
+                "LEFT JOIN FREIGHT_WAGON fw ON f.ID = fw.FREIGHT_ID " +
+                "LEFT JOIN WAGON w ON fw.WAGON_NUMBER = w.WAGON_NUMBER " +
+                "LEFT JOIN WAGON_MODEL wm ON w.MODEL_ID = wm.ID";
 
         try (Connection conn = DatabaseConnection.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
@@ -70,6 +70,7 @@ public class FreightRepository {
                 }
             }
             this.freights.addAll(freightsMap.values());
+            System.out.println("[DB Load] Freights15 carregadas: " + freights.size());
         } catch (SQLException e) {
             System.err.println("Error loading Freights: " + e.getMessage());
         }

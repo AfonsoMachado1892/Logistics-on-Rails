@@ -78,9 +78,9 @@ public class TrainAssignmentRepository {
     public boolean assignTrainToRoute(String locoId, List<String> wagonIds, int routeId, String operatorVat) throws SQLException {
         Connection conn = DatabaseConnection.getInstance().getConnection();
         try {
-            conn.setAutoCommit(false); // Iniciar transação
+            conn.setAutoCommit(false); // Iniciar transaÃ§Ã£o
 
-            // 1. Inserir na tabela TRAIN (Assumindo que associa a locomotiva à rota)
+            // 1. Inserir na tabela TRAIN (Assumindo que associa a locomotiva Ã  rota)
             // Ajusta os nomes das colunas conforme o teu DDL exato de TRAIN
             String sqlTrain = "INSERT INTO TRAIN (OPERATOR_VAT, LOCO_NUMBER, ROUTE_ID) VALUES (?, ?, ?)";
             try (PreparedStatement stmt = conn.prepareStatement(sqlTrain)) {
@@ -90,7 +90,7 @@ public class TrainAssignmentRepository {
                 stmt.executeUpdate();
             }
 
-            // 2. Atualizar os vagões para ficarem associados (ou marcar como em trânsito)
+            // 2. Atualizar os vagÃµes para ficarem associados (ou marcar como em trÃ¢nsito)
             String sqlWagon = "UPDATE WAGON SET CURRENT_FACILITY_ID = NULL WHERE WAGON_NUMBER = ?";
             try (PreparedStatement stmt = conn.prepareStatement(sqlWagon)) {
                 for (String wId : wagonIds) {
@@ -135,7 +135,7 @@ public class TrainAssignmentRepository {
         // Tabela TRAIN_SCHEDULE
         String sqlSchedule = "INSERT INTO train_schedule (schedule_id, train_id, route_id, departure_date, departure_time, status) VALUES (?, ?, ?, TO_DATE(?, 'YYYY-MM-DD'), ?, 'SCHEDULED')";
 
-        // Tabelas de ligação
+        // Tabelas de ligaÃ§Ã£o
         String sqlTrainLoco = "INSERT INTO TRAIN_LOCOMOTIVE (train_id, loco_number) VALUES (?, ?)";
         String sqlFreightWagon = "INSERT INTO FREIGHT_WAGON (freight_id, wagon_number) VALUES (?, ?)";
         String sqlTrainFreight = "INSERT INTO TRAIN_FREIGHT (train_id, freight_id) VALUES (?, ?)";
@@ -158,7 +158,7 @@ public class TrainAssignmentRepository {
 
             // 2. TRAIN
             String[] parts = departureDateTime.trim().split("\\s+");
-            if (parts.length < 2) throw new SQLException("Formato de data/hora inválido.");
+            if (parts.length < 2) throw new SQLException("Formato de data/hora invÃ¡lido.");
             String datePart = parts[0];
             String timePart = parts[1];
 
@@ -185,7 +185,7 @@ public class TrainAssignmentRepository {
                 stmt.executeUpdate();
             }
 
-            // 4. LIGAÇÕES RESTANTES
+            // 4. LIGAÃ‡Ã•ES RESTANTES
             try (PreparedStatement stmt = conn.prepareStatement(sqlTrainFreight)) {
                 stmt.setInt(1, genTrainId);
                 stmt.setInt(2, genFreightId);
@@ -217,7 +217,7 @@ public class TrainAssignmentRepository {
         }
     }
 
-    // Gerador de IDs automáticos: s001, s002...
+    // Gerador de IDs automÃ¡ticos: s001, s002...
     private String generateScheduleId(Connection conn) throws SQLException {
         String sql = "SELECT COUNT(*) + 1 FROM train_schedule";
         try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
