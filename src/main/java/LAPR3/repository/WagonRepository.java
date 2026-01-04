@@ -19,7 +19,7 @@ public class WagonRepository {
     public void loadFromDatabase() {
         this.wagons.clear();
 
-        String query = "SELECT w.wagon_number, w.operator_vat, " +
+        String query = "SELECT w.wagon_number, w.operator_vat, w.current_facility_id, " + // <--- VÍRGULA AQUI
                 "       wm.model_name, wm.maker, wm.type_desc, " +
                 "       wm.num_bogies, wm.bogies_type, " +
                 "       wm.weight_tons, wm.payload_tons, wm.max_speed_kmh, " +
@@ -28,7 +28,6 @@ public class WagonRepository {
                 "FROM Wagon w " +
                 "JOIN Wagon_Model wm ON w.model_id = wm.id " +
                 "ORDER BY w.wagon_number";
-
         try (Connection conn = DatabaseConnection.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
@@ -37,6 +36,7 @@ public class WagonRepository {
                 Wagon wagon = new Wagon(
                         rs.getString("wagon_number"),
                         rs.getString("operator_vat"),
+                        rs.getInt("current_facility_id"),
                         rs.getString("model_name"),
                         rs.getString("maker"),
                         rs.getString("type_desc"),
@@ -50,6 +50,7 @@ public class WagonRepository {
                         rs.getDouble("height_mm"),
                         rs.getDouble("volume_m3"),
                         rs.getDouble("gauge")
+
                 );
                 wagons.add(wagon);
             }

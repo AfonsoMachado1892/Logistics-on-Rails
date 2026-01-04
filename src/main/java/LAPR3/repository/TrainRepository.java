@@ -132,7 +132,7 @@ public class TrainRepository {
 
         // Query completa para ir buscar os dados técnicos à tabela Wagon_Model
         String sql =
-                "SELECT w.wagon_number, w.operator_vat, " +
+                "SELECT w.wagon_number, w.operator_vat, w.current_facility_id, " +
                         "       wm.model_name, wm.maker, wm.type_desc, " +
                         "       wm.num_bogies, wm.bogies_type, " +
                         "       wm.weight_tons, wm.payload_tons, wm.max_speed_kmh, " +
@@ -151,6 +151,7 @@ public class TrainRepository {
                     wagons.add(new Wagon(
                             rs.getString("wagon_number"),
                             rs.getString("operator_vat"),
+                            rs.getInt("current_facility_id"),
                             rs.getString("model_name"),
                             rs.getString("maker"),
                             rs.getString("type_desc"),
@@ -187,7 +188,16 @@ public class TrainRepository {
     public List<Train> findAll() {
         return new ArrayList<>(trains);
     }
-
+    public void save(Train train) {
+        // Se já existe (pelo ID), substitui. Se não, adiciona.
+        Optional<Train> existing = findById(String.valueOf(train.getId()));
+        if (existing.isPresent()) {
+            trains.remove(existing.get());
+        }
+        trains.add(train);
+        // Nota: Como estamos em modo "Memória Local" para a escrita (Sprint 3 requirement),
+        // não fazemos o INSERT na base de dados aqui.
+    }
     /**
      * Finds a train by its ID (String format)
      * @param trainId train identifier
