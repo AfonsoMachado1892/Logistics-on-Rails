@@ -16,15 +16,15 @@ import java.util.Scanner;
 
 /**
  * Main menu for the Cargo Handling System
- * Updated for USLP10 - Traffic Manager with Automatic Path Planning
+ * Updated for USLP08/USLP09/USLP10
  *
- * Changes from previous version:
- * - FreightManagerMenu → TrafficManagerMenu
- * - Added AutomaticPathPlanningService support
- * - Menu option 15 now shows "Traffic Manager (USLP10) "
+ * Changes:
+ * - USLP08: RoutePlanningService (in-memory routes)
+ * - USLP09: TrainAssemblyService (in-memory assembled trains)
+ * - USLP10: TrafficManagerMenu with path planning
  *
  * @author LAPR3 Team
- * @version 3.0 (USLP10)
+ * @version 4.0 (USLP08/09/10)
  */
 public class MainMenu {
 
@@ -35,7 +35,11 @@ public class MainMenu {
     private final UpgradePlanController upgradePlanController;
     private final MinimalBackboneController minimalBackboneController;
     private final CentralityAnalysisMenu centralityAnalysisMenu;
+
+    // ===== SERVICES (USLP08/09) =====
     private final RoutePlanningService routePlanningService;
+    private final TrainAssemblyService trainAssemblyService;
+    // ================================
 
     private final DataImportMenu dataImportMenu;
     private final WagonOperationsMenu wagonMenu;
@@ -57,7 +61,7 @@ public class MainMenu {
     private final MinimalBackboneMenu minimalBackboneMenu;
     private final RiskAwareShortestPathMenu riskAwareShortestPathMenu;
 
-    private final TrainAssignmentMenu trainAssignmentMenu;
+    private final TrainAssemblyMenu trainAssemblyMenu;
 
     public MainMenu(Scanner scanner, DataController dataController, InputValidator validator) {
         this.scanner = scanner;
@@ -65,7 +69,7 @@ public class MainMenu {
         this.validator = validator;
 
         // -------------------------------------------------------------------------
-        // USLP10: BOOTSTRAP - CARREGAMENTO DA BASE DE DADOS (LAPR3)
+        // BOOTSTRAP - CARREGAMENTO DA BASE DE DADOS (LAPR3)
         // -------------------------------------------------------------------------
         System.out.println("\n[System] Connecting to Oracle Database (LAPR3 Data)...");
 
@@ -91,7 +95,6 @@ public class MainMenu {
             routeRepo.loadFromDatabase();
             freightRepo.loadFromDatabase();
             scheduleRepo.loadFromDatabase();
-            // scheduleRepo e routeRepo podem ser carregados se tiverem implementação DB
 
             System.out.println("[System] LAPR3 Database Load Complete.\n");
         } catch (Exception e) {
@@ -105,17 +108,12 @@ public class MainMenu {
         this.stationController = new StationQueryController();
         this.upgradePlanController = new UpgradePlanController();
 
-        // All Sprint 3 Railway Network features share the same repository
         RailwayNetworkRepository railNetworkRepo = upgradePlanController.getRepository();
-
-        // USEI12 shares the same repository as USEI11
         this.minimalBackboneController = new MinimalBackboneController(railNetworkRepo);
-
-        // Controller for USEI15
         RiskAwareShortestPathController riskController = new RiskAwareShortestPathController(railNetworkRepo);
 
         // -------------------------------------------------------------------------
-        // INICIALIZAÇÃO MENUS (Injectando Repositórios BD onde necessário)
+        // INICIALIZAÇÃO MENUS
         // -------------------------------------------------------------------------
 
         this.dataImportMenu = new DataImportMenu(scanner, dataController, validator);
@@ -131,18 +129,43 @@ public class MainMenu {
         this.proximitySearchMenu = new ProximitySearchMenu(scanner, validator, stationController);
         this.radiusSearchResultMenu = new RadiusSearchResultMenu(scanner, validator, stationController);
 
-        // USLP08: Initialize menu
-        this.routePlanningService = new RoutePlanningService(freightRepo, facilityRepo,routeRepo);
-        this.freightsAssigmentMenu = new FreightAssignmentMenu(freightRepo, facilityRepo, lineRepo, routePlanningService);
+        // ===== USLP08: Route Planning Service (IN-MEMORY) =====
+        this.routePlanningService = new RoutePlanningService(
+                freightRepo,
+                facilityRepo
+        );
 
-        //  CHANGED FOR USLP10: Initialize TrafficManagerMenu (instead of FreightManagerMenu)
+        // ===== USLP09: Train Assembly Service (IN-MEMORY) =====
+        this.trainAssemblyService = new TrainAssemblyService(
+                locoRepo,
+                wagonRepo,
+                routePlanningService
+        );
+        // ======================================================
+
+        // USLP08: Freight Assignment Menu
+        this.freightsAssigmentMenu = new FreightAssignmentMenu(
+                freightRepo,
+                facilityRepo,
+                routePlanningService
+        );
+
+        // USLP09: Train Assembly Menu
+        this.trainAssemblyMenu = new TrainAssemblyMenu(
+                scanner,
+                validator,
+                trainAssemblyService,
+                routePlanningService,
+                locoRepo,
+                wagonRepo,
+                facilityRepo
+        );
+
+        // USLP10: Traffic Manager Menu
         this.trafficManagerMenu = initializeTrafficManagerMenu(
                 facilityRepo, lineRepo, segmentRepo, routeRepo,
                 locoRepo, wagonRepo, trainRepo, scheduleRepo
         );
-
-        //uslp09
-        this.trainAssignmentMenu=new TrainAssignmentMenu(scanner,validator);
 
         // Initialize ESINF menus
         this.upgradePlanMenu = new UpgradePlanMenu(scanner, validator, upgradePlanController);
@@ -152,10 +175,7 @@ public class MainMenu {
     }
 
     /**
-     * USLP10: Initializes TrafficManagerMenu (replaces FreightManagerMenu)
-     * Now includes SegmentRepository for automatic path planning
-     *
-     * @return TrafficManagerMenu with all services configured
+     * USLP10: Initializes TrafficManagerMenu
      */
     private TrafficManagerMenu initializeTrafficManagerMenu(
             FacilityRepository facilityRepo,
@@ -167,7 +187,7 @@ public class MainMenu {
             TrainRepository trainRepo,
             ScheduleRepository scheduleRepo) {
 
-        // Initialize services using the passed repositories
+        // Initialize services
         RoutePathService routePathService = new RoutePathService(
                 routeRepo, facilityRepo, lineRepo, segmentRepo);
 
@@ -192,11 +212,11 @@ public class MainMenu {
                 locoRepo, wagonRepo, trainRepo, routeRepo, scheduleRepo
         );
 
-        //  USLP10: Return TrafficManagerMenu (with SegmentRepository)
+        // Return TrafficManagerMenu with routePlanningService
         return new TrafficManagerMenu(
                 scanner, validator, dispatcherService, routeRepo, facilityRepo,
                 trainRepo, scheduleRepo, routePathService, visualService,
-                trainImportMenu, lineRepo, segmentRepo,routePlanningService
+                trainImportMenu, lineRepo, segmentRepo, routePlanningService
         );
     }
 
@@ -240,7 +260,7 @@ public class MainMenu {
         System.out.println("├────────────────────────────────────────────────────────────┤");
         System.out.println("│  9. Travel Time Calculation (USLP03)                       │");
         System.out.println("│  15. Freight Assignment (USLP08)                           │");
-        System.out.println("│  21. Train Assemble and route assignment (USLP09)          │");
+        System.out.println("│  21. Train Assembly and Route Assignment (USLP09)          │");
         System.out.println("│  16. Traffic Manager (USLP10)                              │");
         System.out.println("├────────────────────────────────────────────────────────────┤");
         System.out.println("│  0. Exit                                                   │");
@@ -269,7 +289,7 @@ public class MainMenu {
             case 18 -> minimalBackboneMenu.show();
             case 19 -> centralityAnalysisMenu.run();
             case 20 -> riskAwareShortestPathMenu.show();
-            case 21 -> trainAssignmentMenu.show();
+            case 21 -> trainAssemblyMenu.show();
             default -> System.out.println("Invalid option!");
         }
     }
