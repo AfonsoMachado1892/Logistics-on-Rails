@@ -5,13 +5,13 @@
 <?import javafx.scene.text.*?>
 
 <VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="LAPR3.UI.javafx.TrafficManagerController" spacing="15" styleClass="vbox-container">
-   <Text text="Traffic Manager - Train Scheduling (USLP10)" styleClass="section-title" />
+   <Text text="Traffic Manager - Train Scheduling" styleClass="section-title" />
    
-   <TabPane tabClosingPolicy="UNAVAILABLE">
+   <TabPane fx:id="internalTabPane" tabClosingPolicy="UNAVAILABLE">
       <tabs>
-         <Tab text="📋 Planned Routes">
+         <Tab text="Planned Routes">
             <VBox spacing="10" styleClass="vbox-container">
-               <Text text="Planned Routes (from USLP08)" styleClass="label-title" />
+               <Text text="Planned Routes" styleClass="label-title" />
                <TableView fx:id="plannedRoutesTable" styleClass="table-view" prefHeight="200">
                   <columns>
                      <TableColumn fx:id="routeIdColumn" text="Route ID" prefWidth="150" />
@@ -22,7 +22,7 @@
             </VBox>
          </Tab>
 
-         <Tab text="🗺️ Path Planning">
+         <Tab text="Path Planning">
             <VBox spacing="10" styleClass="vbox-container">
                <HBox spacing="10" styleClass="hbox-container">
                   <Label text="Select Route:" />
@@ -47,8 +47,8 @@
                      <ListView fx:id="manualPathList" prefHeight="200" />
                      <HBox spacing="5">
                         <ComboBox fx:id="facilityComboBox" prefWidth="150" />
-                        <Button fx:id="addFacilityButton" text="Add" />
-                        <Button fx:id="clearPathButton" text="Clear" />
+                        <Button fx:id="addFacilityButton" text="Add" minWidth="70" />
+                        <Button fx:id="clearPathButton" text="Clear" minWidth="70" />
                      </HBox>
                   </VBox>
 
@@ -61,7 +61,7 @@
             </VBox>
          </Tab>
 
-         <Tab text="📅 Schedules">
+         <Tab text="Schedules">
             <VBox spacing="10" styleClass="vbox-container">
                <Text text="Train Schedules" styleClass="label-title" />
                <TableView fx:id="schedulesTable" styleClass="table-view" prefHeight="300">
@@ -76,7 +76,7 @@
             </VBox>
          </Tab>
 
-         <Tab text="📊 Dispatch Plan">
+         <Tab text="Dispatch Plan">
             <VBox spacing="10" styleClass="vbox-container">
                <Text text="Generate Dispatch Plan" styleClass="label-title" />
                <HBox spacing="10" styleClass="hbox-container">

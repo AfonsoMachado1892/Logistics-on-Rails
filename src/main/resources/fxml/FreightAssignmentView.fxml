@@ -5,12 +5,12 @@
 <?import javafx.scene.text.*?>
 
 <VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="LAPR3.UI.javafx.FreightAssignmentController" spacing="15" styleClass="vbox-container">
-   <Text text="Freight Route Planning (USLP08)" styleClass="section-title" />
+   <Text text="Freight Route Planning" styleClass="section-title" />
    
    <HBox spacing="10" styleClass="hbox-container">
-      <Button fx:id="refreshButton" text="🔄 Refresh" />
-      <Button fx:id="createSimpleRouteButton" text="➕ Create Simple Route" />
-      <Button fx:id="createCompositeRouteButton" text="🔗 Create Composite Route" />
+      <Button fx:id="refreshButton" text="Refresh" />
+      <Button fx:id="createSimpleRouteButton" text="Create Simple Route" />
+      <Button fx:id="createCompositeRouteButton" text="Create Composite Route" />
    </HBox>
 
    <SplitPane dividerPositions="0.5" orientation="HORIZONTAL">
@@ -18,7 +18,7 @@
          <Text text="Available Freights" styleClass="label-title" />
          <TableView fx:id="freightTable" styleClass="table-view">
             <columns>
-               <TableColumn fx:id="freightIdColumn" text="ID" prefWidth="60" />
+               <TableColumn fx:id="freightIdColumn" text="ID" prefWidth="100" minWidth="80" />
                <TableColumn fx:id="originColumn" text="Origin" prefWidth="150" />
                <TableColumn fx:id="destinationColumn" text="Destination" prefWidth="150" />
                <TableColumn fx:id="wagonsColumn" text="Wagons" prefWidth="80" />
@@ -30,9 +30,9 @@
             <Text text="Selected Freights for Composite Route:" styleClass="label-subtitle" />
             <ListView fx:id="selectedFreightsList" prefHeight="100" />
             <HBox spacing="5">
-               <Button fx:id="addFreightButton" text="➕ Add Selected" />
-               <Button fx:id="removeFreightButton" text="➖ Remove" />
-               <Button fx:id="clearSelectionButton" text="🗑️ Clear" />
+               <Button fx:id="addFreightButton" text="Add Selected" />
+               <Button fx:id="removeFreightButton" text="Remove" />
+               <Button fx:id="clearSelectionButton" text="Clear" />
             </HBox>
          </VBox>
       </VBox>

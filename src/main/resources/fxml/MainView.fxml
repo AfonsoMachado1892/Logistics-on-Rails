@@ -8,24 +8,18 @@
    <top>
       <VBox styleClass="header-container">
          <HBox styleClass="header-box">
-            <Text styleClass="header-title" text="🚂 Railway Network Logistics Management" />
+            <Text styleClass="header-title" text="Railway Network Logistics Management" />
             <Region HBox.hgrow="ALWAYS" />
-            <Text styleClass="header-subtitle" text="USLP08 • USLP09 • USLP10" />
+            <Text styleClass="header-subtitle" text="Operational Management System" />
          </HBox>
       </VBox>
    </top>
    <center>
       <TabPane fx:id="mainTabPane" styleClass="main-tab-pane" tabClosingPolicy="UNAVAILABLE">
          <tabs>
-            <Tab fx:id="freightAssignmentTab" text="📦 Freight Assignment (USLP08)" closable="false">
-               <fx:include source="FreightAssignmentView.fxml" />
-            </Tab>
-            <Tab fx:id="trainAssemblyTab" text="🚂 Train Assembly (USLP09)" closable="false">
-               <fx:include source="TrainAssemblyView.fxml" />
-            </Tab>
-            <Tab fx:id="trafficManagerTab" text="📊 Traffic Manager (USLP10)" closable="false">
-               <fx:include source="TrafficManagerView.fxml" />
-            </Tab>
+            <Tab fx:id="freightAssignmentTab" text="Freight Assignment" closable="false" />
+            <Tab fx:id="trainAssemblyTab" text="Train Assembly" closable="false" />
+            <Tab fx:id="trafficManagerTab" text="Traffic Manager" closable="false" />
          </tabs>
       </TabPane>
    </center>
