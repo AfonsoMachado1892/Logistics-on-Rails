@@ -39,7 +39,15 @@ END IF;
 INSERT INTO Facility (id, name)
 VALUES (p_facility_id, v_clean_name);
 
+-- 6. TRANSAÇÃO: Sucess
+COMMIT;
 -- Return the ID that was just inserted
 RETURN p_facility_id;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        -- 7. TRANSAÇÃO: Erro
+        ROLLBACK;
+        RAISE;
 END;
 /
