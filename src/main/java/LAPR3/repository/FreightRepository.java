@@ -22,7 +22,7 @@ public class FreightRepository {
         // Updated query to fetch Facility IDs (f.ORIGIN_FACILITY_ID, f.DEST_FACILITY_ID)
         String query = "SELECT f.ID, f.FREIGHT_DATE, f.ORIGIN_FACILITY_ID, f.DEST_FACILITY_ID, " +
                 "fo.NAME AS ORIGIN_NAME, fd.NAME AS DEST_NAME, ts.ROUTE_ID, " +
-                "w.WAGON_NUMBER, w.OPERATOR_VAT, wm.MODEL_NAME, wm.MAKER, wm.TYPE_DESC, " +
+                "w.WAGON_NUMBER, w.OPERATOR_VAT, w.current_facility_id, wm.MODEL_NAME, wm.MAKER, wm.TYPE_DESC, " +
                 "wm.NUM_BOGIES, wm.BOGIES_TYPE, wm.WEIGHT_TONS, wm.PAYLOAD_TONS, " +
                 "wm.MAX_SPEED_KMH, wm.LENGTH_MM, wm.WIDTH_MM, wm.HEIGHT_MM, " +
                 "wm.VOLUME_M3, wm.GAUGE " +
@@ -59,6 +59,7 @@ public class FreightRepository {
                 if (rs.getString("WAGON_NUMBER") != null) {
                     freight.addWagon(new Wagon(
                             rs.getString("WAGON_NUMBER"), rs.getString("OPERATOR_VAT"),
+                            rs.getInt("CURRENT_FACILITY_ID"),
                             rs.getString("MODEL_NAME"),   rs.getString("MAKER"),
                             rs.getString("TYPE_DESC"),    rs.getInt("NUM_BOGIES"),
                             rs.getString("BOGIES_TYPE"),  rs.getDouble("WEIGHT_TONS"),

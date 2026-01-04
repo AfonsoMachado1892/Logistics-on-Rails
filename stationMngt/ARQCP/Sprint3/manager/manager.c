@@ -374,7 +374,6 @@ void manager_main_loop() {
         }
 
         update_board_view(tracks, num_tracks, &sensors);
-        printf("\nUSER: %s\n", current_user->username);
 
         char choice = get_menu_choice();
         switch(choice) {

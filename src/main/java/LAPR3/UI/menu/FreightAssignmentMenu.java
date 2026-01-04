@@ -9,21 +9,19 @@ import java.util.stream.Collectors;
 
 /**
  * Menu for USLP08 - Freight Route Planning
- * Creates routes with ACTIONS only (no path)
  */
 public class FreightAssignmentMenu {
     private final FreightRepository freightRepo;
     private final FacilityRepository facilityRepo;
-    private final LineRepository lineRepo;
     private final RoutePlanningService planningService;
     private final Scanner scanner = new Scanner(System.in);
 
-    public FreightAssignmentMenu(FreightRepository fgr, FacilityRepository fr,
-                                 LineRepository lr, RoutePlanningService rps) {
-        this.freightRepo = fgr;
-        this.facilityRepo = fr;
-        this.lineRepo = lr;
-        this.planningService = rps;
+    public FreightAssignmentMenu(FreightRepository freightRepo,
+                                 FacilityRepository facilityRepo,
+                                 RoutePlanningService planningService) {
+        this.freightRepo = freightRepo;
+        this.facilityRepo = facilityRepo;
+        this.planningService = planningService;
     }
 
     public void show() {
@@ -49,11 +47,11 @@ public class FreightAssignmentMenu {
                     case 2 -> createSimpleRoute();
                     case 3 -> createCompositeRoute();
                     case 4 -> viewPlannedRoutes();
-                    case 0 -> System.out.println("Returning to main menu...");
-                    default -> System.out.println("Invalid option. Please try again.");
+                    case 0 -> System.out.println("Returning...");
+                    default -> System.out.println("Invalid option.");
                 }
             } catch (InputMismatchException e) {
-                System.out.println("✗ Invalid input. Please enter a number.");
+                System.out.println("✗ Invalid input.");
                 scanner.nextLine();
                 option = -1;
             }
@@ -69,7 +67,7 @@ public class FreightAssignmentMenu {
         List<Freight> all = freightRepo.findAll();
 
         if (all.isEmpty()) {
-            System.out.println("\nNo freights found in the system.");
+            System.out.println("\nNo freights found.");
             return;
         }
 
@@ -77,199 +75,119 @@ public class FreightAssignmentMenu {
         System.out.println("FREIGHT LISTING");
         System.out.println("═".repeat(100));
 
-        int count = 1;
         for (Freight f : all) {
-            Optional<PlannedRoute> route = planningService.findPlanByFreight(f.getId());
-
-            System.out.printf("\n[%d] Freight %d\n", count++, f.getId());
-            System.out.printf("    Origin: %s (ID: %d)\n", f.getOriginName(), f.getOriginId());
-            System.out.printf("    Destination: %s (ID: %d)\n", f.getDestinationName(), f.getDestinationId());
-            System.out.printf("    Status: %s\n",
-                    route.isPresent() ? "✓ PLANNED (Route: " + route.get().getId() + ")" : "○ PENDING");
-            System.out.printf("    Wagons: %d\n", f.getAssignedWagons().size());
-
-            if (!f.getAssignedWagons().isEmpty()) {
-                Wagon firstWagon = f.getAssignedWagons().get(0);
-                System.out.printf("    Type: %s\n", firstWagon.getTypeDesc());
-            }
-
-            System.out.println("    " + "─".repeat(80));
+            System.out.printf("\nFreight %d: %s → %s\n",
+                    f.getId(), f.getOriginName(), f.getDestinationName());
+            System.out.printf("  Wagons: %d | Date: %s\n",
+                    f.getAssignedWagons().size(), f.getDate());
         }
-
-        System.out.printf("\nTotal: %d freights (%d pending, %d planned)\n",
-                all.size(),
-                freightRepo.findAllPending().stream()
-                        .filter(f -> planningService.findPlanByFreight(f.getId()).isEmpty())
-                        .count(),
-                all.size() - freightRepo.findAllPending().stream()
-                        .filter(f -> planningService.findPlanByFreight(f.getId()).isEmpty())
-                        .count());
     }
 
     private void createSimpleRoute() {
-        System.out.println("\n" + "═".repeat(60));
-        System.out.println("  CREATE SIMPLE ROUTE (1 Freight)");
-        System.out.println("═".repeat(60));
+        System.out.println("\n═══ CREATE SIMPLE ROUTE ═══");
 
-        // List pending freights
-        List<Freight> pending = freightRepo.findAllPending().stream()
-                .filter(f -> planningService.findPlanByFreight(f.getId()).isEmpty())
+        List<Freight> pending = freightRepo.findAll().stream()
+                .filter(f -> f.getAssignedWagons().size() > 0)
                 .collect(Collectors.toList());
 
         if (pending.isEmpty()) {
-            System.out.println("\n✗ No pending freights available.");
+            System.out.println("\n✗ No freights with wagons available.");
             return;
         }
 
-        System.out.println("\nAvailable Freights:\n");
+        System.out.println("\nAvailable Freights:");
         for (Freight f : pending) {
-            System.out.printf("[%d] %s → %s (%d wagons, %s)\n",
-                    f.getId(),
-                    f.getOriginName(),
-                    f.getDestinationName(),
-                    f.getAssignedWagons().size(),
-                    f.getAssignedWagons().isEmpty() ? "no type" :
-                            f.getAssignedWagons().get(0).getTypeDesc());
+            System.out.printf("[%d] %s → %s (%d wagons)\n",
+                    f.getId(), f.getOriginName(), f.getDestinationName(),
+                    f.getAssignedWagons().size());
         }
 
         System.out.print("\nEnter Freight ID: ");
-        int freightId;
-        try {
-            freightId = scanner.nextInt();
-            scanner.nextLine();
-        } catch (InputMismatchException e) {
-            System.out.println("\n✗ Invalid input.");
-            scanner.nextLine();
-            return;
-        }
+        int freightId = scanner.nextInt();
+        scanner.nextLine();
 
         try {
             PlannedRoute route = planningService.createSimpleRoute(freightId);
-            System.out.println("\n" + "✓".repeat(60));
-            System.out.println("  Simple Route created successfully!");
-            System.out.println("✓".repeat(60));
+            System.out.println("\n✓ Simple Route created!");
             System.out.println("\n" + planningService.formatRoute(route));
-
         } catch (Exception e) {
             System.out.println("\n✗ Error: " + e.getMessage());
         }
     }
 
     private void createCompositeRoute() {
-        System.out.println("\n" + "═".repeat(60));
-        System.out.println("  CREATE COMPOSITE ROUTE (Multiple Freights)");
-        System.out.println("═".repeat(60));
-        System.out.println("\nNote: Freights must form a chain:");
-        System.out.println("  Destination of Freight[i] = Origin of Freight[i+1]");
-        System.out.println();
+        System.out.println("\n═══ CREATE COMPOSITE ROUTE ═══");
+        System.out.println("Note: Freight chain must be valid (dest[i] = origin[i+1])\n");
 
-        List<Integer> selectedFreightIds = new ArrayList<>();
+        List<Integer> selectedIds = new ArrayList<>();
 
         while (true) {
-            // List available freights (not yet selected)
-            List<Freight> available = freightRepo.findAllPending().stream()
-                    .filter(f -> planningService.findPlanByFreight(f.getId()).isEmpty())
-                    .filter(f -> !selectedFreightIds.contains(f.getId()))
+            List<Freight> available = freightRepo.findAll().stream()
+                    .filter(f -> !selectedIds.contains(f.getId()))
+                    .filter(f -> f.getAssignedWagons().size() > 0)
                     .collect(Collectors.toList());
 
-            if (available.isEmpty() && selectedFreightIds.isEmpty()) {
-                System.out.println("\n✗ No pending freights available.");
-                return;
-            }
-
-            // Show current selection
-            if (!selectedFreightIds.isEmpty()) {
-                System.out.println("\n" + "─".repeat(60));
-                System.out.println("Current Selection:");
-                System.out.println("─".repeat(60));
-                for (int i = 0; i < selectedFreightIds.size(); i++) {
-                    int id = selectedFreightIds.get(i);
-                    Freight f = freightRepo.findById(id).get();
-                    System.out.printf("  %d. Freight %d: %s → %s (%d wagons)\n",
-                            i + 1, id, f.getOriginName(), f.getDestinationName(),
-                            f.getAssignedWagons().size());
+            if (!selectedIds.isEmpty()) {
+                System.out.println("\nCurrent Selection:");
+                for (int i = 0; i < selectedIds.size(); i++) {
+                    Freight f = freightRepo.findById(selectedIds.get(i)).get();
+                    System.out.printf("  %d. Freight %d: %s → %s\n",
+                            i + 1, f.getId(), f.getOriginName(), f.getDestinationName());
                 }
-                System.out.println("─".repeat(60));
-            }
 
-            // Validate chain if we have at least one freight
-            if (!selectedFreightIds.isEmpty()) {
-                int lastId = selectedFreightIds.get(selectedFreightIds.size() - 1);
+                int lastId = selectedIds.get(selectedIds.size() - 1);
                 Freight lastFreight = freightRepo.findById(lastId).get();
                 int requiredOrigin = lastFreight.getDestinationId();
 
                 System.out.println("\n⚠ Next freight must start at: " +
-                        facilityRepo.findById(requiredOrigin).get().getName() +
-                        " (ID: " + requiredOrigin + ")");
+                        facilityRepo.findById(requiredOrigin).get().getName());
 
-                // Filter available freights to only those starting at required origin
                 available = available.stream()
                         .filter(f -> f.getOriginId() == requiredOrigin)
                         .collect(Collectors.toList());
+            }
 
-                if (available.isEmpty() && selectedFreightIds.size() >= 2) {
-                    System.out.println("\n✓ No more compatible freights.");
-                    System.out.println("  You can finish the route now or cancel.");
-                }
+            if (available.isEmpty() && selectedIds.size() >= 2) {
+                System.out.println("\n✓ No more compatible freights. Ready to create route.");
+                break;
             }
 
             System.out.println("\nAvailable Freights:");
-            if (available.isEmpty()) {
-                System.out.println("  (none)");
-            } else {
-                for (Freight f : available) {
-                    System.out.printf("  [%d] %s → %s (%d wagons)\n",
-                            f.getId(),
-                            f.getOriginName(),
-                            f.getDestinationName(),
-                            f.getAssignedWagons().size());
-                }
+            for (Freight f : available) {
+                System.out.printf("[%d] %s → %s (%d wagons)\n",
+                        f.getId(), f.getOriginName(), f.getDestinationName(),
+                        f.getAssignedWagons().size());
             }
 
-            System.out.print("\nEnter Freight ID (0 to finish, -1 to cancel): ");
-            int choice;
-            try {
-                choice = scanner.nextInt();
-                scanner.nextLine();
-            } catch (InputMismatchException e) {
-                System.out.println("\n✗ Invalid input.");
-                scanner.nextLine();
-                continue;
-            }
-
-            if (choice == -1) {
-                System.out.println("\n✗ Cancelled.");
-                return;
-            }
+            System.out.print("\nEnter Freight ID (0 to finish): ");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
 
             if (choice == 0) {
-                if (selectedFreightIds.size() < 2) {
-                    System.out.println("\n✗ Composite route requires at least 2 freights.");
+                if (selectedIds.size() < 2) {
+                    System.out.println("\n✗ Need at least 2 freights.");
                     continue;
                 }
                 break;
             }
 
             if (available.stream().anyMatch(f -> f.getId() == choice)) {
-                selectedFreightIds.add(choice);
-                System.out.println("✓ Freight " + choice + " added to selection.");
+                selectedIds.add(choice);
+                System.out.println("✓ Freight " + choice + " added.");
             } else {
-                System.out.println("✗ Invalid freight ID or not compatible with chain.");
+                System.out.println("✗ Invalid freight ID.");
             }
         }
 
-        if (selectedFreightIds.size() < 2) {
-            System.out.println("\n✗ Cancelled. Composite route requires at least 2 freights.");
+        if (selectedIds.size() < 2) {
+            System.out.println("\n✗ Cancelled.");
             return;
         }
 
         try {
-            PlannedRoute route = planningService.createCompositeRoute(selectedFreightIds);
-            System.out.println("\n" + "✓".repeat(60));
-            System.out.println("  Composite Route created successfully!");
-            System.out.println("✓".repeat(60));
+            PlannedRoute route = planningService.createCompositeRoute(selectedIds);
+            System.out.println("\n✓ Composite Route created!");
             System.out.println("\n" + planningService.formatRoute(route));
-
         } catch (Exception e) {
             System.out.println("\n✗ Error: " + e.getMessage());
         }
@@ -291,10 +209,5 @@ public class FreightAssignmentMenu {
             System.out.println("\n" + planningService.formatRoute(route));
             System.out.println("─".repeat(100));
         }
-
-        System.out.printf("\nTotal: %d routes (%d simple, %d composite)\n",
-                routes.size(),
-                routes.stream().filter(PlannedRoute::isSimple).count(),
-                routes.stream().filter(PlannedRoute::isComposite).count());
     }
 }

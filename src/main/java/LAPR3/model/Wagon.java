@@ -6,6 +6,7 @@ package LAPR3.model;
 public class Wagon {
     private String wagonNumber;
     private String operatorVat;
+    private Integer currentFacilityId;
     private String modelName;
     private String maker;
     private String typeDesc;
@@ -21,12 +22,13 @@ public class Wagon {
     private double gauge;
 
     // Full constructor
-    public Wagon(String wagonNumber, String operatorVat, String modelName, String maker,
+    public Wagon(String wagonNumber, String operatorVat,int currentFacilityId,String modelName, String maker,
                  String typeDesc, int numBogies, String bogiesType, double weightTons,
                  double payloadTons, double maxSpeedKmh, double lengthMm, double widthMm,
                  double heightMm, double volumeM3, double gauge) {
         this.wagonNumber = wagonNumber;
         this.operatorVat = operatorVat;
+        this.currentFacilityId = currentFacilityId;
         this.modelName = modelName;
         this.maker = maker;
         this.typeDesc = typeDesc;
@@ -87,5 +89,9 @@ public class Wagon {
     public String toString() {
         return String.format("Wagon[%s, %s, %.1ft, %dmm]",
                 wagonNumber, typeDesc, getTotalWeightTons(), (int)gauge);
+    }
+
+    public Integer getCurrentFacilityId() {
+        return currentFacilityId;
     }
 }
