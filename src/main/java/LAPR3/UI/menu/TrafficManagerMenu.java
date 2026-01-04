@@ -12,14 +12,14 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Traffic Manager Menu for USLP10
- * Extends USLP07 functionality with:
- * - Automatic Path Calculation (using ESINF algorithms)
- * - Manual Path Definition (from USLP07)
- * - Integration with Route Planner (USLP08) - future
- * - Integration with Train Assembly (USLP09) - future
+ * Integrates:
+ * - USLP08: Route Planning (consumes planned routes)
+ * - USLP09: Train Assembly (consumes assembled trains)
+ * - USLP10: Scheduling (creates schedules with automatic/manual path)
  */
 public class TrafficManagerMenu {
     private final Scanner scanner;
@@ -34,6 +34,7 @@ public class TrafficManagerMenu {
     private final TrainDataImportMenu dataImportMenu;
     private final LineRepository lineRepository;
     private final SegmentRepository segmentRepository;
+    private final RoutePlanningService routePlanningService;
 
     // NEW for USLP10
     private final AutomaticPathPlanningService automaticPathService;
@@ -54,7 +55,8 @@ public class TrafficManagerMenu {
                               ScheduleVisualizationService visualService,
                               TrainDataImportMenu dataImportMenu,
                               LineRepository lineRepository,
-                              SegmentRepository segmentRepository) {
+                              SegmentRepository segmentRepository,
+                              RoutePlanningService routePlanningService) {
         this.scanner = scanner;
         this.validator = validator;
         this.dispatcherService = dispatcherService;
@@ -67,6 +69,7 @@ public class TrafficManagerMenu {
         this.dataImportMenu = dataImportMenu;
         this.lineRepository = lineRepository;
         this.segmentRepository = segmentRepository;
+        this.routePlanningService = routePlanningService;
 
         // Initialize automatic path planning service
         this.automaticPathService = new AutomaticPathPlanningService(
@@ -79,22 +82,20 @@ public class TrafficManagerMenu {
 
         while (running) {
             displayMenu();
-            int choice = validator.readInt("Enter your choice: ", 0, 10);
+            int choice = validator.readInt("Enter your choice: ", 0, 8);
 
             switch (choice) {
                 case 1 -> {
                     if (dataImportMenu != null) dataImportMenu.show();
                     else System.out.println("Data Import Menu not configured.");
                 }
-                case 2 -> listAllRoutes();
-                case 3 -> buildRouteManual();
-                case 4 -> buildRouteAutomatic(); // NEW for USLP10
-                case 5 -> listAllTrains();
-                case 6 -> createSchedule();
-                case 7 -> viewSchedule();
-                case 8 -> generateDispatchPlan();
-                case 9 -> viewDailyDispatchPlan();
-                case 10 -> exportDispatchPlan();
+                case 2 -> listAllTrains();
+                case 3 -> listPlannedRoutes();
+                case 4 -> createScheduleForTrain();
+                case 5 -> viewSchedule();
+                case 6 -> generateDispatchPlan();
+                case 7 -> viewDailyDispatchPlan();
+                case 8 -> exportDispatchPlan();
                 case 0 -> running = false;
             }
 
@@ -106,37 +107,286 @@ public class TrafficManagerMenu {
 
     private void displayMenu() {
         System.out.println("\n┌────────────────────────────────────────────────┐");
-        System.out.println("│  TRAFFIC MANAGER - TRAIN DISPATCHER (USLP10)   │");
+        System.out.println("│  TRAFFIC MANAGER - TRAIN SCHEDULER (USLP10)   │");
         System.out.println("└────────────────────────────────────────────────┘");
         System.out.println();
-        System.out.println("  1. Data Import & Management  ");
+        System.out.println("  1. Data Import & Management");
         System.out.println("  ────────────────────────────────────────────");
-        System.out.println("  2. List All Routes");
-        System.out.println("  3. Build Route (Manual Path)");
-        System.out.println("  4. Build Route (Automatic Path) ⭐ NEW");
-        System.out.println("  5. List All Trains");
-        System.out.println("  6. Create New Schedule");
-        System.out.println("  7. View Schedule Details");
-        System.out.println("  8. Generate Dispatch Plan (Process Schedules)");
-        System.out.println("  9. View Dispatch Visualizations (Timeline/Heatmap)");
-        System.out.println("  10. Export Dispatch Plan");
+        System.out.println("  2. List All Trains");
+        System.out.println("  3. List Planned Routes (from USLP08)");
+        System.out.println("  4. Create Schedule for Train");
+        System.out.println("  5. View Schedules");
+        System.out.println("  6. Generate Dispatch Plan");
+        System.out.println("  7. View Dispatch Visualizations");
+        System.out.println("  8. Export Dispatch Plan");
         System.out.println("  ────────────────────────────────────────────");
         System.out.println("  0. Back to Main Menu");
         System.out.println();
     }
 
     // ============================================================================
-    // NEW FOR USLP10: AUTOMATIC PATH CALCULATION
+    // USLP10 - LIST PLANNED ROUTES FROM USLP08
     // ============================================================================
 
     /**
-     * Builds a route using automatic path calculation (USLP10)
-     * Uses Bellman-Ford algorithm from ESINF to find optimal path
+     * Lists all planned routes created in USLP08
      */
-    private void buildRouteAutomatic() {
-        System.out.println("\n═══ BUILD ROUTE - AUTOMATIC PATH CALCULATION ═══");
-        System.out.println("Using cost-based optimization (Bellman-Ford Algorithm)");
+    private void listPlannedRoutes() {
+        System.out.println("\n═══ PLANNED ROUTES (from USLP08) ═══");
+
+        List<PlannedRoute> routes = routePlanningService.getAllRoutes();
+
+        if (routes.isEmpty()) {
+            System.out.println("\nNo routes planned yet.");
+            System.out.println("Please use the Freight Assignment Menu (USLP08) to create routes first.");
+            return;
+        }
+
         System.out.println();
+        for (PlannedRoute route : routes) {
+            System.out.println(routePlanningService.formatRoute(route));
+            System.out.println("─".repeat(80));
+        }
+
+        System.out.printf("\nTotal: %d routes (%d simple, %d composite)\n",
+                routes.size(),
+                routes.stream().filter(PlannedRoute::isSimple).count(),
+                routes.stream().filter(PlannedRoute::isComposite).count());
+    }
+
+    // ============================================================================
+    // USLP10 - CREATE SCHEDULE FOR TRAIN
+    // ============================================================================
+
+    /**
+     * USLP10 - Create schedule for a train with a planned route
+     * Integrates USLP08 (route planning) → USLP09 (train assembly) → USLP10 (scheduling)
+     */
+    private void createScheduleForTrain() {
+        System.out.println("\n═══ CREATE SCHEDULE (USLP10) ═══\n");
+
+        // 1. List available trains (created in USLP09)
+        List<Train> trains = trainRepository.findAll();
+
+        if (trains.isEmpty()) {
+            System.out.println("✗ No trains available.");
+            System.out.println("Please assemble trains first (USLP09).");
+            return;
+        }
+
+        System.out.println("Available Trains:");
+        for (Train t : trains) {
+            System.out.printf("  [%d] Train %d - %s (%.0fkW, %.1ft, %d locos, %d wagons)\n",
+                    t.getId(), t.getId(), t.getOperator(),
+                    t.getTotalPowerKw(), t.getTotalWeightTons(),
+                    t.getLocomotiveCount(), t.getWagonCount());
+        }
+
+        // 2. Select train
+        int trainId = validator.readInt("\nEnter Train ID: ", 0, Integer.MAX_VALUE);
+        Train train = trainRepository.findById(String.valueOf(trainId)).orElse(null);
+
+        if (train == null) {
+            System.out.println("✗ Train not found.");
+            return;
+        }
+
+        System.out.println("\n✓ Selected Train " + trainId);
+        System.out.printf("  Power: %.0fkW | Weight: %.1ft | Power-to-Weight: %.2f kW/t\n",
+                train.getTotalPowerKw(), train.getTotalWeightTons(), train.getPowerToWeightRatio());
+
+        // 3. List planned routes from USLP08
+        List<PlannedRoute> routes = routePlanningService.getAllRoutes();
+
+        if (routes.isEmpty()) {
+            System.out.println("\n✗ No routes available.");
+            System.out.println("Please create routes first using Freight Assignment Menu (USLP08).");
+            return;
+        }
+
+        System.out.println("\nAvailable Routes:");
+        for (PlannedRoute r : routes) {
+            System.out.printf("  [%s] %s - %d freight(s), %d action(s)\n",
+                    r.getId(), r.getType(), r.getFreightIds().size(), r.getActions().size());
+        }
+
+        // 4. Select route
+        String routeId = validator.readString("\nEnter Route ID: ");
+        PlannedRoute plannedRoute = routePlanningService.getRoute(routeId).orElse(null);
+
+        if (plannedRoute == null) {
+            System.out.println("✗ Route not found.");
+            return;
+        }
+
+        System.out.println("\n✓ Selected Route " + routeId);
+        System.out.println(routePlanningService.formatRoute(plannedRoute));
+
+        // 5. Choose path calculation method
+        System.out.println("\n═══ PATH CALCULATION ═══");
+        System.out.println("1. Manual Path Definition");
+        System.out.println("2. Automatic Path Calculation (ESINF US15)");
+        int pathChoice = validator.readInt("Choice: ", 1, 2);
+
+        List<Integer> path;
+        if (pathChoice == 1) {
+            path = buildPathManually(plannedRoute);
+        } else {
+            path = calculatePathAutomatically(plannedRoute);
+        }
+
+        if (path == null || path.isEmpty()) {
+            System.out.println("✗ Path calculation failed or cancelled.");
+            return;
+        }
+
+        // Store path in route
+        plannedRoute.setPath(path);
+
+        // 6. Get departure time
+        String dateStr = validator.readString("\nEnter Departure Time (yyyy-MM-dd HH:mm): ");
+        LocalDateTime departure;
+
+        try {
+            departure = LocalDateTime.parse(dateStr, DATE_TIME_FORMATTER);
+        } catch (Exception e) {
+            System.out.println("✗ Invalid date format. Please use yyyy-MM-dd HH:mm");
+            return;
+        }
+
+        // 7. Create schedule
+        String scheduleId = "SCH-" + (scheduleRepository.findAll().size() + 1001);
+
+        Schedule schedule = new Schedule(
+                scheduleId,
+                String.valueOf(trainId),
+                routeId,
+                departure,
+                Schedule.ScheduleStatus.SCHEDULED
+        );
+
+        scheduleRepository.save(schedule);
+
+        System.out.println("\n" + "✓".repeat(60));
+        System.out.println("  Schedule created successfully!");
+        System.out.println("✓".repeat(60));
+        System.out.println("\nSchedule Details:");
+        System.out.println("  Schedule ID: " + scheduleId);
+        System.out.println("  Train: " + trainId);
+        System.out.println("  Route: " + routeId);
+        System.out.println("  Departure: " + departure.format(DATE_TIME_FORMATTER));
+        System.out.println("\nPath: " + path.stream()
+                .map(id -> facilityRepository.findById(id)
+                        .map(Facility::getName)
+                        .orElse(String.valueOf(id)))
+                .collect(Collectors.joining(" → ")));
+    }
+
+    // ============================================================================
+    // PATH CALCULATION METHODS
+    // ============================================================================
+
+    /**
+     * Build path manually (user selects each station)
+     */
+    private List<Integer> buildPathManually(PlannedRoute route) {
+        System.out.println("\n═══ MANUAL PATH DEFINITION ═══");
+
+        List<Integer> mandatoryStops = route.getMandatoryFacilities();
+        List<Integer> path = new ArrayList<>();
+
+        System.out.println("\nMandatory stops (must visit in order):");
+        for (Integer facilityId : mandatoryStops) {
+            String name = facilityRepository.findById(facilityId)
+                    .map(Facility::getName)
+                    .orElse("Unknown");
+            System.out.printf("  - %s (ID: %d)\n", name, facilityId);
+        }
+
+        int currentId = mandatoryStops.get(0);
+        path.add(currentId);
+
+        Set<Integer> remainingStops = new HashSet<>(mandatoryStops);
+        remainingStops.remove(currentId);
+
+        System.out.println("\nStarting at: " + facilityRepository.findById(currentId)
+                .map(Facility::getName).orElse("Unknown"));
+
+        while (!remainingStops.isEmpty()) {
+            String currentName = facilityRepository.findById(currentId)
+                    .map(Facility::getName)
+                    .orElse("Unknown");
+
+            System.out.println("\n" + "─".repeat(60));
+            System.out.println("Current position: " + currentName);
+
+            if (!remainingStops.isEmpty()) {
+                System.out.println("Remaining mandatory stops: " + remainingStops.stream()
+                        .map(id -> facilityRepository.findById(id)
+                                .map(Facility::getName)
+                                .orElse(String.valueOf(id)))
+                        .collect(Collectors.joining(", ")));
+            }
+
+            Map<Integer, Line> connections = lineRepository.findDirectlyConnectedFacilities(currentId);
+
+            if (connections.isEmpty()) {
+                System.out.println("✗ No connections available. Path building failed.");
+                return null;
+            }
+
+            System.out.println("\nDirectly connected facilities:");
+            for (Integer neighborId : connections.keySet()) {
+                String name = facilityRepository.findById(neighborId)
+                        .map(Facility::getName)
+                        .orElse("Unknown");
+                boolean isMandatory = remainingStops.contains(neighborId);
+                System.out.printf("  [%d] %s %s\n",
+                        neighborId, name, isMandatory ? "⚠ MANDATORY" : "");
+            }
+
+            int nextId = validator.readInt("\nEnter next facility ID (0 to cancel): ", 0, Integer.MAX_VALUE);
+
+            if (nextId == 0) {
+                System.out.println("✗ Path building cancelled.");
+                return null;
+            }
+
+            if (!connections.containsKey(nextId)) {
+                System.out.println("✗ Not directly connected. Choose again.");
+                continue;
+            }
+
+            path.add(nextId);
+            currentId = nextId;
+
+            if (remainingStops.contains(nextId)) {
+                System.out.println("✓ Mandatory stop reached: " +
+                        facilityRepository.findById(nextId)
+                                .map(Facility::getName)
+                                .orElse("Unknown"));
+                remainingStops.remove(nextId);
+            }
+        }
+
+        System.out.println("\n" + "✓".repeat(60));
+        System.out.println("  Path completed successfully!");
+        System.out.println("✓".repeat(60));
+        System.out.println("\nFinal path: " + path.stream()
+                .map(id -> facilityRepository.findById(id)
+                        .map(Facility::getName)
+                        .orElse(String.valueOf(id)))
+                .collect(Collectors.joining(" → ")));
+
+        return path;
+    }
+
+    /**
+     * Calculate path automatically using ESINF US15 (Bellman-Ford)
+     */
+    private List<Integer> calculatePathAutomatically(PlannedRoute route) {
+        System.out.println("\n═══ AUTOMATIC PATH CALCULATION (ESINF US15) ═══");
+        System.out.println("Using Bellman-Ford algorithm with cost optimization\n");
 
         // Show network summary
         AutomaticPathPlanningService.NetworkSummary summary =
@@ -147,260 +397,77 @@ public class TrafficManagerMenu {
         System.out.println("  Lines: " + summary.lines);
         System.out.println("  Segments: " + summary.segments);
         System.out.println("  Total Distance: " + String.format("%.2f", summary.totalDistanceKm) + " km");
-        System.out.println("  Electrified: " + summary.electrifiedSegments + " segments");
-        System.out.println("  Double Track: " + summary.doubleTrackSegments + " segments");
         System.out.println();
 
-        // 1. Select starting facility
-        int startId = validator.readInt("Enter Starting Facility ID: ", 0, Integer.MAX_VALUE);
-        Facility startFacility = facilityRepository.findById(startId).orElse(null);
+        List<Integer> completePath = new ArrayList<>();
+        List<Integer> mandatoryStops = route.getMandatoryFacilities();
 
-        if (startFacility == null) {
-            System.out.println("✗ Error: Starting facility not found.");
-            return;
-        }
+        // For each consecutive pair of mandatory stops
+        for (int i = 0; i < mandatoryStops.size() - 1; i++) {
+            int from = mandatoryStops.get(i);
+            int to = mandatoryStops.get(i + 1);
 
-        System.out.println("✓ Starting facility: " + startFacility.getName());
+            String fromName = facilityRepository.findById(from)
+                    .map(Facility::getName)
+                    .orElse(String.valueOf(from));
+            String toName = facilityRepository.findById(to)
+                    .map(Facility::getName)
+                    .orElse(String.valueOf(to));
 
-        // 2. Select ending facility
-        int endId = validator.readInt("Enter Ending Facility ID: ", 0, Integer.MAX_VALUE);
-        Facility endFacility = facilityRepository.findById(endId).orElse(null);
+            System.out.printf("⏳ Calculating: %s → %s\n", fromName, toName);
 
-        if (endFacility == null) {
-            System.out.println("✗ Error: Ending facility not found.");
-            return;
-        }
+            // Use ESINF US15
+            AutomaticPathPlanningService.PathCalculationResult result =
+                    automaticPathService.calculateOptimalPath(from, to);
 
-        System.out.println("✓ Ending facility: " + endFacility.getName());
-
-        if (startId == endId) {
-            System.out.println("✗ Error: Start and end must be different.");
-            return;
-        }
-
-        // 3. Calculate optimal path
-        System.out.println("\n⏳ Calculating optimal path...");
-
-        AutomaticPathPlanningService.PathCalculationResult result =
-                automaticPathService.calculateOptimalPath(startId, endId);
-
-        if (!result.isSuccess()) {
-            if (result.hasNegativeCycle()) {
-                System.out.println("\n✗ NEGATIVE COST CYCLE DETECTED!");
-                System.out.println("The network configuration contains a negative cost cycle.");
-                System.out.println("This means there's a loop where traversing it reduces cost indefinitely.");
-                System.out.println("\nStations involved in cycle:");
-                for (String station : result.getCycleInfo()) {
-                    System.out.println("  • " + station);
+            if (!result.isSuccess()) {
+                if (result.hasNegativeCycle()) {
+                    System.out.println("\n✗ NEGATIVE CYCLE DETECTED!");
+                    System.out.println("  Stations involved: " + result.getNegativeCycleStations());
+                    System.out.println("  This indicates inconsistent costs in the network.");
+                    return null;
                 }
-                System.out.println("\n⚠️  This indicates a configuration error in line costs.");
-            } else {
-                System.out.println("✗ Error: " + result.getErrorMessage());
-            }
-            return;
-        }
 
-        // 4. Display calculated path
-        System.out.println("\n✓ OPTIMAL PATH FOUND!");
-        System.out.println("─".repeat(80));
-        System.out.println(String.format("Total Cost: %.2f", result.getTotalCost()));
-        System.out.println(String.format("Facilities: %d", result.getFacilityIds().size()));
-        System.out.println("─".repeat(80));
-
-        System.out.println("\nPath Details:");
-        List<Integer> path = result.getFacilityIds();
-        List<Double> costs = result.getCumulativeCosts();
-
-        for (int i = 0; i < path.size(); i++) {
-            int facId = path.get(i);
-            Facility fac = facilityRepository.findById(facId).orElse(null);
-            String facName = fac != null ? fac.getName() : "Unknown";
-
-            if (i < costs.size()) {
-                System.out.printf("%2d. %-30s (Cost: %.2f)%n",
-                        i + 1, facName, costs.get(i));
-            } else {
-                System.out.printf("%2d. %-30s%n", i + 1, facName);
+                System.out.println("✗ No path found between " + fromName + " and " + toName);
+                return null;
             }
 
-            // Show connection info
-            if (i < path.size() - 1) {
-                int nextId = path.get(i + 1);
-                Optional<Line> lineOpt = lineRepository.findLineConnecting(facId, nextId);
-                if (lineOpt.isPresent()) {
-                    Line line = lineOpt.get();
-                    List<Segment> segments = segmentRepository.findByLineId(line.getId());
-                    double distance = segments.stream()
-                            .mapToDouble(s -> s.getLengthMeters() / 1000.0)
-                            .sum();
-                    System.out.printf("    ↓ %s (%.2f km)%n", line.getName(), distance);
-                }
+            List<Integer> segment = result.getPath();
+
+            if (i > 0) {
+                segment.remove(0);  // Remove duplicate facility
             }
+
+            completePath.addAll(segment);
+
+            System.out.printf("  ✓ Path: %s\n",
+                    segment.stream()
+                            .map(id -> facilityRepository.findById(id)
+                                    .map(Facility::getName)
+                                    .orElse(String.valueOf(id)))
+                            .collect(Collectors.joining(" → ")));
+            System.out.printf("    Distance: %.2f km | Cost: %.2f\n",
+                    result.getTotalDistanceKm(), result.getTotalCost());
         }
 
-        System.out.println("─".repeat(80));
+        System.out.println("\n" + "✓".repeat(60));
+        System.out.println("  Complete path calculated successfully!");
+        System.out.println("✓".repeat(60));
+        System.out.println("\nFinal path: " + completePath.stream()
+                .map(id -> facilityRepository.findById(id)
+                        .map(Facility::getName)
+                        .orElse(String.valueOf(id)))
+                .collect(Collectors.joining(" → ")));
 
-        // 5. Ask if user wants to save as route
-        System.out.print("\nSave this path as a Route? (y/n): ");
-        String save = scanner.nextLine().trim().toLowerCase();
-
-        if (save.equals("y") || save.equals("yes")) {
-            saveCalculatedRoute(result.getFacilityIds(), startFacility, endFacility);
-        }
-    }
-
-    /**
-     * Saves automatically calculated path as a route
-     */
-    private void saveCalculatedRoute(List<Integer> facilityIds,
-                                     Facility start, Facility end) {
-        System.out.println("\n═══ SAVE ROUTE ═══");
-
-        // Generate route ID
-        String routeId = "AUTO_" + System.currentTimeMillis();
-
-        // Get route name
-        System.out.print("Enter Route Name: ");
-        String name = scanner.nextLine().trim();
-        if (name.isEmpty()) {
-            name = start.getName() + " → " + end.getName() + " (Auto)";
-        }
-
-        // Determine route type
-        Route.RouteType type = facilityIds.size() <= 3 ?
-                Route.RouteType.SIMPLE : Route.RouteType.COMPLEX;
-
-        // Create route
-        Route route = new Route(routeId, name, type, facilityIds);
-
-        // Save route
-        routeRepository.save(route);
-
-        System.out.println("✓ Route saved successfully!");
-        System.out.println("  Route ID: " + routeId);
-        System.out.println("  Name: " + name);
-        System.out.println("  Type: " + type);
-        System.out.println("  Facilities: " + facilityIds.size());
+        return completePath;
     }
 
     // ============================================================================
-    // EXISTING METHODS FROM USLP07 (Mantidos)
+    // EXISTING METHODS (PRESERVED)
     // ============================================================================
-
-    private void listAllRoutes() {
-        System.out.println("\n═══ AVAILABLE ROUTES ═══");
-        List<Route> routes = routeRepository.findAll();
-        if (routes.isEmpty()) {
-            System.out.println("No routes available.");
-            return;
-        }
-        System.out.println("\nTotal routes: " + routes.size());
-        System.out.println("─".repeat(90));
-        System.out.printf("%-10s | %-30s | %-10s | %-10s | %-10s%n",
-                "Route ID", "Name", "Type", "Facilities", "Segments");
-        System.out.println("─".repeat(90));
-
-        for (Route route : routes) {
-            int facilityCount = route.getFacilityIds().size();
-            int legCount = facilityCount > 1 ? facilityCount - 1 : 0;
-
-            int segmentCount = 0;
-            try {
-                List<Segment> segments = routePathService.getAllSegments(route.getRouteId());
-                segmentCount = segments.size();
-            } catch (Exception e) {
-                segmentCount = legCount;
-            }
-
-            String routeName = route.getName();
-            if (routeName.length() > 30) {
-                routeName = routeName.substring(0, 27) + "...";
-            }
-
-            System.out.printf("%-10s | %-30s | %-10s | %-10d | %-10d%n",
-                    route.getRouteId(),
-                    routeName,
-                    route.getType(),
-                    facilityCount,
-                    segmentCount
-            );
-        }
-    }
-
-    private void buildRouteManual() {
-        System.out.println("\n═══ BUILD ROUTE - MANUAL PATH DEFINITION ═══");
-
-        // 1. Starting facility
-        int startId = validator.readInt("Enter Starting Facility ID: ", 0, Integer.MAX_VALUE);
-        Facility startFacility = facilityRepository.findById(startId).orElse(null);
-
-        if (startFacility == null) {
-            System.out.println("✗ Error: Starting facility not found.");
-            return;
-        }
-
-        System.out.println("✓ Starting facility: " + startFacility.getName());
-
-        // 2. Ending facility
-        int endId = validator.readInt("Enter Ending Facility ID: ", 0, Integer.MAX_VALUE);
-        Facility endFacility = facilityRepository.findById(endId).orElse(null);
-
-        if (endFacility == null) {
-            System.out.println("✗ Error: Ending facility not found.");
-            return;
-        }
-
-        System.out.println("✓ Ending facility: " + endFacility.getName());
-
-        // 3. Build path manually
-        List<Integer> path = new ArrayList<>();
-        path.add(startId);
-
-        int currentId = startId;
-        while (currentId != endId) {
-            Map<Integer, Line> connected = lineRepository.findDirectlyConnectedFacilities(currentId);
-
-            if (connected.isEmpty()) {
-                System.out.println("✗ Error: No connections from current facility.");
-                return;
-            }
-
-            System.out.println("\nAvailable connections from " +
-                    facilityRepository.findById(currentId).get().getName() + ":");
-
-            for (Map.Entry<Integer, Line> entry : connected.entrySet()) {
-                Facility fac = facilityRepository.findById(entry.getKey()).orElse(null);
-                System.out.println("  " + entry.getKey() + ": " +
-                        (fac != null ? fac.getName() : "Unknown") +
-                        " (via " + entry.getValue().getName() + ")");
-            }
-
-            int nextId = validator.readInt("Select next facility ID (or 0 to cancel): ",
-                    0, Integer.MAX_VALUE);
-
-            if (nextId == 0) {
-                System.out.println("Route building cancelled.");
-                return;
-            }
-
-            if (!connected.containsKey(nextId)) {
-                System.out.println("✗ Error: No direct connection to that facility.");
-                continue;
-            }
-
-            path.add(nextId);
-            currentId = nextId;
-        }
-
-        // 4. Create and save route
-        System.out.println("\n✓ Path completed!");
-        System.out.println("Path: " + path);
-
-        saveCalculatedRoute(path, startFacility, endFacility);
-    }
 
     private void listAllTrains() {
-        System.out.println("\n═══ ALL TRAINS ═══");
+        System.out.println("\n═══ TRAIN LIST ═══");
         List<Train> trains = trainRepository.findAll();
 
         if (trains.isEmpty()) {
@@ -408,69 +475,21 @@ public class TrafficManagerMenu {
             return;
         }
 
-        System.out.printf("%-10s | %-20s | %-15s | %-10s%n", "ID", "Operator", "Payload (t)", "Electric");
-        System.out.println("─".repeat(65));
+        System.out.printf("%-10s | %-20s | %-15s | %-10s | %-10s%n",
+                "ID", "Operator", "Payload (t)", "Power (kW)", "Electric");
+        System.out.println("─".repeat(75));
 
         for (Train t : trains) {
-            System.out.printf("%-10s | %-20s | %-15.1f | %-10s%n",
+            System.out.printf("%-10s | %-20s | %-15.1f | %-10.0f | %-10s%n",
                     t.getTrainId(),
                     t.getOperator(),
                     t.getTotalPayloadTons(),
+                    t.getTotalPowerKw(),
                     t.requiresElectrification() ? "Yes" : "No"
             );
         }
     }
 
-    private void createSchedule() {
-        System.out.println("\n═══ CREATE NEW SCHEDULE ═══");
-        System.out.println("\n═══ CREATE NEW SCHEDULE ═══");
-
-        // 1. Selecionar Comboio
-        String trainId = validator.readString("Enter Train ID: ");
-
-        if (trainRepository.findById(trainId).isEmpty()) {
-            System.out.println("✗ Error: Train ID not found.");
-            return;
-        }
-
-        // 2. Selecionar Rota
-        String routeId = validator.readString("Enter Route ID: ");
-
-        // Validar se a rota existe
-        Optional<String> validationResult = routePathService.validateRoute(routeId);
-
-        if (validationResult.isPresent()) {
-            System.out.println("✗ Error: " + validationResult.get());
-            return;
-        }
-
-        // 3. Definir Data/Hora
-        String dateStr = validator.readString("Enter Departure Time (yyyy-MM-dd HH:mm): ");
-
-        try {
-            LocalDateTime departure = LocalDateTime.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-
-            // Gerar ID simples e único
-            String scheduleId = "SCH-" + (scheduleRepository.findAll().size() + 1001);
-
-            // CORREÇÃO: Passar o Status no construtor (5 argumentos)
-            Schedule schedule = new Schedule(
-                    scheduleId,
-                    trainId,
-                    routeId,
-                    departure,
-                    Schedule.ScheduleStatus.SCHEDULED
-            );
-
-            scheduleRepository.save(schedule);
-            System.out.println(" Schedule created successfully! ID: " + scheduleId);
-
-        } catch (DateTimeParseException e) {
-            System.out.println(" Invalid date format. Please use yyyy-MM-dd HH:mm");
-        } catch (Exception e) {
-            System.out.println(" Error creating schedule: " + e.getMessage());
-        }
-    }
     private void viewSchedule() {
         System.out.println("\n═══ SCHEDULE LIST ═══");
         List<Schedule> schedules = scheduleRepository.findAll();
@@ -480,10 +499,17 @@ public class TrafficManagerMenu {
             return;
         }
 
+        System.out.printf("%-10s | %-10s | %-10s | %-20s | %-10s%n",
+                "ID", "Train", "Route", "Departure", "Status");
+        System.out.println("─".repeat(70));
+
         for (Schedule s : schedules) {
-            System.out.printf("ID: %-8s | Train: %-8s | Route: %-8s | Time: %s%n",
-                    s.getScheduleId(), s.getTrainId(), s.getRouteId(),
-                    s.getDepartureDateTime().format(DATE_TIME_FORMATTER));
+            System.out.printf("%-10s | %-10s | %-10s | %-20s | %-10s%n",
+                    s.getScheduleId(),
+                    s.getTrainId(),
+                    s.getRouteId(),
+                    s.getDepartureDateTime().format(DATE_TIME_FORMATTER),
+                    s.getStatus());
         }
     }
 
@@ -502,37 +528,37 @@ public class TrafficManagerMenu {
                 String dayStr = scanner.nextLine().trim();
                 LocalDate date = LocalDate.parse(dayStr, DATE_ONLY_FORMATTER);
 
-                System.out.println("Calculating physics and resolving conflicts...");
+                System.out.println("⏳ Calculating physics and resolving conflicts...");
                 plan = dispatcherService.createDailyDispatchPlan(date.atStartOfDay());
 
             } else {
-                System.out.print("Enter Schedule IDs (comma separated, e.g., S001,S002): ");
+                System.out.print("Enter Schedule IDs (comma separated, e.g., SCH-1001,SCH-1002): ");
                 String input = scanner.nextLine();
                 List<String> ids = Arrays.asList(input.split(","));
                 ids.replaceAll(String::trim);
 
-                System.out.println("Calculating physics and resolving conflicts...");
+                System.out.println("⏳ Calculating physics and resolving conflicts...");
                 plan = dispatcherService.createDispatchPlan(ids);
             }
 
             if (plan != null) {
-                this.currentDispatchPlan = plan; // Guardar em memória
-                System.out.println("\n PLAN GENERATED SUCCESSFULLY");
+                this.currentDispatchPlan = plan;
+                System.out.println("\n✓ PLAN GENERATED SUCCESSFULLY");
                 System.out.println(dispatcherService.getDispatchSummary(plan));
 
                 // Validar resultados
                 var validation = dispatcherService.validateDispatchPlan(plan);
                 if (!validation.isValid()) {
-                    System.out.println("\n Validation Warnings:");
+                    System.out.println("\n⚠ Validation Warnings:");
                     validation.getWarnings().forEach(w -> System.out.println("  - " + w));
                 }
             }
 
         } catch (DateTimeParseException e) {
-            System.out.println(" Invalid date format.");
+            System.out.println("✗ Invalid date format.");
         } catch (Exception e) {
-            System.out.println(" Error generating plan: " + e.getMessage());
-            // e.printStackTrace(); // Debug se necessário
+            System.out.println("✗ Error generating plan: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -540,13 +566,13 @@ public class TrafficManagerMenu {
         System.out.println("\n═══ DISPATCH VISUALIZATIONS ═══");
 
         if (currentDispatchPlan == null) {
-            System.out.println(" No plan available in memory.");
-            System.out.println("Please run Option 7 (Generate Dispatch Plan) first.");
+            System.out.println("✗ No plan available in memory.");
+            System.out.println("Please run Option 6 (Generate Dispatch Plan) first.");
             return;
         }
 
         boolean viewing = true;
-        while(viewing) {
+        while (viewing) {
             System.out.println("\nSelect Visualization:");
             System.out.println("1. Timeline View (ASCII)");
             System.out.println("2. Train Diagram (Bildfahrplan)");
@@ -574,7 +600,7 @@ public class TrafficManagerMenu {
         System.out.println("\n═══ EXPORT PLAN ═══");
 
         if (currentDispatchPlan == null) {
-            System.out.println(" No plan available. Run Option 7 first.");
+            System.out.println("✗ No plan available. Run Option 6 first.");
             return;
         }
 

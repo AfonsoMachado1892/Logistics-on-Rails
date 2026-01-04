@@ -90,6 +90,7 @@ public class MainMenu {
             trainRepo.loadFromDatabase();
             routeRepo.loadFromDatabase();
             freightRepo.loadFromDatabase();
+            scheduleRepo.loadFromDatabase();
             // scheduleRepo e routeRepo podem ser carregados se tiverem implementação DB
 
             System.out.println("[System] LAPR3 Database Load Complete.\n");
@@ -131,7 +132,7 @@ public class MainMenu {
         this.radiusSearchResultMenu = new RadiusSearchResultMenu(scanner, validator, stationController);
 
         // USLP08: Initialize menu
-        this.routePlanningService = new RoutePlanningService();
+        this.routePlanningService = new RoutePlanningService(freightRepo, facilityRepo,routeRepo);
         this.freightsAssigmentMenu = new FreightAssignmentMenu(freightRepo, facilityRepo, lineRepo, routePlanningService);
 
         //  CHANGED FOR USLP10: Initialize TrafficManagerMenu (instead of FreightManagerMenu)
@@ -195,7 +196,7 @@ public class MainMenu {
         return new TrafficManagerMenu(
                 scanner, validator, dispatcherService, routeRepo, facilityRepo,
                 trainRepo, scheduleRepo, routePathService, visualService,
-                trainImportMenu, lineRepo, segmentRepo
+                trainImportMenu, lineRepo, segmentRepo,routePlanningService
         );
     }
 
