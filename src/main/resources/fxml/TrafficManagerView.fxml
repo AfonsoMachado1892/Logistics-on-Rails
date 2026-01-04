@@ -46,7 +46,7 @@
                      <Text text="Manual Path Building" styleClass="label-title" />
                      <ListView fx:id="manualPathList" prefHeight="200" />
                      <HBox spacing="5">
-                        <ComboBox fx:id="facilityComboBox" prefWidth="150" />
+                        <ComboBox fx:id="facilityComboBox" prefWidth="300" />
                         <Button fx:id="addFacilityButton" text="Add" minWidth="70" />
                         <Button fx:id="clearPathButton" text="Clear" minWidth="70" />
                      </HBox>
