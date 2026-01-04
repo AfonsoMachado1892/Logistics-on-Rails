@@ -1,5 +1,5 @@
 
 Statement processed.
 --- TEST 5: Empty String / Spaces Validation ---
-RESULTADO: SUCESSO (Espaços em branco bloqueados corretamente).
-Mensagem: ORA-20001: Facility name cannot be null or empty.
+RESULT: SUCCESS (Empty spaces blocked correctly).
+Message: ORA-20002: Facility name cannot be null or empty.

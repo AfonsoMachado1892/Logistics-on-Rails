@@ -89,29 +89,36 @@ CREATE TABLE Wagon (
                        CONSTRAINT fk_wagon_op FOREIGN KEY (operator_vat) REFERENCES Operator(vat_number)
 );
 
--- Tabela de Locomotivas
+-- Tabela de Modelos de Locomotivas
+CREATE TABLE Locomotive_Model (
+                                  id NUMBER PRIMARY KEY,
+                                  model_name VARCHAR2(50) NOT NULL,
+                                  make VARCHAR2(50) NOT NULL,
+                                  num_bogies NUMBER,
+                                  bogies_type VARCHAR2(50),
+                                  power_kw NUMBER,
+                                  length_m NUMBER,
+                                  width_m NUMBER,
+                                  height_m NUMBER,
+                                  weight_tons NUMBER,
+                                  max_speed_kmh NUMBER,
+                                  traction_kn NUMBER,
+                                  engine_type VARCHAR2(20) CHECK (UPPER(engine_type) IN ('ELECTRIC', 'DIESEL')),
+                                  voltage VARCHAR2(20),
+                                  frequency VARCHAR2(20),
+                                  fuel_capacity_l NUMBER,
+                                  gauge NUMBER
+);
+
+-- Tabela de Locomotivas (ALTERADA PARA REFERENCIAR O MODELO - USBD43)
 CREATE TABLE Locomotive (
                             loco_number VARCHAR2(50) PRIMARY KEY, -- Pode conter pontos (ex: "335.001")
+                            model_id NUMBER NOT NULL,
                             name VARCHAR2(50),
-                            make VARCHAR2(50),
-                            model VARCHAR2(50),
                             service_start_date DATE,
-                            num_bogies NUMBER,
-                            bogies_type VARCHAR2(50),
-                            power_kw NUMBER,
-                            length_m NUMBER,
-                            width_m NUMBER,
-                            height_m NUMBER,
-                            weight_tons NUMBER,
-                            max_speed_kmh NUMBER,
                             operational_speed_kmh NUMBER,
-                            traction_kn NUMBER,
-                            engine_type VARCHAR2(20), -- Electric, Diesel
-                            voltage VARCHAR2(20),
-                            frequency VARCHAR2(20),
                             operator_vat VARCHAR2(20),
-                            gauge NUMBER,
-                            fuel_capacity_l NUMBER,
+                            CONSTRAINT fk_loco_model FOREIGN KEY (model_id) REFERENCES Locomotive_Model(id),
                             CONSTRAINT fk_loco_op FOREIGN KEY (operator_vat) REFERENCES Operator(vat_number)
 );
 
@@ -192,7 +199,7 @@ INSERT INTO Railway_Gauge (gauge_value, description) VALUES (1435, 'Bitola Stand
 -- Atualizar FK nas tabelas existentes (Opcional, mas recomendado para integridade)
 ALTER TABLE Line ADD CONSTRAINT fk_line_gauge FOREIGN KEY (gauge) REFERENCES Railway_Gauge(gauge_value);
 ALTER TABLE Wagon_Model ADD CONSTRAINT fk_model_gauge FOREIGN KEY (gauge) REFERENCES Railway_Gauge(gauge_value);
-ALTER TABLE Locomotive ADD CONSTRAINT fk_loco_gauge FOREIGN KEY (gauge) REFERENCES Railway_Gauge(gauge_value);
+ALTER TABLE Locomotive_Model ADD CONSTRAINT fk_lm_gauge FOREIGN KEY (gauge) REFERENCES Railway_Gauge(gauge_value);
 
 -- 3. Para USBD37: Suporte a múltiplas bitolas por vagão
 CREATE TABLE Wagon_Model_Gauge (

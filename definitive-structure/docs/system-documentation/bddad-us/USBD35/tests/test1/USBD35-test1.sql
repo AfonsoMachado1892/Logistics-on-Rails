@@ -6,8 +6,8 @@ v_id NUMBER;
 BEGIN
     DBMS_OUTPUT.PUT_LINE('--- TEST 1: Register Valid Facility ---');
 
-    -- 1. Execute Function
-    v_id := fn_register_facility(v_name);
+    -- 1. Execute Function with Manual ID (901)
+    v_id := fn_register_facility(901, v_name);
     DBMS_OUTPUT.PUT_LINE('Returned ID: ' || v_id);
 
     -- 2. Verify existence in DB

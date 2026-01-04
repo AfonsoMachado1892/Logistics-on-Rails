@@ -9,11 +9,12 @@ RETURN NUMBER IS
     v_loco_len NUMBER := 0;
     v_wagons_len NUMBER := 0;
 BEGIN
-    -- Comprimento das Locomotivas (já em metros)
-SELECT NVL(SUM(l.length_m), 0)
+    -- Comprimento das Locomotivas (já em metros) - UPDATED to join Model
+SELECT NVL(SUM(lm.length_m), 0)
 INTO v_loco_len
 FROM Train_Locomotive tl
          JOIN Locomotive l ON tl.loco_number = l.loco_number
+         JOIN Locomotive_Model lm ON l.model_id = lm.id
 WHERE tl.train_id = p_train_id;
 
 -- Comprimento dos Vagões (converter mm para metros)
@@ -48,8 +49,11 @@ SELECT max_length_m INTO v_max_len FROM Train WHERE id = :NEW.train_id;
 IF v_max_len IS NOT NULL THEN
         v_current_len := fn_calculate_train_length(:NEW.train_id);
 
-SELECT length_m INTO v_new_loco_len
-FROM Locomotive WHERE loco_number = :NEW.loco_number;
+-- UPDATED: Get length from Locomotive_Model via Locomotive
+SELECT lm.length_m INTO v_new_loco_len
+FROM Locomotive l
+         JOIN Locomotive_Model lm ON l.model_id = lm.id
+WHERE l.loco_number = :NEW.loco_number;
 
 IF (v_current_len + v_new_loco_len) > v_max_len THEN
             RAISE_APPLICATION_ERROR(-20001, 'USBD33: Train length limit exceeded adding Loco. Max: '

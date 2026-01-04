@@ -1,6 +1,4 @@
+
 Statement processed.
---- TEST 3: Null/Empty Input Validation ---
-Testing NULL input...
-RESULT: SUCCESS (NULL blocked).
-Testing Empty String (spaces)...
-RESULT: SUCCESS (Empty spaces blocked).
+--- Test 3: Non-Existent Gauge ---
+Success: Invalid Gauge correctly blocked.
