@@ -16,11 +16,14 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.stream.Collectors;
+import javafx.scene.control.ListCell;
 
 /**
  * Controller for Traffic Manager
@@ -95,6 +98,7 @@ public class TrafficManagerController implements Initializable {
     private ObservableList<PlannedRoute> plannedRoutes = FXCollections.observableArrayList();
     private ObservableList<Schedule> schedules = FXCollections.observableArrayList();
     private ObservableList<Integer> manualPath = FXCollections.observableArrayList();
+    private Set<Integer> remainingMandatoryStops = new HashSet<>();
 
     private DispatchPlan currentDispatchPlan;
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -141,6 +145,22 @@ public class TrafficManagerController implements Initializable {
         plannedRoutesTable.setItems(plannedRoutes);
         schedulesTable.setItems(schedules);
         manualPathList.setItems(manualPath);
+        
+        // Configure manual path list to show facility names
+        manualPathList.setCellFactory(listView -> new ListCell<Integer>() {
+            @Override
+            protected void updateItem(Integer facilityId, boolean empty) {
+                super.updateItem(facilityId, empty);
+                if (empty || facilityId == null) {
+                    setText(null);
+                } else {
+                    String name = facilityRepo.findById(facilityId)
+                        .map(Facility::getName)
+                        .orElse("Unknown");
+                    setText(name + " (ID: " + facilityId + ")");
+                }
+            }
+        });
 
         routeIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         routeTypeColumn.setCellValueFactory(cellData -> 
@@ -160,9 +180,14 @@ public class TrafficManagerController implements Initializable {
             new javafx.beans.property.SimpleStringProperty(
                 cellData.getValue().getStatus().toString()));
 
-        facilityComboBox.getItems().addAll(facilityRepo.findAll().stream()
-            .map(Facility::getId)
-            .collect(Collectors.toList()));
+        // Configure facility combo box to show names with mandatory indicator
+        // We'll update this dynamically when the path changes
+        updateFacilityComboBoxDisplay();
+        
+        // Listen to manual path changes to update combo box display
+        manualPath.addListener((javafx.collections.ListChangeListener.Change<? extends Integer> c) -> {
+            updateFacilityComboBoxDisplay();
+        });
     }
 
     private void setupEventHandlers() {
@@ -174,6 +199,13 @@ public class TrafficManagerController implements Initializable {
         clearPathButton.setOnAction(e -> clearPath());
 
         routeComboBox.setOnAction(e -> updatePathOptions());
+        
+        // When manual path radio is selected, initialize path if route is selected
+        manualPathRadio.setOnAction(e -> {
+            if (manualPathRadio.isSelected() && routeComboBox.getValue() != null) {
+                updatePathOptions();
+            }
+        });
     }
 
     public void refreshData() {
@@ -196,49 +228,253 @@ public class TrafficManagerController implements Initializable {
         PlannedRoute route = routeComboBox.getValue();
         if (route == null) return;
 
-        facilityComboBox.getItems().clear();
         List<Integer> mandatory = route.getMandatoryFacilities();
-        if (!mandatory.isEmpty()) {
-            int currentId = mandatory.get(0);
-            manualPath.clear();
-            manualPath.add(currentId);
-            updateAvailableFacilities(currentId, mandatory);
+        if (mandatory.isEmpty()) {
+            showError("Route has no mandatory facilities.");
+            return;
         }
+
+        // Initialize path with first mandatory facility
+        int startId = mandatory.get(0);
+        manualPath.clear();
+        manualPath.add(startId);
+        
+        // Initialize remaining mandatory stops (all except the first)
+        remainingMandatoryStops.clear();
+        remainingMandatoryStops.addAll(mandatory);
+        remainingMandatoryStops.remove(startId);
+        
+        // Update available facilities and path details
+        updateAvailableFacilities(startId, route);
+        updatePathDetailsDisplay(route);
     }
 
-    private void updateAvailableFacilities(int currentId, List<Integer> mandatory) {
+    private void updateAvailableFacilities(int currentId, PlannedRoute route) {
         facilityComboBox.getItems().clear();
         Map<Integer, Line> connections = lineRepo.findDirectlyConnectedFacilities(currentId);
-        facilityComboBox.getItems().addAll(connections.keySet());
+        
+        if (connections.isEmpty()) {
+            showError("No connections available from current facility.");
+            facilityComboBox.setPromptText("No connections available");
+            return;
+        }
+        
+        // Add connected facilities to combo box (sorted for better UX)
+        List<Integer> connectedIds = new ArrayList<>(connections.keySet());
+        connectedIds.sort((a, b) -> {
+            // Sort mandatory stops first, then by name
+            boolean aMandatory = remainingMandatoryStops.contains(a);
+            boolean bMandatory = remainingMandatoryStops.contains(b);
+            if (aMandatory != bMandatory) {
+                return aMandatory ? -1 : 1;
+            }
+            String nameA = facilityRepo.findById(a).map(Facility::getName).orElse("");
+            String nameB = facilityRepo.findById(b).map(Facility::getName).orElse("");
+            return nameA.compareToIgnoreCase(nameB);
+        });
+        
+        facilityComboBox.getItems().addAll(connectedIds);
+        facilityComboBox.setPromptText("Select next facility...");
+        
+        // Update path details to show current status
+        updatePathDetailsDisplay(route);
     }
 
     private void addFacilityToPath() {
         Integer facilityId = facilityComboBox.getValue();
-        if (facilityId == null) return;
-
-        PlannedRoute route = routeComboBox.getValue();
-        if (route == null) return;
-
-        int currentId = manualPath.isEmpty() ? 
-            route.getMandatoryFacilities().get(0) : 
-            manualPath.get(manualPath.size() - 1);
-
-        Map<Integer, Line> connections = lineRepo.findDirectlyConnectedFacilities(currentId);
-        if (!connections.containsKey(facilityId)) {
-            showError("Facility not directly connected.");
+        if (facilityId == null) {
+            showError("Please select a facility from the list.");
             return;
         }
 
+        PlannedRoute route = routeComboBox.getValue();
+        if (route == null) {
+            showError("Please select a route first.");
+            return;
+        }
+
+        if (manualPath.isEmpty()) {
+            showError("Path is empty. Please select a route first.");
+            return;
+        }
+
+        int currentId = manualPath.get(manualPath.size() - 1);
+
+        // Verify facility is directly connected
+        Map<Integer, Line> connections = lineRepo.findDirectlyConnectedFacilities(currentId);
+        if (!connections.containsKey(facilityId)) {
+            String currentName = facilityRepo.findById(currentId)
+                .map(Facility::getName)
+                .orElse(String.valueOf(currentId));
+            String selectedName = facilityRepo.findById(facilityId)
+                .map(Facility::getName)
+                .orElse(String.valueOf(facilityId));
+            showError("Facility " + selectedName + " is not directly connected to " + currentName + ".\nPlease choose a directly connected facility.");
+            return;
+        }
+
+        // Add facility to path
         manualPath.add(facilityId);
-        updateAvailableFacilities(facilityId, route.getMandatoryFacilities());
+        
+        // Check if this is a mandatory stop
+        if (remainingMandatoryStops.contains(facilityId)) {
+            String facilityName = facilityRepo.findById(facilityId)
+                .map(Facility::getName)
+                .orElse(String.valueOf(facilityId));
+            remainingMandatoryStops.remove(facilityId);
+            showSuccess("Mandatory stop reached: " + facilityName);
+        }
+        
+        // Clear selection in combo box
+        facilityComboBox.getSelectionModel().clearSelection();
+        
+        // Update available facilities for next step
+        updateAvailableFacilities(facilityId, route);
     }
 
+    private void updateFacilityComboBoxDisplay() {
+        facilityComboBox.setCellFactory(listView -> new ListCell<Integer>() {
+            @Override
+            protected void updateItem(Integer facilityId, boolean empty) {
+                super.updateItem(facilityId, empty);
+                if (empty || facilityId == null) {
+                    setText(null);
+                } else {
+                    String name = facilityRepo.findById(facilityId)
+                        .map(Facility::getName)
+                        .orElse("Unknown");
+                    boolean isMandatory = remainingMandatoryStops.contains(facilityId);
+                    setText(String.format("[%d] %s%s", facilityId, name, isMandatory ? " ⚠ MANDATORY" : ""));
+                }
+            }
+        });
+        
+        facilityComboBox.setButtonCell(new ListCell<Integer>() {
+            @Override
+            protected void updateItem(Integer facilityId, boolean empty) {
+                super.updateItem(facilityId, empty);
+                if (empty || facilityId == null) {
+                    setText("Select next facility...");
+                } else {
+                    String name = facilityRepo.findById(facilityId)
+                        .map(Facility::getName)
+                        .orElse("Unknown");
+                    boolean isMandatory = remainingMandatoryStops.contains(facilityId);
+                    setText(String.format("[%d] %s%s", facilityId, name, isMandatory ? " ⚠ MANDATORY" : ""));
+                }
+            }
+        });
+    }
+    
     private void clearPath() {
         manualPath.clear();
+        remainingMandatoryStops.clear();
+        
         PlannedRoute route = routeComboBox.getValue();
-        if (route != null && !route.getMandatoryFacilities().isEmpty()) {
-            manualPath.add(route.getMandatoryFacilities().get(0));
+        if (route != null) {
+            List<Integer> mandatory = route.getMandatoryFacilities();
+            if (!mandatory.isEmpty()) {
+                int startId = mandatory.get(0);
+                manualPath.add(startId);
+                remainingMandatoryStops.addAll(mandatory);
+                remainingMandatoryStops.remove(startId);
+                updateAvailableFacilities(startId, route);
+            }
         }
+        
+        facilityComboBox.getItems().clear();
+        pathDetailsArea.clear();
+        updateFacilityComboBoxDisplay();
+    }
+    
+    private void updatePathDetailsDisplay(PlannedRoute route) {
+        if (route == null) return;
+        
+        StringBuilder details = new StringBuilder();
+        details.append("Route: ").append(route.getId()).append("\n");
+        details.append("Type: ").append(route.getType()).append("\n\n");
+        
+        // Show mandatory facilities
+        List<Integer> mandatory = route.getMandatoryFacilities();
+        details.append("Mandatory Stops (must visit in order):\n");
+        for (Integer facilityId : mandatory) {
+            String name = facilityRepo.findById(facilityId)
+                .map(Facility::getName)
+                .orElse("Unknown");
+            boolean visited = manualPath.contains(facilityId);
+            details.append(String.format("  %s %s (ID: %d)\n", 
+                visited ? "✓" : "○", name, facilityId));
+        }
+        
+        details.append("\n");
+        
+        // Show current position
+        if (!manualPath.isEmpty()) {
+            int currentId = manualPath.get(manualPath.size() - 1);
+            String currentName = facilityRepo.findById(currentId)
+                .map(Facility::getName)
+                .orElse("Unknown");
+            details.append("Current Position: ").append(currentName).append(" (ID: ").append(currentId).append(")\n");
+        }
+        
+        // Show remaining mandatory stops
+        if (!remainingMandatoryStops.isEmpty()) {
+            details.append("\nRemaining Mandatory Stops:\n");
+            for (Integer facilityId : remainingMandatoryStops) {
+                String name = facilityRepo.findById(facilityId)
+                    .map(Facility::getName)
+                    .orElse(String.valueOf(facilityId));
+                details.append("  - ").append(name).append(" (ID: ").append(facilityId).append(")\n");
+            }
+        } else if (!manualPath.isEmpty()) {
+            details.append("\n✓ All mandatory stops visited!\n");
+        }
+        
+        // Show current path
+        if (!manualPath.isEmpty()) {
+            details.append("\nCurrent Path:\n");
+            details.append(manualPath.stream()
+                .map(id -> {
+                    String name = facilityRepo.findById(id)
+                        .map(Facility::getName)
+                        .orElse(String.valueOf(id));
+                    return name + " (" + id + ")";
+                })
+                .collect(Collectors.joining(" → ")));
+        }
+        
+        // Show available connections (same as shown in ComboBox)
+        if (!manualPath.isEmpty()) {
+            int currentId = manualPath.get(manualPath.size() - 1);
+            Map<Integer, Line> connections = lineRepo.findDirectlyConnectedFacilities(currentId);
+            if (!connections.isEmpty()) {
+                details.append("\n\nDirectly Connected Facilities (select from dropdown):\n");
+                List<Integer> sortedIds = new ArrayList<>(connections.keySet());
+                sortedIds.sort((a, b) -> {
+                    boolean aMandatory = remainingMandatoryStops.contains(a);
+                    boolean bMandatory = remainingMandatoryStops.contains(b);
+                    if (aMandatory != bMandatory) {
+                        return aMandatory ? -1 : 1;
+                    }
+                    String nameA = facilityRepo.findById(a).map(Facility::getName).orElse("");
+                    String nameB = facilityRepo.findById(b).map(Facility::getName).orElse("");
+                    return nameA.compareToIgnoreCase(nameB);
+                });
+                
+                for (Integer neighborId : sortedIds) {
+                    String name = facilityRepo.findById(neighborId)
+                        .map(Facility::getName)
+                        .orElse("Unknown");
+                    boolean isMandatory = remainingMandatoryStops.contains(neighborId);
+                    details.append(String.format("  [%d] %s%s\n", 
+                        neighborId, name, isMandatory ? " ⚠ MANDATORY" : ""));
+                }
+            } else {
+                details.append("\n\n⚠ No connections available from current position.\n");
+            }
+        }
+        
+        pathDetailsArea.setText(details.toString());
     }
 
     private void calculatePath() {
@@ -248,17 +484,51 @@ public class TrafficManagerController implements Initializable {
             return;
         }
 
+        // Debug: Check route has mandatory facilities
+        List<Integer> mandatory = route.getMandatoryFacilities();
+        System.out.println("[DEBUG] Route " + route.getId() + " has " + mandatory.size() + " mandatory facilities: " + mandatory);
+
         List<Integer> path;
         if (manualPathRadio.isSelected()) {
             if (manualPath.size() < 2) {
                 showError("Path must have at least 2 facilities.");
                 return;
             }
+            
+            // Verify all mandatory stops are visited
+            if (!remainingMandatoryStops.isEmpty()) {
+                String missing = remainingMandatoryStops.stream()
+                    .map(id -> facilityRepo.findById(id)
+                        .map(Facility::getName)
+                        .orElse(String.valueOf(id)))
+                    .collect(Collectors.joining(", "));
+                showError("Not all mandatory stops have been visited.\n" +
+                    "Missing: " + missing);
+                return;
+            }
+            
             path = new ArrayList<>(manualPath);
         } else {
             path = calculatePathAutomatically(route);
             if (path == null || path.isEmpty()) {
-                showError("Automatic path calculation failed.");
+                // Get facility names for better error message
+                if (mandatory.size() >= 2) {
+                    String fromName = facilityRepo.findById(mandatory.get(0))
+                        .map(Facility::getName)
+                        .orElse(String.valueOf(mandatory.get(0)));
+                    String toName = facilityRepo.findById(mandatory.get(mandatory.size() - 1))
+                        .map(Facility::getName)
+                        .orElse(String.valueOf(mandatory.get(mandatory.size() - 1)));
+                    showError("Automatic path calculation failed.\n" +
+                        "Could not find a path from " + fromName + " (" + mandatory.get(0) + ") to " + 
+                        toName + " (" + mandatory.get(mandatory.size() - 1) + ").\n" +
+                        "Please check if the facilities are connected in the network.\n\n" +
+                        "Mandatory facilities: " + mandatory);
+                } else {
+                    showError("Automatic path calculation failed.\n" +
+                        "Route does not have enough facilities to calculate a path.\n" +
+                        "Route has " + mandatory.size() + " mandatory facilities.");
+                }
                 return;
             }
         }
@@ -275,22 +545,55 @@ public class TrafficManagerController implements Initializable {
 
     private List<Integer> calculatePathAutomatically(PlannedRoute route) {
         List<Integer> mandatoryStops = route.getMandatoryFacilities();
+        
+        if (mandatoryStops.size() < 2) {
+            System.err.println("Route has less than 2 mandatory facilities");
+            return null;
+        }
+        
         List<Integer> completePath = new ArrayList<>();
 
         for (int i = 0; i < mandatoryStops.size() - 1; i++) {
             int from = mandatoryStops.get(i);
             int to = mandatoryStops.get(i + 1);
 
+            // Verify facilities exist
+            if (facilityRepo.findById(from).isEmpty()) {
+                System.err.println("Facility not found: " + from);
+                return null;
+            }
+            if (facilityRepo.findById(to).isEmpty()) {
+                System.err.println("Facility not found: " + to);
+                return null;
+            }
+
             AutomaticPathPlanningService.PathCalculationResult result = 
                 automaticPathService.calculateOptimalPath(from, to);
 
             if (!result.isSuccess()) {
+                String fromName = facilityRepo.findById(from)
+                    .map(Facility::getName)
+                    .orElse(String.valueOf(from));
+                String toName = facilityRepo.findById(to)
+                    .map(Facility::getName)
+                    .orElse(String.valueOf(to));
+                
+                if (result.hasNegativeCycle()) {
+                    System.err.println("Negative cycle detected between " + fromName + " and " + toName);
+                } else {
+                    System.err.println("No path found from " + fromName + " (" + from + ") to " + toName + " (" + to + ")");
+                }
                 return null;
             }
 
             List<Integer> segment = result.getPath();
-            if (i > 0) {
-                segment.remove(0);
+            if (segment == null || segment.isEmpty()) {
+                System.err.println("Path segment is empty from " + from + " to " + to);
+                return null;
+            }
+            
+            if (i > 0 && !segment.isEmpty()) {
+                segment.remove(0); // Remove duplicate facility
             }
             completePath.addAll(segment);
         }
@@ -323,15 +626,25 @@ public class TrafficManagerController implements Initializable {
                 return;
             }
 
+            // Validate train has departure date and time
+            if (train.getDepartureDate() == null || train.getDepartureTime() == null) {
+                showError("Train does not have a valid departure date and time.");
+                return;
+            }
+
             Optional<Schedule> existing = scheduleRepo.findAll().stream()
-                .filter(s -> s.getTrainId().equals(trainId))
+                .filter(s -> s.getTrainId().equals(trainId) && s.getRouteId().equals(route.getId()))
                 .findFirst();
 
             if (existing.isPresent()) {
                 showSuccess("Schedule already exists: " + existing.get().getScheduleId());
             } else {
                 String scheduleId = "SCH-" + trainId;
-                LocalDateTime departure = LocalDateTime.now();
+                // Use the train's departure date and time
+                LocalDateTime departure = LocalDateTime.of(
+                    train.getDepartureDate(),
+                    train.getDepartureTime()
+                );
                 Schedule schedule = new Schedule(scheduleId, trainId, route.getId(), 
                     departure, Schedule.ScheduleStatus.SCHEDULED);
                 scheduleRepo.save(schedule);

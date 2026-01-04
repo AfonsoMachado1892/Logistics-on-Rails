@@ -364,19 +364,10 @@ public class TrainAssemblyController implements Initializable {
 
             trainRepo.save(train);
 
-            // Create schedule
-            String scheduleId = "SCH-" + trainId;
-            Schedule schedule = new Schedule(
-                scheduleId,
-                String.valueOf(trainId),
-                route.getId(),
-                departureDateTime,
-                Schedule.ScheduleStatus.SCHEDULED
-            );
-            scheduleRepo.save(schedule);
-
             // Mark route as assigned
             route.setAssignedTrainId(String.valueOf(trainId));
+            
+            // Note: Schedule will be created later in Traffic Manager after path calculation
 
             showSuccess("Train " + trainId + " assembled and assigned to route " + route.getId());
             refreshData();
