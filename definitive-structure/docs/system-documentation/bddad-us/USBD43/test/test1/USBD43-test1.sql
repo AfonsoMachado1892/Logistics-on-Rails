@@ -1,30 +1,17 @@
 SET SERVEROUTPUT ON;
 DECLARE
 v_id NUMBER;
+    v_test_id NUMBER := 100;
 BEGIN
-    DBMS_OUTPUT.PUT_LINE('--- Test 1: Happy Path ---');
-    v_id := fn_create_electric_loco_model(
-        p_model_id      => 100,
-        p_model_name    => 'EuroSprinter ES64',
-        p_make          => 'Siemens',
-        p_power_kw      => 6400,
-        p_weight_tons   => 87,
-        p_max_speed_kmh => 230,
-        p_traction_kn   => 300,
-        p_voltage       => '25kV',
-        p_frequency     => '50Hz',
-        p_gauge_desc    => 'Bitola Ibérica',
-        p_length_m      => 19.2,
-        p_width_m       => 3.0,
-        p_height_m      => 4.4,
-        p_num_bogies    => 2,
-        p_bogies_type   => 'Bo-Bo'
-    );
-    DBMS_OUTPUT.PUT_LINE('Success! Created Electric Locomotive Model with ID: ' || v_id);
+    DBMS_OUTPUT.PUT_LINE('--- TEST 1: Happy Path ---');
+    -- Limpeza preventiva
+DELETE FROM Locomotive_Model WHERE id = v_test_id OR UPPER(model_name) = 'EUROSPRINTER ES64';
 COMMIT;
+
+v_id := fn_create_electric_loco_model(v_test_id, 'EuroSprinter ES64', 'Siemens', 6400, 87, 230, 300, '25kV', '50Hz', 'Bitola Ibérica', 19.2, 3.0, 4.4, 2, 'Bo-Bo');
+    DBMS_OUTPUT.PUT_LINE('Success! Created ID: ' || v_id);
 EXCEPTION
     WHEN OTHERS THEN
         DBMS_OUTPUT.PUT_LINE('Test Failed: ' || SQLERRM);
-ROLLBACK;
 END;
 /
