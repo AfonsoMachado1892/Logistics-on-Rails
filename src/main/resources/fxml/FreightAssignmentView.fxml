@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="LAPR3.UI.javafx.FreightAssignmentController" spacing="15" styleClass="vbox-container">
+   <Text text="Freight Route Planning (USLP08)" styleClass="section-title" />
+   
+   <HBox spacing="10" styleClass="hbox-container">
+      <Button fx:id="refreshButton" text="🔄 Refresh" />
+      <Button fx:id="createSimpleRouteButton" text="➕ Create Simple Route" />
+      <Button fx:id="createCompositeRouteButton" text="🔗 Create Composite Route" />
+   </HBox>
+
+   <SplitPane dividerPositions="0.5" orientation="HORIZONTAL">
+      <VBox spacing="10">
+         <Text text="Available Freights" styleClass="label-title" />
+         <TableView fx:id="freightTable" styleClass="table-view">
+            <columns>
+               <TableColumn fx:id="freightIdColumn" text="ID" prefWidth="60" />
+               <TableColumn fx:id="originColumn" text="Origin" prefWidth="150" />
+               <TableColumn fx:id="destinationColumn" text="Destination" prefWidth="150" />
+               <TableColumn fx:id="wagonsColumn" text="Wagons" prefWidth="80" />
+               <TableColumn fx:id="dateColumn" text="Date" prefWidth="120" />
+            </columns>
+         </TableView>
+         
+         <VBox spacing="5">
+            <Text text="Selected Freights for Composite Route:" styleClass="label-subtitle" />
+            <ListView fx:id="selectedFreightsList" prefHeight="100" />
+            <HBox spacing="5">
+               <Button fx:id="addFreightButton" text="➕ Add Selected" />
+               <Button fx:id="removeFreightButton" text="➖ Remove" />
+               <Button fx:id="clearSelectionButton" text="🗑️ Clear" />
+            </HBox>
+         </VBox>
+      </VBox>
+
+      <VBox spacing="10">
+         <Text text="Planned Routes" styleClass="label-title" />
+         <TableView fx:id="routesTable" styleClass="table-view">
+            <columns>
+               <TableColumn fx:id="routeIdColumn" text="Route ID" prefWidth="100" />
+               <TableColumn fx:id="routeTypeColumn" text="Type" prefWidth="100" />
+               <TableColumn fx:id="freightCountColumn" text="Freights" prefWidth="80" />
+               <TableColumn fx:id="statusColumn" text="Status" prefWidth="200" />
+            </columns>
+         </TableView>
+         
+         <Text text="Route Details" styleClass="label-title" />
+         <TextArea fx:id="routeDetailsArea" prefRowCount="15" wrapText="true" editable="false" />
+      </VBox>
+   </SplitPane>
+</VBox>
+

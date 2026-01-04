@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="LAPR3.UI.javafx.TrainAssemblyController" spacing="15" styleClass="vbox-container">
+   <Text text="Train Assembly and Route Assignment (USLP09)" styleClass="section-title" />
+   
+   <HBox spacing="10" styleClass="hbox-container">
+      <Label text="Route:" />
+      <ComboBox fx:id="routeComboBox" prefWidth="300" />
+      <Label text="Operator:" />
+      <ComboBox fx:id="operatorComboBox" prefWidth="150" />
+      <Button fx:id="refreshButton" text="🔄 Refresh" />
+   </HBox>
+
+   <GridPane hgap="15" vgap="15">
+      <columnConstraints>
+         <ColumnConstraints prefWidth="300" />
+         <ColumnConstraints prefWidth="50" />
+         <ColumnConstraints prefWidth="300" />
+         <ColumnConstraints prefWidth="300" />
+      </columnConstraints>
+
+      <!-- Locomotives Section -->
+      <VBox GridPane.columnIndex="0" spacing="5">
+         <Text text="Available Locomotives" styleClass="label-title" />
+         <ListView fx:id="locomotivesList" prefHeight="200" />
+         <Button fx:id="addLocomotiveButton" text="➡️ Add" />
+      </VBox>
+
+      <VBox GridPane.columnIndex="1" alignment="CENTER" spacing="10">
+         <!-- Empty space for visual separation -->
+      </VBox>
+
+      <VBox GridPane.columnIndex="2" spacing="5">
+         <Text text="Selected Locomotives" styleClass="label-title" />
+         <ListView fx:id="selectedLocomotivesList" prefHeight="200" />
+         <Button fx:id="removeLocomotiveButton" text="⬅️ Remove" />
+      </VBox>
+
+      <!-- Wagons Section -->
+      <VBox GridPane.columnIndex="3" spacing="5">
+         <Text text="Available Wagons" styleClass="label-title" />
+         <ListView fx:id="wagonsList" prefHeight="200" />
+         <HBox spacing="5">
+            <Button fx:id="addWagonButton" text="➡️ Add" />
+            <Button fx:id="removeWagonButton" text="⬅️ Remove" />
+         </HBox>
+         <Text text="Selected Wagons" styleClass="label-subtitle" />
+         <ListView fx:id="selectedWagonsList" prefHeight="100" />
+      </VBox>
+   </GridPane>
+
+   <HBox spacing="10" styleClass="hbox-container">
+      <Label text="Departure Date (yyyy-MM-dd):" />
+      <TextField fx:id="departureDateField" prefWidth="150" />
+      <Label text="Time (HH:mm):" />
+      <TextField fx:id="departureTimeField" prefWidth="100" />
+      <Button fx:id="assembleTrainButton" text="🚂 Assemble Train" styleClass="button-success" />
+   </HBox>
+
+   <Label fx:id="validationLabel" styleClass="status-info" />
+
+   <Separator />
+
+   <Text text="Assembled Trains" styleClass="section-title" />
+   <TableView fx:id="assembledTrainsTable" styleClass="table-view" prefHeight="200">
+      <columns>
+         <TableColumn fx:id="trainIdColumn" text="Train ID" prefWidth="100" />
+         <TableColumn fx:id="operatorColumn" text="Operator" prefWidth="150" />
+         <TableColumn fx:id="locosColumn" text="Locomotives" prefWidth="100" />
+         <TableColumn fx:id="wagonsColumn" text="Wagons" prefWidth="100" />
+         <TableColumn fx:id="powerColumn" text="Total Power" prefWidth="120" />
+      </columns>
+   </TableView>
+</VBox>
+

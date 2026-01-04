@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="LAPR3.UI.javafx.TrafficManagerController" spacing="15" styleClass="vbox-container">
+   <Text text="Traffic Manager - Train Scheduling (USLP10)" styleClass="section-title" />
+   
+   <TabPane tabClosingPolicy="UNAVAILABLE">
+      <tabs>
+         <Tab text="📋 Planned Routes">
+            <VBox spacing="10" styleClass="vbox-container">
+               <Text text="Planned Routes (from USLP08)" styleClass="label-title" />
+               <TableView fx:id="plannedRoutesTable" styleClass="table-view" prefHeight="200">
+                  <columns>
+                     <TableColumn fx:id="routeIdColumn" text="Route ID" prefWidth="150" />
+                     <TableColumn fx:id="routeTypeColumn" text="Type" prefWidth="100" />
+                     <TableColumn fx:id="assignedTrainColumn" text="Assigned Train" prefWidth="200" />
+                  </columns>
+               </TableView>
+            </VBox>
+         </Tab>
+
+         <Tab text="🗺️ Path Planning">
+            <VBox spacing="10" styleClass="vbox-container">
+               <HBox spacing="10" styleClass="hbox-container">
+                  <Label text="Select Route:" />
+                  <ComboBox fx:id="routeComboBox" prefWidth="300" />
+               </HBox>
+
+               <HBox spacing="15" styleClass="hbox-container">
+                  <RadioButton fx:id="manualPathRadio" text="Manual Path" />
+                  <RadioButton fx:id="automaticPathRadio" text="Automatic Path (Bellman-Ford)" selected="true" />
+                  <Button fx:id="calculatePathButton" text="Calculate Path" />
+               </HBox>
+
+               <GridPane hgap="10" vgap="10">
+                  <columnConstraints>
+                     <ColumnConstraints prefWidth="300" />
+                     <ColumnConstraints prefWidth="50" />
+                     <ColumnConstraints prefWidth="300" />
+                  </columnConstraints>
+
+                  <VBox GridPane.columnIndex="0" spacing="5">
+                     <Text text="Manual Path Building" styleClass="label-title" />
+                     <ListView fx:id="manualPathList" prefHeight="200" />
+                     <HBox spacing="5">
+                        <ComboBox fx:id="facilityComboBox" prefWidth="150" />
+                        <Button fx:id="addFacilityButton" text="Add" />
+                        <Button fx:id="clearPathButton" text="Clear" />
+                     </HBox>
+                  </VBox>
+
+                  <VBox GridPane.columnIndex="2" spacing="5">
+                     <Text text="Path Details" styleClass="label-title" />
+                     <TextArea fx:id="pathDetailsArea" prefRowCount="10" wrapText="true" editable="false" />
+                     <Button fx:id="createScheduleButton" text="Create Schedule" styleClass="button-success" />
+                  </VBox>
+               </GridPane>
+            </VBox>
+         </Tab>
+
+         <Tab text="📅 Schedules">
+            <VBox spacing="10" styleClass="vbox-container">
+               <Text text="Train Schedules" styleClass="label-title" />
+               <TableView fx:id="schedulesTable" styleClass="table-view" prefHeight="300">
+                  <columns>
+                     <TableColumn fx:id="scheduleIdColumn" text="Schedule ID" prefWidth="150" />
+                     <TableColumn fx:id="trainIdColumn" text="Train ID" prefWidth="100" />
+                     <TableColumn fx:id="scheduleRouteIdColumn" text="Route ID" prefWidth="150" />
+                     <TableColumn fx:id="departureColumn" text="Departure" prefWidth="200" />
+                     <TableColumn fx:id="statusColumn" text="Status" prefWidth="100" />
+                  </columns>
+               </TableView>
+            </VBox>
+         </Tab>
+
+         <Tab text="📊 Dispatch Plan">
+            <VBox spacing="10" styleClass="vbox-container">
+               <Text text="Generate Dispatch Plan" styleClass="label-title" />
+               <HBox spacing="10" styleClass="hbox-container">
+                  <Label text="Date (yyyy-MM-dd):" />
+                  <TextField fx:id="dispatchDateField" prefWidth="150" />
+                  <Button fx:id="generateDispatchPlanButton" text="Generate Plan" />
+                  <Button fx:id="viewVisualizationsButton" text="View Visualizations" />
+               </HBox>
+               <TextArea fx:id="dispatchPlanArea" prefRowCount="20" wrapText="true" editable="false" />
+            </VBox>
+         </Tab>
+      </tabs>
+   </TabPane>
+</VBox>
+
