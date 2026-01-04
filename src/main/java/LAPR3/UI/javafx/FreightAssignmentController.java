@@ -19,7 +19,7 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 /**
- * Controller for Freight Assignment (USLP08)
+ * Controller for Freight Assignment
  */
 public class FreightAssignmentController implements Initializable {
 
@@ -140,7 +140,7 @@ public class FreightAssignmentController implements Initializable {
         });
     }
 
-    private void refreshData() {
+    public void refreshData() {
         freightList.clear();
         freightList.addAll(freightRepo.findAll().stream()
             .filter(f -> f.getAssignedWagons().size() > 0)

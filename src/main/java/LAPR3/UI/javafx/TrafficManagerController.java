@@ -23,7 +23,7 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 /**
- * Controller for Traffic Manager (USLP10)
+ * Controller for Traffic Manager
  */
 public class TrafficManagerController implements Initializable {
 
@@ -79,6 +79,8 @@ public class TrafficManagerController implements Initializable {
     private Button addFacilityButton;
     @FXML
     private Button clearPathButton;
+    @FXML
+    private TabPane internalTabPane;
 
     private RoutePlanningService routePlanningService;
     private FacilityRepository facilityRepo;
@@ -106,6 +108,15 @@ public class TrafficManagerController implements Initializable {
         
         // Refresh data when route combo box is opened
         routeComboBox.setOnShowing(e -> refreshData());
+        
+        // Refresh planned routes when the Planned Routes tab is selected
+        if (internalTabPane != null) {
+            internalTabPane.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
+                if (newTab != null && newTab.getText().equals("Planned Routes")) {
+                    refreshData();
+                }
+            });
+        }
     }
 
     private void initializeRepositories() {
