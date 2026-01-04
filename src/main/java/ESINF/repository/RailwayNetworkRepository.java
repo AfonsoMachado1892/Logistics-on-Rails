@@ -281,6 +281,13 @@ public class RailwayNetworkRepository {
             this.stationsLoaded = stationsLoaded;
             this.connectionsLoaded = connectionsLoaded;
         }
+
+        @Override
+        public String toString() {
+            return String.format("Loaded %d stations and %d connections",
+                    stationsLoaded, connectionsLoaded);
+        }
+
     }
 
     @Override
