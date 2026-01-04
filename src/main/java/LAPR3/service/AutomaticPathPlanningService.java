@@ -1,55 +1,24 @@
 package LAPR3.service;
 
-import ESINF.model.Connection;
-import ESINF.model.RailwayStation;
-import ESINF.model.RiskAwarePathResult;
-import ESINF.service.RailwayNetworkOptimizationService;
-import ESINF.repository.RailwayNetworkRepository;
 import LAPR3.model.Facility;
 import LAPR3.model.Line;
 import LAPR3.model.Segment;
 import LAPR3.repository.FacilityRepository;
 import LAPR3.repository.LineRepository;
 import LAPR3.repository.SegmentRepository;
-import Graph.Graph;
-import Graph.map.MapGraph;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
- * Service for Automatic Path Planning (USLP10)
- * Bridges LAPR3 domain (Facilities, Lines, Segments) with ESINF graph algorithms
- *
- * This service:
- * 1. Converts LAPR3 railway network → ESINF graph structure
- * 2. Uses Bellman-Ford algorithm for shortest path (supports negative costs)
- * 3. Returns path as list of Facility IDs
- * 4. Considers sidings in cost calculation (USLP10 requirement)
- *
- * SIDINGS HANDLING (USLP07/USLP10):
- * - Single-track segments WITH sidings: Allow train crossing → Higher cost (+30%)
- * - Single-track segments WITHOUT sidings: Must cross at stations → Normal cost
- * - Double-track segments: Free crossing → Lower cost (-15%)
- *
- * The cost calculation penalizes single-track lines with sidings because they
- * require complex crossing coordination, which is handled by CrossingResolutionService
- * in the dispatch phase.
- *
- * Part of USLP10 - Automatic Path Calculation Mode
+ * Service for automatic path calculation using Bellman-Ford algorithm
+ * Supports negative edge weights (penalties/bonuses)
+ * Part of USLP10 - Automatic Path Planning with ESINF US15
  */
 public class AutomaticPathPlanningService {
-
     private final FacilityRepository facilityRepository;
     private final LineRepository lineRepository;
     private final SegmentRepository segmentRepository;
-
-    // ESINF components
-    private RailwayNetworkRepository railwayRepo;
-    private RailwayNetworkOptimizationService optimizationService;
-
-    // Mapping between LAPR3 and ESINF domains
-    private Map<Integer, RailwayStation> facilityToStation;
-    private Map<RailwayStation, Integer> stationToFacility;
 
     public AutomaticPathPlanningService(FacilityRepository facilityRepository,
                                         LineRepository lineRepository,
@@ -57,281 +26,437 @@ public class AutomaticPathPlanningService {
         this.facilityRepository = facilityRepository;
         this.lineRepository = lineRepository;
         this.segmentRepository = segmentRepository;
-        this.facilityToStation = new HashMap<>();
-        this.stationToFacility = new HashMap<>();
     }
 
     /**
-     * Calculates the optimal path between two facilities using cost-based algorithm
-     *
-     * @param startFacilityId origin facility ID
-     * @param endFacilityId destination facility ID
-     * @return PathCalculationResult with ordered list of facility IDs or error
+     * Calculate optimal path between two facilities using Bellman-Ford
+     * Handles negative costs (bonuses) and detects negative cycles
      */
     public PathCalculationResult calculateOptimalPath(int startFacilityId, int endFacilityId) {
-        try {
-            // Step 1: Build ESINF graph from LAPR3 data
-            buildRailwayNetwork();
-
-            // Step 2: Get corresponding railway stations
-            RailwayStation startStation = facilityToStation.get(startFacilityId);
-            RailwayStation endStation = facilityToStation.get(endFacilityId);
-
-            if (startStation == null || endStation == null) {
-                return PathCalculationResult.error("Invalid facility IDs: start or end not found");
-            }
-
-            // Step 3: Calculate shortest path using Bellman-Ford
-            RiskAwarePathResult result = optimizationService.getRiskAwareShortestPath(
-                    startStation.getStationId(),
-                    endStation.getStationId()
-            );
-
-            // Step 4: Check for negative cycles
-            if (result.hasNegativeCycle()) {
-                List<String> cycleNames = new ArrayList<>();
-                for (RailwayStation station : result.getCycleStations()) {
-                    Integer facId = stationToFacility.get(station);
-                    if (facId != null) {
-                        Facility fac = facilityRepository.findById(facId).orElse(null);
-                        cycleNames.add(fac != null ? fac.getName() : "Unknown");
-                    }
-                }
-                return PathCalculationResult.negativeCycle(cycleNames);
-            }
-
-            // Step 5: Convert path back to facility IDs
-            List<Integer> facilityPath = new ArrayList<>();
-            List<Double> costs = new ArrayList<>();
-
-            if (result.getPath() != null) {
-                for (int i = 0; i < result.getPath().size(); i++) {
-                    RailwayStation station = result.getPath().get(i);
-                    Integer facId = stationToFacility.get(station);
-                    if (facId != null) {
-                        facilityPath.add(facId);
-                        if (i < result.getPathCosts().size()) {
-                            costs.add(result.getPathCosts().get(i));
-                        }
-                    }
-                }
-            }
-
-            if (facilityPath.isEmpty()) {
-                return PathCalculationResult.noPath("No path found between facilities");
-            }
-
-            return PathCalculationResult.success(facilityPath, costs, result.getTotalCost());
-
-        } catch (Exception e) {
-            return PathCalculationResult.error("Error calculating path: " + e.getMessage());
+        // Validate facilities exist
+        if (facilityRepository.findById(startFacilityId).isEmpty()) {
+            System.err.println("Start facility not found: " + startFacilityId);
+            return new PathCalculationResult();
         }
+
+        if (facilityRepository.findById(endFacilityId).isEmpty()) {
+            System.err.println("End facility not found: " + endFacilityId);
+            return new PathCalculationResult();
+        }
+
+        // Build graph
+        Map<Integer, List<Edge>> graph = buildGraph();
+
+        if (graph.isEmpty()) {
+            System.err.println("Graph is empty - no lines loaded");
+            return new PathCalculationResult();
+        }
+
+        // Get all facility IDs in the graph
+        Set<Integer> allFacilities = new HashSet<>(graph.keySet());
+        for (List<Edge> edges : graph.values()) {
+            for (Edge edge : edges) {
+                allFacilities.add(edge.to);
+            }
+        }
+
+        // Verify start and end are in graph
+        if (!allFacilities.contains(startFacilityId)) {
+            System.err.println("Start facility not connected to network: " + startFacilityId);
+            return new PathCalculationResult();
+        }
+
+        if (!allFacilities.contains(endFacilityId)) {
+            System.err.println("End facility not connected to network: " + endFacilityId);
+            return new PathCalculationResult();
+        }
+
+        // Initialize distances - CRITICAL FIX
+        Map<Integer, Double> distances = new HashMap<>();
+        Map<Integer, Integer> predecessors = new HashMap<>();
+
+        // Initialize ALL facilities to infinity
+        for (Integer facility : allFacilities) {
+            distances.put(facility, Double.POSITIVE_INFINITY);
+        }
+
+        // Start facility has distance 0
+        distances.put(startFacilityId, 0.0);
+
+        // Bellman-Ford algorithm
+        int n = allFacilities.size();
+
+        // Relax edges (n-1) times
+        for (int i = 0; i < n - 1; i++) {
+            boolean changed = false;
+
+            for (Map.Entry<Integer, List<Edge>> entry : graph.entrySet()) {
+                int from = entry.getKey();
+
+                // CRITICAL FIX: Check if distance exists and is not infinity
+                Double fromDist = distances.get(from);
+                if (fromDist == null || fromDist == Double.POSITIVE_INFINITY) {
+                    continue;
+                }
+
+                for (Edge edge : entry.getValue()) {
+                    // CRITICAL FIX: Ensure 'to' node has a distance
+                    Double toDist = distances.get(edge.to);
+                    if (toDist == null) {
+                        distances.put(edge.to, Double.POSITIVE_INFINITY);
+                        toDist = Double.POSITIVE_INFINITY;
+                    }
+
+                    double newDist = fromDist + edge.cost;
+
+                    if (newDist < toDist) {
+                        distances.put(edge.to, newDist);
+                        predecessors.put(edge.to, from);
+                        changed = true;
+                    }
+                }
+            }
+
+            if (!changed) {
+                break; // Early termination if no changes
+            }
+        }
+
+        // Check for negative cycles
+        List<Integer> negativeCycleNodes = detectNegativeCycle(graph, distances);
+        if (!negativeCycleNodes.isEmpty()) {
+            return new PathCalculationResult(negativeCycleNodes);
+        }
+
+        // Check if destination is reachable
+        Double endDist = distances.get(endFacilityId);
+        if (endDist == null || endDist == Double.POSITIVE_INFINITY) {
+            System.err.println("No path found from " + startFacilityId + " to " + endFacilityId);
+            return new PathCalculationResult(); // No path found
+        }
+
+        // Reconstruct path
+        List<Integer> path = reconstructPath(predecessors, startFacilityId, endFacilityId);
+
+        if (path.isEmpty()) {
+            System.err.println("Failed to reconstruct path");
+            return new PathCalculationResult();
+        }
+
+        // Calculate total distance
+        double totalDistance = calculateTotalDistance(path);
+
+        return new PathCalculationResult(path, totalDistance, endDist);
     }
 
     /**
-     * Builds the ESINF railway network graph from LAPR3 data
-     * Converts Facilities → RailwayStations
-     * Converts Lines/Segments → Connections with cost calculation
+     * Build graph from railway network
+     * IMPROVED: Better error handling and validation
      */
-    private void buildRailwayNetwork() {
-        // Clear mappings
-        facilityToStation.clear();
-        stationToFacility.clear();
+    private Map<Integer, List<Edge>> buildGraph() {
+        Map<Integer, List<Edge>> graph = new HashMap<>();
 
-        // Create cost graph (directed)
-        Graph<RailwayStation, Double> costGraph = new MapGraph<>(true);
+        List<Line> allLines = lineRepository.findAll();
 
-        // Step 1: Convert all facilities to railway stations
-        List<Facility> facilities = facilityRepository.findAll();
-        for (Facility facility : facilities) {
-            // Create RailwayStation (using facility ID as station ID)
-            RailwayStation station = new RailwayStation(
-                    facility.getId(),
-                    facility.getName(),
-                    0.0, // latitude (not used in path calculation)
-                    0.0, // longitude (not used in path calculation)
-                    0.0, // coordX
-                    0.0  // coordY
-            );
-
-            facilityToStation.put(facility.getId(), station);
-            stationToFacility.put(station, facility.getId());
-            costGraph.addVertex(station);
+        if (allLines.isEmpty()) {
+            System.err.println("No lines found in repository");
+            return graph;
         }
 
-        // Step 2: Convert all lines to connections with calculated costs
-        List<Line> lines = lineRepository.findAll();
-        for (Line line : lines) {
-            // Get segments for this line
+        int edgesAdded = 0;
+
+        for (Line line : allLines) {
             List<Segment> segments = segmentRepository.findByLineId(line.getId());
 
             if (segments.isEmpty()) {
+                System.err.println("Warning: Line " + line.getId() + " has no segments");
                 continue;
             }
 
-            // Calculate total distance (in km)
+            int start = line.getStartFacilityId();
+            int end = line.getEndFacilityId();
+
+            // Validate facilities exist
+            if (facilityRepository.findById(start).isEmpty()) {
+                System.err.println("Warning: Start facility " + start + " not found for line " + line.getId());
+                continue;
+            }
+
+            if (facilityRepository.findById(end).isEmpty()) {
+                System.err.println("Warning: End facility " + end + " not found for line " + line.getId());
+                continue;
+            }
+
             double totalDistance = segments.stream()
                     .mapToDouble(Segment::getLengthMeters)
-                    .sum() / 1000.0;
+                    .sum() / 1000.0; // Convert to km
 
-            // Calculate cost based on multiple factors
-            double cost = calculateLineCost(segments, totalDistance);
+            // Calculate cost (can include penalties/bonuses)
+            double cost = calculateEdgeCost(segments, totalDistance);
 
-            // Add bidirectional edges (lines work in both directions)
-            RailwayStation startStation = facilityToStation.get(line.getStartFacilityId());
-            RailwayStation endStation = facilityToStation.get(line.getEndFacilityId());
+            // Add bidirectional edges
+            graph.computeIfAbsent(start, k -> new ArrayList<>())
+                    .add(new Edge(end, cost, totalDistance));
+            graph.computeIfAbsent(end, k -> new ArrayList<>())
+                    .add(new Edge(start, cost, totalDistance));
 
-            if (startStation != null && endStation != null) {
-                // Forward direction
-                costGraph.addEdge(startStation, endStation, cost);
-                // Reverse direction (same cost)
-                costGraph.addEdge(endStation, startStation, cost);
+            edgesAdded += 2;
+        }
+
+        System.out.println("[AutomaticPath] Graph built: " + graph.size() + " nodes, " + edgesAdded + " edges");
+
+        return graph;
+    }
+
+    /**
+     * Calculate cost for an edge based on distance and segment characteristics
+     */
+    private double calculateEdgeCost(List<Segment> segments, double distanceKm) {
+        double baseCost = distanceKm;
+
+        // Bonuses (negative costs)
+        boolean allElectrified = segments.stream().allMatch(Segment::isElectrified);
+        boolean allDoubleTrack = segments.stream().allMatch(s -> s.getNumberTracks() >= 2);
+
+        if (allElectrified) {
+            baseCost -= distanceKm * 0.1; // 10% bonus for electrified
+        }
+
+        if (allDoubleTrack) {
+            baseCost -= distanceKm * 0.05; // 5% bonus for double-track
+        }
+
+        // Penalties (positive costs)
+        boolean hasSingleTrack = segments.stream().anyMatch(s -> s.getNumberTracks() == 1);
+        if (hasSingleTrack) {
+            baseCost += distanceKm * 0.15; // 15% penalty for single-track
+        }
+
+        return baseCost;
+    }
+
+    /**
+     * Detect negative cycle by running one more iteration
+     */
+    private List<Integer> detectNegativeCycle(Map<Integer, List<Edge>> graph,
+                                              Map<Integer, Double> distances) {
+        for (Map.Entry<Integer, List<Edge>> entry : graph.entrySet()) {
+            int from = entry.getKey();
+
+            Double fromDist = distances.get(from);
+            if (fromDist == null || fromDist == Double.POSITIVE_INFINITY) {
+                continue;
+            }
+
+            for (Edge edge : entry.getValue()) {
+                Double toDist = distances.get(edge.to);
+                if (toDist == null) {
+                    continue;
+                }
+
+                double newDist = fromDist + edge.cost;
+                if (newDist < toDist) {
+                    // Negative cycle detected
+                    return traceCycle(graph, from, edge.to);
+                }
             }
         }
 
-        // Step 3: Create custom repository with our built graph
-        railwayRepo = new CustomRailwayNetworkRepository(costGraph, facilityToStation);
-
-        // Step 4: Create optimization service
-        optimizationService = new RailwayNetworkOptimizationService(railwayRepo);
+        return Collections.emptyList(); // No negative cycle
     }
 
     /**
-     * Calculates cost for a line based on its segments characteristics
-     *
-     * Cost factors:
-     * - Base: Distance (km)
-     * - Electrification bonus: -10% if fully electrified
-     * - Double track bonus: -15% if all segments are double track
-     * - Single track penalty: +30% if any segment is single track with sidings (crossing complexity)
-     * - Weight limit penalty: +20% if average weight limit < 7000 kg/m
-     *
-     * @param segments list of segments in the line
-     * @param distanceKm total distance in kilometers
-     * @return calculated cost
+     * Trace the negative cycle starting from a node
      */
-    private double calculateLineCost(List<Segment> segments, double distanceKm) {
-        double cost = distanceKm;
+    private List<Integer> traceCycle(Map<Integer, List<Edge>> graph, int start, int current) {
+        List<Integer> cycle = new ArrayList<>();
+        cycle.add(start);
+        cycle.add(current);
 
-        // Factor 1: Electrification bonus (-10%)
-        boolean allElectrified = segments.stream().allMatch(Segment::isElectrified);
-        if (allElectrified) {
-            cost *= 0.9;
+        Set<Integer> visited = new HashSet<>();
+        visited.add(start);
+        visited.add(current);
+
+        int node = current;
+        int maxSteps = 100;
+
+        while (maxSteps-- > 0) {
+            List<Edge> edges = graph.get(node);
+            if (edges == null || edges.isEmpty()) {
+                break;
+            }
+
+            node = edges.get(0).to;
+            if (visited.contains(node)) {
+                cycle.add(node);
+                break;
+            }
+
+            cycle.add(node);
+            visited.add(node);
         }
 
-        // Factor 2: Track type
-        boolean allDoubleTrack = segments.stream().allMatch(s -> s.getNumberTracks() >= 2);
-        boolean hasSingleTrackWithSiding = segments.stream()
-                .anyMatch(s -> s.getNumberTracks() == 1 && s.getSidingPosition() != null);
-
-        if (allDoubleTrack) {
-            // Double track bonus: -15%
-            cost *= 0.85;
-        } else if (hasSingleTrackWithSiding) {
-            // Single track with siding penalty: +30% (crossing complexity)
-            cost *= 1.3;
-        }
-
-        // Factor 3: Weight limit penalty
-        double avgWeightLimit = segments.stream()
-                .mapToDouble(Segment::getMaxWeightKgPerMeter)
-                .average()
-                .orElse(8000.0);
-
-        if (avgWeightLimit < 7000) {
-            cost *= 1.2; // +20% penalty for low weight capacity
-        }
-
-        return cost;
+        return cycle;
     }
 
     /**
-     * Gets a summary of the network structure
+     * Reconstruct path from predecessors map
+     */
+    private List<Integer> reconstructPath(Map<Integer, Integer> predecessors,
+                                          int start, int end) {
+        List<Integer> path = new ArrayList<>();
+        Integer current = end;
+
+        Set<Integer> visited = new HashSet<>();
+        int maxSteps = 1000; // Prevent infinite loops
+
+        while (current != null && !current.equals(start) && maxSteps-- > 0) {
+            if (visited.contains(current)) {
+                System.err.println("Cycle detected in path reconstruction");
+                return Collections.emptyList();
+            }
+
+            path.add(current);
+            visited.add(current);
+            current = predecessors.get(current);
+        }
+
+        if (current == null) {
+            System.err.println("Path reconstruction failed - current is null");
+            return Collections.emptyList();
+        }
+
+        if (maxSteps <= 0) {
+            System.err.println("Path reconstruction timeout");
+            return Collections.emptyList();
+        }
+
+        path.add(start);
+        Collections.reverse(path);
+
+        return path;
+    }
+
+    /**
+     * Calculate total distance of a path
+     */
+    private double calculateTotalDistance(List<Integer> path) {
+        double total = 0.0;
+
+        for (int i = 0; i < path.size() - 1; i++) {
+            int from = path.get(i);
+            int to = path.get(i + 1);
+
+            Optional<Line> line = lineRepository.findLineConnecting(from, to);
+            if (line.isPresent()) {
+                List<Segment> segments = segmentRepository.findByLineId(line.get().getId());
+                total += segments.stream()
+                        .mapToDouble(Segment::getLengthMeters)
+                        .sum() / 1000.0;
+            }
+        }
+
+        return total;
+    }
+
+    /**
+     * Get network summary for display
      */
     public NetworkSummary getNetworkSummary() {
         List<Facility> facilities = facilityRepository.findAll();
         List<Line> lines = lineRepository.findAll();
+        List<Segment> segments = segmentRepository.findAll();
 
-        int totalSegments = 0;
-        double totalDistance = 0.0;
-        int electrifiedSegments = 0;
-        int doubleTrackSegments = 0;
+        double totalDistance = segments.stream()
+                .mapToDouble(Segment::getLengthMeters)
+                .sum() / 1000.0;
 
-        for (Line line : lines) {
-            List<Segment> segments = segmentRepository.findByLineId(line.getId());
-            totalSegments += segments.size();
+        long electrifiedSegments = segments.stream()
+                .filter(Segment::isElectrified)
+                .count();
 
-            for (Segment seg : segments) {
-                totalDistance += seg.getLengthMeters() / 1000.0;
-                if (seg.isElectrified()) electrifiedSegments++;
-                if (seg.getNumberTracks() >= 2) doubleTrackSegments++;
-            }
-        }
+        long doubleTrackSegments = segments.stream()
+                .filter(s -> s.getNumberTracks() >= 2)
+                .count();
 
         return new NetworkSummary(
                 facilities.size(),
                 lines.size(),
-                totalSegments,
+                segments.size(),
                 totalDistance,
-                electrifiedSegments,
-                doubleTrackSegments
+                (int) electrifiedSegments,
+                (int) doubleTrackSegments
         );
     }
 
-    /**
-     * Result of path calculation
-     */
+    // ============================================================================
+    // INNER CLASSES
+    // ============================================================================
+
+    private static class Edge {
+        final int to;
+        final double cost;
+        final double distanceKm;
+
+        Edge(int to, double cost, double distanceKm) {
+            this.to = to;
+            this.cost = cost;
+            this.distanceKm = distanceKm;
+        }
+    }
+
     public static class PathCalculationResult {
         private final boolean success;
-        private final List<Integer> facilityIds;
-        private final List<Double> cumulativeCosts;
+        private final List<Integer> path;
+        private final double totalDistanceKm;
         private final double totalCost;
-        private final String errorMessage;
         private final boolean hasNegativeCycle;
-        private final List<String> cycleInfo;
+        private final List<Integer> negativeCycleStations;
 
-        private PathCalculationResult(boolean success, List<Integer> facilityIds,
-                                      List<Double> cumulativeCosts, double totalCost,
-                                      String errorMessage, boolean hasNegativeCycle,
-                                      List<String> cycleInfo) {
-            this.success = success;
-            this.facilityIds = facilityIds != null ? facilityIds : Collections.emptyList();
-            this.cumulativeCosts = cumulativeCosts != null ? cumulativeCosts : Collections.emptyList();
+        public PathCalculationResult(List<Integer> path, double totalDistanceKm, double totalCost) {
+            this.success = true;
+            this.path = path;
+            this.totalDistanceKm = totalDistanceKm;
             this.totalCost = totalCost;
-            this.errorMessage = errorMessage;
-            this.hasNegativeCycle = hasNegativeCycle;
-            this.cycleInfo = cycleInfo;
+            this.hasNegativeCycle = false;
+            this.negativeCycleStations = Collections.emptyList();
         }
 
-        public static PathCalculationResult success(List<Integer> path, List<Double> costs, double totalCost) {
-            return new PathCalculationResult(true, path, costs, totalCost, null, false, null);
+        public PathCalculationResult(List<Integer> negativeCycleStations) {
+            this.success = false;
+            this.path = Collections.emptyList();
+            this.totalDistanceKm = 0;
+            this.totalCost = 0;
+            this.hasNegativeCycle = true;
+            this.negativeCycleStations = negativeCycleStations;
         }
 
-        public static PathCalculationResult error(String message) {
-            return new PathCalculationResult(false, null, null, 0.0, message, false, null);
-        }
-
-        public static PathCalculationResult noPath(String message) {
-            return new PathCalculationResult(false, Collections.emptyList(), null, Double.MAX_VALUE, message, false, null);
-        }
-
-        public static PathCalculationResult negativeCycle(List<String> cycleInfo) {
-            return new PathCalculationResult(false, null, null, 0.0,
-                    "Negative cost cycle detected", true, cycleInfo);
+        public PathCalculationResult() {
+            this.success = false;
+            this.path = Collections.emptyList();
+            this.totalDistanceKm = 0;
+            this.totalCost = 0;
+            this.hasNegativeCycle = false;
+            this.negativeCycleStations = Collections.emptyList();
         }
 
         public boolean isSuccess() { return success; }
-        public List<Integer> getFacilityIds() { return facilityIds; }
-        public List<Double> getCumulativeCosts() { return cumulativeCosts; }
+        public List<Integer> getPath() { return new ArrayList<>(path); }
+        public double getTotalDistanceKm() { return totalDistanceKm; }
         public double getTotalCost() { return totalCost; }
-        public String getErrorMessage() { return errorMessage; }
         public boolean hasNegativeCycle() { return hasNegativeCycle; }
-        public List<String> getCycleInfo() { return cycleInfo; }
+        public List<Integer> getNegativeCycleStations() { return new ArrayList<>(negativeCycleStations); }
+
+        public String getNegativeCycleStationsFormatted() {
+            if (!hasNegativeCycle || negativeCycleStations.isEmpty()) {
+                return "None";
+            }
+            return negativeCycleStations.stream()
+                    .map(String::valueOf)
+                    .collect(Collectors.joining(" → "));
+        }
     }
 
-    /**
-     * Summary of network structure
-     */
     public static class NetworkSummary {
         public final int facilities;
         public final int lines;
@@ -349,37 +474,6 @@ public class AutomaticPathPlanningService {
             this.totalDistanceKm = totalDistanceKm;
             this.electrifiedSegments = electrifiedSegments;
             this.doubleTrackSegments = doubleTrackSegments;
-        }
-    }
-
-    /**
-     * Custom repository that wraps our built graph
-     * This is needed because RailwayNetworkOptimizationService expects a repository
-     */
-    private static class CustomRailwayNetworkRepository extends RailwayNetworkRepository {
-        private final Graph<RailwayStation, Double> costGraph;
-        private final Map<Integer, RailwayStation> stationMap;
-
-        public CustomRailwayNetworkRepository(Graph<RailwayStation, Double> costGraph,
-                                              Map<Integer, RailwayStation> stationMap) {
-            super();
-            this.costGraph = costGraph;
-            this.stationMap = stationMap;
-        }
-
-        @Override
-        public boolean isDataLoaded() {
-            return true;
-        }
-
-        @Override
-        public RailwayStation getStationById(int stationId) {
-            return stationMap.get(stationId);
-        }
-
-        @Override
-        public Graph<RailwayStation, Double> getCostGraph() {
-            return costGraph;
         }
     }
 }
