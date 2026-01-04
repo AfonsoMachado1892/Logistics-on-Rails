@@ -1,3 +1,4 @@
+// Updated test_sensors.c (added one more test for extract invalid value)
 #include "unity.h"
 #include <string.h>
 
@@ -24,6 +25,16 @@ void test_ExtractData_ValidString(void) {
 void test_ExtractData_TokenNotFound(void) {
     char input[] = "#HUM&unit:%&value:50&";
     char token[] = "TEMP"; // Não existe
+    char unit[10];
+    int value;
+
+    int res = extract_data(input, token, unit, &value);
+    TEST_ASSERT_EQUAL_INT(0, res);
+}
+
+void test_ExtractData_InvalidValue(void) {
+    char input[] = "TEMP&unit:C&value:abc&";
+    char token[] = "TEMP";
     char unit[10];
     int value;
 
@@ -62,6 +73,7 @@ int main(void) {
     UNITY_BEGIN();
     RUN_TEST(test_ExtractData_ValidString);
     RUN_TEST(test_ExtractData_TokenNotFound);
+    RUN_TEST(test_ExtractData_InvalidValue);
     RUN_TEST(test_FormatCommand_TwoParams);
     RUN_TEST(test_FormatCommand_OneParam);
     RUN_TEST(test_FormatCommand_InvalidRange);

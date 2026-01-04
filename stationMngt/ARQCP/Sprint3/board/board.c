@@ -92,6 +92,8 @@ static void draw_line(int width) {
 }
 
 void update_board_view(Track* tracks, int num_tracks, SensorData* sensorData) {
+#ifndef TEST
+    // Full beautiful dashboard - only shown in the real program
     clear_screen();
 
     printf("  __________________________________________________  \n");
@@ -147,5 +149,9 @@ void update_board_view(Track* tracks, int num_tracks, SensorData* sensorData) {
                tracks[i].id, state_str, train_info, visual);
     }
     draw_line(62);
-    printf("\n[Press ENTER to refresh...]");
+
+    printf("\n[Press ENTER to refresh...]\n");
+#endif
+
+    //do  nothing if running test
 }

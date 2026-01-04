@@ -14,111 +14,118 @@ To identify domain conceptual classes, candidate conceptual classes were listed 
 
 **Business Transactions**
 - Freight
-- Route
-- RouteSegment
+- Route (Planned high-level connection)
+- Order (Warehouse dispatch request)
+- Allocation (Assignment of stock to orders)
 
 **Transaction Line Items**
-- Locomotive
-- Wagon
-- FreightWagon
+- OrderLine (Specific SKU and quantity in an order)
+- FreightWagon (Wagon assignment in a freight context)
 
 **Product/Service related to a Transaction or Transaction Line Item**
 - Train
 - Freight Service
-- Route
+- Item (SKU definition)
 
 **Transaction Records**
 - Freight (records a transport operation)
+- MovementLog (records internal warehouse movements)
+- ReturnsEntry (audit log for returned goods inspection)
+- CrossingOperation (log/plan of train crossings)
 
 **Roles of People or Organizations**
 - Operator
 
 **Places**
-- Station
+- Station (Transport node)
+- Facility (Specific building e.g., Warehouse, Silo)
 - RailwayLine
 - LineSegment
-- Facility
+- Siding (Parking line on a segment)
+- StationTrack (Lines inside a station)
+- Aisle (Warehouse location)
+- Bay (Warehouse location)
 
 **Noteworthy Events**
 - Freight dispatching
 - Freight arrival
-- Route execution
+- Sensor Reading (Temperature/Humidity updates)
+- Return Inspection (Quality control)
 
 **Physical Objects**
 - Train
-- Locomotive
+- Locomotive (Electric/Diesel)
 - Wagon
-- WagonModel
-- LineSegment
-- RailwayLine
-- Station
+- Sensor (IoT device at station)
+- Trolley (Used for picking in warehouse)
+- Box (Physical container of items)
 
 **Descriptions of Things**
-- WagonModel (technical characteristics of wagons)
-- Gauge (track and gauge description)
-- Locomotive (technical specifications)
+- WagonModel (technical characteristics)
+- LocomotiveModel
+- Gauge (track width specifications)
+- Item (Product description/Category)
+- HubScore (Centrality metrics for network analysis)
 
 **Catalogs**
-- WagonModel
-- Gauge types
+- FacilityType
+- WagonModelType
 
 **Containers**
-- RailwayLine (contains LineSegments)
-- Route (contains RouteSegments)
+- Inventory (Logical container of warehouse contents)
+- Aisle (Contains Bays)
+- Bay (Contains Boxes)
+- Siding (Contains Wagons)
 
 **Elements of Containers**
-- LineSegment
-- RouteSegment
+- Box
 - Wagon
 
 **Organizations**
 - Operator
 
-**Other External/Collaborating Systems**
-- N/A
-
 **Records of Finance, Work, Contracts, Legal Matters**
 - N/A
-
-**Documents mentioned/used to perform some work**
-- Possibly derived from Freight or Route, but not directly represented
 
 ---
 
 ## Rationale to Identify Associations Between Conceptual Classes
 
-Associations were identified based on semantic relations observed between classes, according to common association patterns:
-- *A* is part of *B*
-- *A* is contained in *B*
-- *A* is described by *B*
-- *A* uses or operates *B*
-- *A* is related to the transaction of *B*
+Associations were identified based on semantic relations observed between classes, according to common association patterns. The updated list includes new requirements for Warehouse Management, Safety Systems (Sensors), and Network Optimization.
 
 ---
 
 | Concept (A) | Association | Concept (B) |
 |--------------|-------------|-------------|
-| Operator | operates | Locomotive  |
-| Operator | operates | Wagon       |
-| Operator | manages | Train       |
-| Train | uses | Locomotive  |
-| Train | pulls | Wagon       |
-| WagonModel | defines | Wagon       |
+| **Infrastructure** | | |
 | RailwayLine | composed of | LineSegment |
-| LineSegment | start | Station     |
-| LineSegment | end | Station     |
-| Gauge | defines | LineSegment |
-| Gauge | supports | Locomotive  |
-| Gauge | supports | Wagon       |
-| Freight | includes | Wagon       |
+| LineSegment | contains | Siding |
+| Station | possesses | Facility |
+| Station | contains | StationTrack |
+| Station | equipped with | Sensor |
+| Facility | categorized as | FacilityType |
+| **Rolling Stock** | | |
+| Operator | manages | Train |
+| Train | uses | Locomotive |
+| Train | pulls | Wagon |
+| Train | follows | Route |
+| Locomotive | supports | Gauge |
+| **Freight** | | |
 | Freight | includes | FreightWagon |
-| Freight | follows | Route       |
-| Freight | origin | Station     |
-| Freight | destination | Station     |
-| Wagon | assigned to | FreightWagon |
-| Route | consists of | RouteSegment |
-| RouteSegment | references | LineSegment |
-| Station | dispatches/receives | Freight     |
+| Freight | origin/destination | Station |
+| Route | defined by | Path |
+| Path | uses | LineSegment |
+| CrossingOperation | occurs at | Station |
+| **Warehouse** | | |
+| Facility | manages | Inventory |
+| Inventory | composed of | Aisle |
+| Aisle | composed of | Bay |
+| Bay | contains | Box |
+| Box | references | Item |
+| Order | contains | OrderLine |
+| Allocation | references | Box |
+| ReturnsEntry | restocks as | Box |
+| MovementLog | logs | Box |
 
 ---
 
