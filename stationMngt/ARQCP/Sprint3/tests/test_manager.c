@@ -1,3 +1,4 @@
+// Updated test_manager.c (added decrypt and init_track_struct tests)
 #include <string.h>
 #include <stdlib.h>
 #include "../common/domain.h"
@@ -18,6 +19,7 @@ int num_users = 0;
 extern void update_track_struct(Track* t, int state, int train_id);
 extern int encrypt_data(char* in, int key, char *out);
 extern int decrypt_data(char* in, int key, char *out);
+extern void init_track_struct(Track* t, int id, int state, int train_id);
 
 // --- SETUP & TEARDOWN ---
 
@@ -81,6 +83,20 @@ void test_SetTrackInoperative_Should_ChangeStateOnly(void) {
     TEST_ASSERT_EQUAL_INT_MESSAGE(3, tracks[track_index].state, "A track devia estar inoperativa (3)");
 }
 
+// Teste para init_track_struct
+void test_InitTrackStruct_Should_SetFields(void) {
+    Track t;
+    int id = 42;
+    int state = 3;
+    int train_id = 101;
+
+    init_track_struct(&t, id, state, train_id);
+
+    TEST_ASSERT_EQUAL_INT(id, t.id);
+    TEST_ASSERT_EQUAL_INT(state, t.state);
+    TEST_ASSERT_EQUAL_INT(train_id, t.train_id);
+}
+
 // Teste para USAC11 (Login/Encriptação) e USAC01
 void test_PasswordEncryption_Should_MatchLogic(void) {
     char plain_pass[] = "ADMIN";
@@ -94,6 +110,19 @@ void test_PasswordEncryption_Should_MatchLogic(void) {
     // Assert
     TEST_ASSERT_EQUAL_INT(1, res);
     TEST_ASSERT_EQUAL_STRING_MESSAGE(expected, encrypted, "A encriptação Caesar Cipher falhou");
+}
+
+// Teste para decrypt_data (USAC02)
+void test_PasswordDecryption_Should_MatchLogic(void) {
+    char encrypted_pass[] = "BENJO";
+    int key = 1;
+    char decrypted[20];
+    char expected[] = "ADMIN";
+
+    int res = decrypt_data(encrypted_pass, key, decrypted);
+
+    TEST_ASSERT_EQUAL_INT(1, res);
+    TEST_ASSERT_EQUAL_STRING(expected, decrypted);
 }
 
 // Teste de integridade de memória (Offset da Struct)
@@ -121,7 +150,9 @@ int main(void) {
     RUN_TEST(test_AssignTrackToTrain_Should_UpdateStateAndTrainId);
     RUN_TEST(test_FreeTrack_Should_ResetStateAndRemoveTrain);
     RUN_TEST(test_SetTrackInoperative_Should_ChangeStateOnly);
+    RUN_TEST(test_InitTrackStruct_Should_SetFields);
     RUN_TEST(test_PasswordEncryption_Should_MatchLogic);
+    RUN_TEST(test_PasswordDecryption_Should_MatchLogic);
     RUN_TEST(test_StructMemoryLayout_Should_BeCompatibleWithAssembly);
 
     return UNITY_END();
