@@ -20,7 +20,7 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 /**
- * Controller for Train Assembly (USLP09)
+ * Controller for Train Assembly
  */
 public class TrainAssemblyController implements Initializable {
 
@@ -289,7 +289,7 @@ public class TrainAssemblyController implements Initializable {
         Optional<Line> lineOpt = lineRepo.findLineConnecting(startId, nextId);
         if (lineOpt.isEmpty()) {
             // If no direct line found, try to find any line in the route
-            // or skip validation (path will be calculated later in USLP10)
+            // or skip validation (path will be calculated later)
             System.out.println("Warning: No direct line found between facilities " + startId + " and " + nextId + ". Gauge validation skipped.");
             return;
         }
