@@ -30,7 +30,7 @@ package "Infrastructure" {
         measureMM
     }
 
-    class Station {
+    class Facility {
         id
         name
         city
@@ -39,18 +39,12 @@ package "Infrastructure" {
         country
         timeZone
         timeZoneGroup
-        isCity
-        isMainStation
-        isAirport
-        hasWarehouse
-        hasGrainSilo
-        hasRefrigeratedStorage
     }
 
     RailwayLine "1" -- "*" LineSegment : composed of
     Gauge "1" -- "*" LineSegment : defines
-    Station "1" -- "*" LineSegment : occurs at
-    Station "1" -- "*" LineSegment : start / end
+    Facility "1" -- "*" LineSegment : occurs at
+    Facility "1" -- "*" LineSegment : start / end
 }
 
 package "Freight and Routes" {
@@ -83,11 +77,11 @@ package "Freight and Routes" {
     Route "1" -- "*" Freight : contains
     Route "1" -- "*" CrossingOperation : requires
     Route "1" -- "*" LineSegment : composed of
-    CrossingOperation "*" -- "1" Station : occurs at
+    CrossingOperation "*" -- "1" Facility : occurs at
     Freight "1" -- "*" FreightWagon : includes
-    Freight "*" -- "1" Station : origin
-    Freight "*" -- "1" Station : destination
-    Freight "*" -- "*" Station : assigned to
+    Freight "*" -- "1" Facility : origin
+    Freight "*" -- "1" Facility : destination
+    Freight "*" -- "*" Facility : assigned to
 }
 
 package "Operators and Rolling Stock" {
@@ -231,7 +225,7 @@ package "Warehouse Management" {
         bay
     }
 
-    Station "1" -- "1" Inventory : manages
+    Facility "1" -- "1" Inventory : manages
 
     Inventory "1" -- "*" MovementLog : logs
     Inventory "1" -- "*" Box : contains
