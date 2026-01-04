@@ -154,12 +154,15 @@ public class MainMenu {
         this.trainAssemblyMenu = new TrainAssemblyMenu(
                 scanner,
                 validator,
-                trainAssemblyService,
                 routePlanningService,
                 locoRepo,
                 wagonRepo,
-                facilityRepo
-        );
+                facilityRepo,
+                trainRepo,
+                scheduleRepo,
+                lineRepo
+
+                );
 
         // USLP10: Traffic Manager Menu
         this.trafficManagerMenu = initializeTrafficManagerMenu(

@@ -91,7 +91,7 @@ public class TrafficManagerMenu {
                 }
                 case 2 -> listAllTrains();
                 case 3 -> listPlannedRoutes();
-                case 4 -> createScheduleForTrain();
+                case 4 -> createScheduleForAssignedRoute();
                 case 5 -> viewSchedule();
                 case 6 -> generateDispatchPlan();
                 case 7 -> viewDailyDispatchPlan();
@@ -114,7 +114,7 @@ public class TrafficManagerMenu {
         System.out.println("  ────────────────────────────────────────────");
         System.out.println("  2. List All Trains");
         System.out.println("  3. List Planned Routes (from USLP08)");
-        System.out.println("  4. Create Schedule for Train");
+        System.out.println("  4. Create Schedule");
         System.out.println("  5. View Schedules");
         System.out.println("  6. Generate Dispatch Plan");
         System.out.println("  7. View Dispatch Visualizations");
@@ -159,70 +159,67 @@ public class TrafficManagerMenu {
     // ============================================================================
 
     /**
-     * USLP10 - Create schedule for a train with a planned route
-     * Integrates USLP08 (route planning) → USLP09 (train assembly) → USLP10 (scheduling)
+     * USLP10 - Create schedule/Define Path (Lógica Corrigida)
+     * Seleciona uma Rota já atribuída (USLP09) em vez de um Comboio solto.
      */
-    private void createScheduleForTrain() {
-        System.out.println("\n═══ CREATE SCHEDULE (USLP10) ═══\n");
+    private void createScheduleForAssignedRoute() {
+        System.out.println("\n═══ DISPATCH TRAIN (USLP10) ═══");
+        System.out.println("Select a route that already has a train assigned (from USLP09).");
 
-        // 1. List available trains (created in USLP09)
-        List<Train> trains = trainRepository.findAll();
+        // 1. Obter rotas atribuídas
+        List<PlannedRoute> assignedRoutes = routePlanningService.getAssignedRoutes();
 
-        if (trains.isEmpty()) {
-            System.out.println("✗ No trains available.");
-            System.out.println("Please assemble trains first (USLP09).");
+        if (assignedRoutes.isEmpty()) {
+            System.out.println("\n✗ No assigned routes found.");
+            System.out.println("Please go to USLP09 (Train Assembly) and assign a train to a route first.");
             return;
         }
 
-        System.out.println("Available Trains:");
-        for (Train t : trains) {
-            System.out.printf("  [%d] Train %d - %s (%.0fkW, %.1ft, %d locos, %d wagons)\n",
-                    t.getId(), t.getId(), t.getOperator(),
-                    t.getTotalPowerKw(), t.getTotalWeightTons(),
-                    t.getLocomotiveCount(), t.getWagonCount());
+        // 2. Listar e Selecionar Rota
+        System.out.println("\nReady for Dispatch:");
+        for (int i = 0; i < assignedRoutes.size(); i++) {
+            PlannedRoute r = assignedRoutes.get(i);
+            System.out.printf("[%d] Route %s -> Assigned Train: %s (%s)\n",
+                    i + 1, r.getId(), r.getAssignedTrainId(), r.getType());
         }
 
-        // 2. Select train
-        int trainId = validator.readInt("\nEnter Train ID: ", 0, Integer.MAX_VALUE);
-        Train train = trainRepository.findById(String.valueOf(trainId)).orElse(null);
+        int idx = validator.readInt("\nSelect Route Number (0 to cancel): ", 0, assignedRoutes.size());
+        if (idx == 0) return;
 
+        PlannedRoute selectedRoute = assignedRoutes.get(idx - 1);
+        String trainId = selectedRoute.getAssignedTrainId();
+
+        // 3. Validar consistência
+        Train train = trainRepository.findById(trainId).orElse(null);
         if (train == null) {
-            System.out.println("✗ Train not found.");
+            System.out.println("✗ Error: Assigned train " + trainId + " not found in repository.");
             return;
         }
 
-        System.out.println("\n✓ Selected Train " + trainId);
-        System.out.printf("  Power: %.0fkW | Weight: %.1ft | Power-to-Weight: %.2f kW/t\n",
-                train.getTotalPowerKw(), train.getTotalWeightTons(), train.getPowerToWeightRatio());
+        System.out.println("\n✓ Selected: Route " + selectedRoute.getId() + " with Train " + trainId);
 
-        // 3. List planned routes from USLP08
-        List<PlannedRoute> routes = routePlanningService.getAllRoutes();
+        // Tentar encontrar o Schedule criado na USLP09
+        Optional<Schedule> existingSchedule = scheduleRepository.findAll().stream()
+                .filter(s -> s.getTrainId().equals(trainId))
+                .findFirst();
 
-        if (routes.isEmpty()) {
-            System.out.println("\n✗ No routes available.");
-            System.out.println("Please create routes first using Freight Assignment Menu (USLP08).");
-            return;
+        LocalDateTime departureTime;
+        if (existingSchedule.isPresent()) {
+            departureTime = existingSchedule.get().getDepartureDateTime();
+            System.out.println("  Departure Time: " + departureTime.format(DATE_TIME_FORMATTER));
+        } else {
+            System.out.println("⚠ No schedule found. Creating new.");
+            String dateStr = validator.readString("Enter Departure (yyyy-MM-dd HH:mm): ");
+            try {
+                departureTime = LocalDateTime.parse(dateStr, DATE_TIME_FORMATTER);
+            } catch (Exception e) {
+                System.out.println("Invalid date. Using NOW.");
+                departureTime = LocalDateTime.now();
+            }
         }
 
-        System.out.println("\nAvailable Routes:");
-        for (PlannedRoute r : routes) {
-            System.out.printf("  [%s] %s - %d freight(s), %d action(s)\n",
-                    r.getId(), r.getType(), r.getFreightIds().size(), r.getActions().size());
-        }
-
-        // 4. Select route
-        String routeId = validator.readString("\nEnter Route ID: ");
-        PlannedRoute plannedRoute = routePlanningService.getRoute(routeId).orElse(null);
-
-        if (plannedRoute == null) {
-            System.out.println("✗ Route not found.");
-            return;
-        }
-
-        System.out.println("\n✓ Selected Route " + routeId);
-        System.out.println(routePlanningService.formatRoute(plannedRoute));
-
-        // 5. Choose path calculation method
+        // 4. Calcular Caminho (Path Calculation)
+        // (Reutiliza os métodos que JÁ TENS no ficheiro original)
         System.out.println("\n═══ PATH CALCULATION ═══");
         System.out.println("1. Manual Path Definition");
         System.out.println("2. Automatic Path Calculation (ESINF US15)");
@@ -230,56 +227,31 @@ public class TrafficManagerMenu {
 
         List<Integer> path;
         if (pathChoice == 1) {
-            path = buildPathManually(plannedRoute);
+            path = buildPathManually(selectedRoute);
         } else {
-            path = calculatePathAutomatically(plannedRoute);
+            path = calculatePathAutomatically(selectedRoute);
         }
 
         if (path == null || path.isEmpty()) {
-            System.out.println("✗ Path calculation failed or cancelled.");
+            System.out.println("✗ Path calculation failed/cancelled.");
             return;
         }
 
-        // Store path in route
-        plannedRoute.setPath(path);
+        // 5. Guardar Caminho
+        selectedRoute.setPath(path);
+        train.setPath(path); // O comboio precisa do caminho para a física
 
-        // 6. Get departure time
-        String dateStr = validator.readString("\nEnter Departure Time (yyyy-MM-dd HH:mm): ");
-        LocalDateTime departure;
-
-        try {
-            departure = LocalDateTime.parse(dateStr, DATE_TIME_FORMATTER);
-        } catch (Exception e) {
-            System.out.println("✗ Invalid date format. Please use yyyy-MM-dd HH:mm");
-            return;
+        // 6. Atualizar/Criar Schedule
+        if (existingSchedule.isPresent()) {
+            System.out.println("✓ Schedule " + existingSchedule.get().getScheduleId() + " updated with Path.");
+        } else {
+            String schId = "SCH-" + trainId;
+            Schedule newSched = new Schedule(schId, trainId, selectedRoute.getId(), departureTime, Schedule.ScheduleStatus.SCHEDULED);
+            scheduleRepository.save(newSched);
+            System.out.println("✓ New Schedule " + schId + " created.");
         }
 
-        // 7. Create schedule
-        String scheduleId = "SCH-" + (scheduleRepository.findAll().size() + 1001);
-
-        Schedule schedule = new Schedule(
-                scheduleId,
-                String.valueOf(trainId),
-                routeId,
-                departure,
-                Schedule.ScheduleStatus.SCHEDULED
-        );
-
-        scheduleRepository.save(schedule);
-
-        System.out.println("\n" + "✓".repeat(60));
-        System.out.println("  Schedule created successfully!");
-        System.out.println("✓".repeat(60));
-        System.out.println("\nSchedule Details:");
-        System.out.println("  Schedule ID: " + scheduleId);
-        System.out.println("  Train: " + trainId);
-        System.out.println("  Route: " + routeId);
-        System.out.println("  Departure: " + departure.format(DATE_TIME_FORMATTER));
-        System.out.println("\nPath: " + path.stream()
-                .map(id -> facilityRepository.findById(id)
-                        .map(Facility::getName)
-                        .orElse(String.valueOf(id)))
-                .collect(Collectors.joining(" → ")));
+        System.out.println("\nReady for Dispatch Plan Generation (Option 6).");
     }
 
     // ============================================================================

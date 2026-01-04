@@ -168,4 +168,12 @@ public class RoutePlanningService {
         }
         return sb.toString();
     }
+    /**
+     * Retorna as rotas que JÁ têm um comboio atribuído (prontas para Dispatch/USLP10).
+     */
+    public List<PlannedRoute> getAssignedRoutes() {
+        return getAllRoutes().stream()
+                .filter(PlannedRoute::isAssigned) // Verifica se tem assignedTrainId
+                .collect(Collectors.toList());
+    }
 }
