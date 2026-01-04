@@ -40,7 +40,7 @@ public class RouteAction {
 
     @Override
     public String toString() {
-        return String.format("RouteAction{facility=%d, type=%s, freight=%d, wagons=%d}",
-                facilityId, type, freightId, wagonCount);
+        return String.format("%s at facility %d: Freight %d (%d wagons)",
+                type, facilityId, freightId, wagonCount);
     }
 }
