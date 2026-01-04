@@ -7,6 +7,11 @@ hide methods
 title Domain Model
 
 package "Infrastructure" {
+
+    class Owner{
+        name
+    }
+
     class RailwayLine {
         id
         name
@@ -26,7 +31,6 @@ package "Infrastructure" {
 
     class Gauge {
         id
-        name
         measureMM
     }
 
@@ -41,10 +45,16 @@ package "Infrastructure" {
         timeZoneGroup
     }
 
+    class FacilityType {
+        typeName
+    }
+
+    Owner "1" -- "*" RailwayLine : owns
     RailwayLine "1" -- "*" LineSegment : composed of
     Gauge "1" -- "*" LineSegment : defines
     Facility "1" -- "*" LineSegment : occurs at
     Facility "1" -- "*" LineSegment : start / end
+    Facility "1" -- "1" FacilityType : categorized as
 }
 
 package "Freight and Routes" {
@@ -99,32 +109,52 @@ package "Operators and Rolling Stock" {
 
     class Locomotive {
         id
-        make
-        model
         year
-        powerKw
-        maxSpeedKmH
-        tareWeightTons
-        numBogies
+    }
+
+    class LocomotiveModel {
+        maker
+        power
+        maxSpeed
+        trackType
+        maxWeight
+        numberBogies
+        length
+        weight
+        width
         gauge
     }
 
-    class ElectricLocomotive extends Locomotive {
+    class ElectricLocomotive extends LocomotiveModel {
         voltageV
         frequencyHz
     }
 
-    class DieselLocomotive extends Locomotive {
+    class DieselLocomotive extends LocomotiveModel {
         fuelCapacityL
     }
 
     class Wagon {
         id
-        type
-        payloadCapacityKg
-        volumeM3
-        tareWeightKg
+        year
+    }
+
+    class WagonModel {
+        maker
+        numberBogies
+        maxSpeed
+        payloadCapacity
+        volumeCapacity
+        tareWeight
+        length
+        weight
+        width
+        height
         gauge
+    }
+
+    class WagonModelType{
+        typeName
     }
 
     Operator "1" -- "*" Train : manages
@@ -136,10 +166,13 @@ package "Operators and Rolling Stock" {
     Train "1" -- "1" Route : follows
 
     Locomotive "*" -- "1" Gauge : supports
+    Locomotive "1" -- "1" LocomotiveModel : built as
 
     Wagon "*" -- "1" Freight: references
     Wagon "*" -- "1" Gauge : supports
     Wagon "1" -- "*" FreightWagon : assigned to
+    Wagon "1" -- "1" WagonModel : built as
+    Wagon "1" -- "1" WagonModelType : as
 }
 
 package "Warehouse Management" {
