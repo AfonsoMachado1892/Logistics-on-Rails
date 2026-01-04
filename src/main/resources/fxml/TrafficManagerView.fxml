@@ -48,7 +48,7 @@
                      <HBox spacing="5">
                         <ComboBox fx:id="facilityComboBox" prefWidth="300" />
                         <Button fx:id="addFacilityButton" text="Add" minWidth="70" />
-                        <Button fx:id="clearPathButton" text="Clear" minWidth="70" />
+                        <Button fx:id="clearPathButton" text="Clear" minWidth="80" />
                      </HBox>
                   </VBox>
 

@@ -142,7 +142,8 @@ public class FreightAssignmentController implements Initializable {
 
     public void refreshData() {
         freightList.clear();
-        freightList.addAll(freightRepo.findAll().stream()
+        // Use findAllPending() to show only freights without assigned routes
+        freightList.addAll(freightRepo.findAllPending().stream()
             .filter(f -> f.getAssignedWagons().size() > 0)
             .collect(Collectors.toList()));
 
