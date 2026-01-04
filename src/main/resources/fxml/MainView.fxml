@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="LAPR3.UI.javafx.MainController">
+   <top>
+      <VBox styleClass="header-container">
+         <HBox styleClass="header-box">
+            <Text styleClass="header-title" text="🚂 Railway Network Logistics Management" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Text styleClass="header-subtitle" text="USLP08 • USLP09 • USLP10" />
+         </HBox>
+      </VBox>
+   </top>
+   <center>
+      <TabPane fx:id="mainTabPane" styleClass="main-tab-pane" tabClosingPolicy="UNAVAILABLE">
+         <tabs>
+            <Tab fx:id="freightAssignmentTab" text="📦 Freight Assignment (USLP08)" closable="false">
+               <fx:include source="FreightAssignmentView.fxml" />
+            </Tab>
+            <Tab fx:id="trainAssemblyTab" text="🚂 Train Assembly (USLP09)" closable="false">
+               <fx:include source="TrainAssemblyView.fxml" />
+            </Tab>
+            <Tab fx:id="trafficManagerTab" text="📊 Traffic Manager (USLP10)" closable="false">
+               <fx:include source="TrafficManagerView.fxml" />
+            </Tab>
+         </tabs>
+      </TabPane>
+   </center>
+</BorderPane>
+
