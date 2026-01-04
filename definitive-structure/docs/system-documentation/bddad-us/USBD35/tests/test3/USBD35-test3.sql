@@ -2,21 +2,15 @@ SET SERVEROUTPUT ON;
 DECLARE
 v_id NUMBER;
 BEGIN
-    DBMS_OUTPUT.PUT_LINE('--- TEST 3: Null Input Validation ---');
-
+    DBMS_OUTPUT.PUT_LINE('--- TEST 3: Null Name Validation ---');
 BEGIN
-        -- Attempt to register with Valid ID (904) but NULL Name
         v_id := fn_register_facility(904, NULL);
-
-        DBMS_OUTPUT.PUT_LINE('RESULT: FAILURE. System allowed NULL name.');
+        DBMS_OUTPUT.PUT_LINE('RESULT: FAILURE.');
 EXCEPTION
         WHEN OTHERS THEN
-            -- New Error Code for Null Name is -20002
             IF SQLCODE = -20002 THEN
-                DBMS_OUTPUT.PUT_LINE('RESULT: SUCCESS (NULL input blocked correctly).');
-                DBMS_OUTPUT.PUT_LINE('Message: ' || SQLERRM);
-ELSE
-                DBMS_OUTPUT.PUT_LINE('RESULT: FAILURE (Unexpected error code): ' || SQLERRM);
+                DBMS_OUTPUT.PUT_LINE('RESULT: SUCESSO (NULL bloqueado).');
+ELSE DBMS_OUTPUT.PUT_LINE('RESULT: FALHA (Erro inesperado): ' || SQLERRM);
 END IF;
 END;
 END;
