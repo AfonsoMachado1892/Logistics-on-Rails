@@ -1,0 +1,75 @@
+Based on the provided meeting logs, I would evaluate this team at a 9/10.
+
+The team demonstrates high professional maturity, consistent communication, and a strong ability to translate teacher feedback into technical improvements. Below is a detailed breakdown of the evaluation.
+
+Team Performance Evaluation: 9/10
+1. Consistency and Participation
+The team maintained a remarkably consistent meeting schedule from November 2025 through January 2026.
+
+
+
+
+
+
+Attendance: Attendance was perfect ("Everyone") for every recorded session.
+
+
+
+
+
+
+Structure: They strictly followed a standard Agile/Scrum format, covering progress, blockers, solutions, and future tasks in every meeting.
+
+
+
+
+
+2. Technical Versatility and Problem Solving
+The records show the team handling a complex, multi-disciplinary project involving hardware, database management, and algorithm design.
+
+
+Complex Implementation: Members successfully tackled diverse tasks such as topological sorting , cycle detection , hardware assembly with Raspberry Pi Pico , and JavaFX UI integration.
+
+
+
+
+
+
+Proactive Troubleshooting: When faced with technical "barriers," such as noise in sensor data, José implemented a Moving Median filter. Similarly, Miguel and Afonso used research and teacher consultations to resolve architecture and hardware assembly issues.
+
+
+3. Collaboration and Feedback Integration
+The team’s greatest strength is their use of external feedback and peer support.
+
+
+Iterative Improvement: On December 3rd, several members (Miguel, Marília, Afonso) specifically reported adapting their models and correcting work based on teacher evaluations.
+
+
+
+
+
+Peer Support: "Talking with teammates" was the most common method for overcoming difficulties, especially for Marília, Diogo, and Afonso.
+
+
+
+
+
+4. Results Orientation
+The team moved efficiently through the sprint cycles.
+
+By mid-December, members were finishing major components in ARQCP, ESINF, and BDDAD.
+
+
+By the final meetings, they were focused on "fine-tuning," report writing, and repository submission.
+
+
+Areas for Minor Improvement
+
+Reporting Detail: While the team is highly productive, some entries for Diogo were occasionally brief or missing compared to his teammates.
+
+
+Time Management: Miguel and José both noted time management or "interpreting new assignments" as recurring hurdles, though they successfully overcame them by prioritizing and seeking clarification.
+
+
+
+Would you like me to generate a summary of each member's individual contributions to the project based on these logs?

@@ -1,0 +1,88 @@
+Based on the provided daily meeting records, project assignment requirements, and the final Sprint 3 report, the team performance is evaluated as a **9.5 out of 10**.
+
+The team demonstrated exceptional technical versatility, high adherence to agile methodologies, and successful completion of a complex, multi-domain integrative project.
+
+### Performance Breakdown
+
+---
+
+#### 1. Task Completion and Technical Depth: 10/10
+
+The team successfully completed all assigned User Stories (US) across five different course units: **ARQCP, BDDAD, ESINF, FSIAP, and LAPR3**.
+
+* 
+**Diverse Skillsets**: Team members managed complex integrations, including hardware setup for Raspberry Pi Pico (USAC10), PL/SQL database management (USBD37/40), and advanced Java algorithms like topological sorting and cycle detection (USEI11).
+
+
+* 
+**Full Delivery**: By the final meeting on January 3, 2026, all key functionalities—including database transitions, JavaFX UI implementation, and hardware logic—were finished.
+
+
+
+#### 2. Process and Agile Adherence: 9/10
+
+The team followed the SCRUM framework as mandated by the project guidelines.
+
+* 
+**Consistency**: They conducted frequent daily meetings (10 recorded during Sprint 3) with durations ranging from 15 to 25 minutes, ensuring high alignment .
+
+
+* 
+**Transparency**: The team maintained an updated Scrum board and successfully identified blockers early, such as difficulty understanding the "new assignment" or hardware assembly.
+
+
+* 
+**Evolution**: They reported significant improvement in their estimation accuracy compared to previous sprints, showing healthy team growth.
+
+
+
+#### 3. Collaboration and Problem Solving: 10/10
+
+The records show a highly collaborative environment where members frequently sought help from peers and teachers to overcome technical hurdles.
+
+* 
+**Overcoming Blockers**: When faced with complex issues like "handling noise in sensor data" or "memory management with dynamic arrays," members engaged in targeted research (e.g., Moving Median filter, debugging tools) and peer discussion to find solutions.
+
+
+* 
+**Synergy**: The retrospective highlights a "consistent workflow" and "greatly improved communication" between members.
+
+
+
+#### 4. Documentation and Reporting: 9/10
+
+The final report is comprehensive, including LLM performance assessments for each member and critical insights into team dynamics .
+
+* 
+**Self-Reflection**: The team performed an honest retrospective, identifying a struggle with understanding specific user stories as a weakness and committing to "spend more time reunited" to clarify concepts.
+
+
+
+---
+
+**Summary Table of Team Contributions**
+
+| Member | Primary Focus & Impact |
+| --- | --- |
+| **Miguel** | Optimized EI US, handled BDAD stories, and completed USLP10.
+
+ |
+| **Marília** | Corrected architectural points, completed USEI13, and managed BDDAD/ARQCP USs.
+
+ |
+| **José** | Managed hardware (USAC10), cycle detection (USEI11), and JavaFX/DB integration.
+
+ |
+| **Diogo** | Focused on ER modeling, USEI14, and various BDDAD/LAPR functionalities.
+
+ |
+| **Afonso** | Assembled Raspberry Pi hardware, implemented USEI15, and revamped ARQCP logic.
+
+ |
+
+> 
+> **Note on the Score**: A perfect 10 was withheld only due to the team's self-reported initial struggle with understanding some user stories and minor "merge conflicts," which are standard but noted areas for improvement.
+> 
+> 
+
+Would you like me to analyze the specific contributions of a particular team member in more detail?
